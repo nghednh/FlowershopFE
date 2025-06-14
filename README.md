@@ -3,7 +3,7 @@ Install nodejs v22.16.0
 Clone then run following command:  
 cd rt         # cd into rt folder  
 npm install   # Install dependencies  
-npm run dev   # Start the development server  
+npm run dev   # Start the development server  (Open the link and start coding)
 npm run build # Build for production  
 
 Incase there is still error, try running:  

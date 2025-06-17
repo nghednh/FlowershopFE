@@ -10,7 +10,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/products" element={<ProductPage />} /> {/* Add this line */}
+        <Route path="/products" element={<ProductPage />} />
       </Routes>
     </Router>
   );

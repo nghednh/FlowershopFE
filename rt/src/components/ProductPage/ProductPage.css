@@ -220,3 +220,33 @@
 .add-to-basket-button:hover {
     background-color: #333;
 }
+
+.you-may-also-like {
+    margin: 80px 0;
+    font-size: 38px;
+    text-align: center;
+}
+
+.recommended-products {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    border-top: black solid 1px;
+}
+
+.recommended-product {
+    display: flex;
+    flex-direction: column;
+    border-right: black solid 1px;
+    text-align: center;
+    gap: 4px;
+}
+
+.re-product-name {
+    font-size: 16px;
+    color: black;
+}
+
+.re-product-price {
+    font-size: 14px;
+    color: gray;
+}

@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Layout from "./components/Layout";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import ProductPage from "./components/ProductPage";
@@ -10,7 +11,9 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/products" element={<ProductPage />} />
+        <Route element={<Layout />}>
+          <Route path="/products" element={<ProductPage />} />
+        </Route>
       </Routes>
     </Router>
   );

@@ -4,6 +4,7 @@ import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import ProductPage from "./components/ProductPage";
 import HomePage from "./components/HomePage";
+import CategoryPage from "./components/CategoryPage";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/products" element={<ProductPage />} />
         </Route>
         <Route path="/home" element={<HomePage />} />
+        <Route path="/category" element={<CategoryPage/> } />
       </Routes>
     </Router>
   );

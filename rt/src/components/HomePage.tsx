@@ -1,8 +1,11 @@
+import Header from "./Header";
+
 export default function HomePage() {
     return (
-    <div className="min-h-screen overflow-y-auto">
-
-      <div className="relative flex flex-row w-full h-[10vh] bg-gray-100">
+    <div className="min-h-screen">
+      <Header>
+      </Header>
+      <div className="relative sticky top-0 flex flex-row w-full h-[10vh] bg-gray-100">
         <div className="w-[25%] flex flex-row">
           <button
             className="text-[clamp(0.75rem,2vw,1.25rem)] h-full w-[50%] flex items-center justify-center   text-center border border-gray-400 bg-white hover:border-blue-500"

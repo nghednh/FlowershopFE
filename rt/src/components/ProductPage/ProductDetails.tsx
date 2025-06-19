@@ -103,7 +103,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ name, description, cate
                         value="oneTime"
                         checked={selectedOption === 'oneTime'}
                         onChange={handleOptionChange}
-                        className="hidden" // Hide the default radio button
+                        className="hidden"
                     />
                     <label htmlFor="oneTime" className='price-option'>
                         <img src={selectedOption === 'oneTime' ? "/radio-button-active.svg" : "/radio-button.svg"} />
@@ -117,7 +117,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ name, description, cate
                         value="subscribe"
                         checked={selectedOption === 'subscribe'}
                         onChange={handleOptionChange}
-                        className="hidden" // Hide the default radio button
+                        className="hidden"
                     />
                     <label htmlFor="subscribe" className='price-option'>
                         <img src={selectedOption === 'subscribe' ? "/radio-button-active.svg" : "/radio-button.svg"} />

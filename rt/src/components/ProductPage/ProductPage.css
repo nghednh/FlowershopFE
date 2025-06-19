@@ -27,7 +27,6 @@
 
 .product-image:hover {
     transform: scale(1.05);
-    border-right: black solid 1px;
 }
 
 .product-details {
@@ -95,6 +94,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 
 .quantity-button:hover {
@@ -179,6 +179,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 
 .scroll-arrow:hover {
@@ -204,6 +205,7 @@
     font-size: 16px;
     /* text-base */
     color: black;
+    cursor: pointer;
 }
 
 .add-to-basket-button {
@@ -215,6 +217,7 @@
     /* tracking-wide */
     padding: 16px 24px;
     background-color: black;
+    cursor: pointer;
 }
 
 .add-to-basket-button:hover {
@@ -238,7 +241,12 @@
     flex-direction: column;
     border-right: black solid 1px;
     text-align: center;
+    transition: transform 0.3s;
     gap: 4px;
+}
+
+.recommended-product:hover {
+    transform: scale(1.05);
 }
 
 .re-product-name {

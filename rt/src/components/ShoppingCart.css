@@ -1,0 +1,152 @@
+.shopping-cart-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 39;
+    backdrop-filter: blur(2px);
+}
+
+.shopping-cart {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    z-index: 40;
+    border-left: 1px solid black;
+    background: white;
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    .shopping-cart {
+        width: 100%;
+    }
+}
+
+.cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 40px 26px;
+    border-bottom: 1px solid black;
+}
+
+.close-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.cart-items {
+    padding: 40px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border-bottom: 1px solid black;
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 20px;
+}
+
+.cart-item-wrapper {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.cart-item-image {
+    width: 160px;
+    height: 160px;
+    object-fit: cover;
+    border: 1px solid black;
+}
+
+.cart-item-name {
+    font-size: 18px;
+    color: black;
+}
+
+.cart-item-price {
+    font-size: 18px;
+    color: black;
+}
+
+.cart-item-quantity {
+    display: flex;
+    font-size: 16px;
+    align-items: center;
+    gap: 10px;
+}
+
+.remove-button {
+    font-size: 16px;
+    font-weight: 600;
+    color: gray;
+    cursor: pointer;
+}
+
+.remove-button:hover {
+    color: black;
+}
+
+.cart-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 40px 40px;
+    border-bottom: 1px solid black;
+}
+
+.total-label {
+    font-size: 18px;
+    color: black;
+}
+
+.total-amount {
+    font-size: 21px;
+    color: black;
+}
+
+.gift-message {
+    padding: 40px 40px;
+    display: flex;
+    flex-direction: column;
+    height: 120px;
+    border-bottom: 1px solid black;
+}
+
+.cart-caption {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 40px;
+    font-size: 16px;
+    color: black;
+    font-weight: 500;
+    border-bottom: 1px solid black;
+}
+
+.checkout-button {
+    background: black;
+    padding: 24px 16px;
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.checkout-button:hover {
+    background: #333;
+}

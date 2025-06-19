@@ -16,6 +16,10 @@
     cursor: pointer;
 }
 
+.header-button:hover {
+    background-color: #f0f0f0;
+}
+
 .header-mobile {
     display: none;
     width: 100%;
@@ -30,6 +34,10 @@
     border-left: 1px solid black;
     border-right: 1px solid black;
     cursor: pointer;
+}
+
+.header-icon-btn:hover {
+    background-color: #f0f0f0;
 }
 
 .header-icon {

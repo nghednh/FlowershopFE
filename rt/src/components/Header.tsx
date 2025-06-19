@@ -1,7 +1,11 @@
 import React from 'react';
 import './Header.css';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+    toggleCart: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ toggleCart }) => {
     return (
         <header className="header">
             {/* Desktop */}
@@ -18,9 +22,7 @@ const Header: React.FC = () => {
                     Sign in
                 </button>
                 <button className="header-button"
-                    onClick={() =>
-                        alert('Cart functionality not implemented yet.'
-                        )}
+                    onClick={toggleCart}
                 >
                     Cart
                 </button>
@@ -31,9 +33,7 @@ const Header: React.FC = () => {
                     <img src="/menu.svg" alt="Menu" className="header-icon" />
                 </button>
                 <button className="header-icon-btn" aria-label="Cart"
-                    onClick={() =>
-                        alert('Cart functionality not implemented yet.'
-                        )}
+                    onClick={toggleCart}
                 >
                     <img src="/shopping-bag.svg" alt="Cart" className="header-icon" />
                 </button>

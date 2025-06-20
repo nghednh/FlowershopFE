@@ -3,14 +3,16 @@ import './Header.css';
 
 interface HeaderProps {
     toggleCart: () => void;
+    toggleMenu?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ toggleCart }) => {
+const Header: React.FC<HeaderProps> = ({ toggleCart, toggleMenu }) => {
     return (
         <header className="header">
             {/* Desktop */}
             <div className="header-left desktop-only">
-                <button className="header-button">
+                <button className="header-button"
+                >
                     Shop
                 </button>
                 <button className="header-button">
@@ -27,9 +29,12 @@ const Header: React.FC<HeaderProps> = ({ toggleCart }) => {
                     Cart
                 </button>
             </div>
+
             {/* Mobile */}
             <div className="header-mobile mobile-only">
-                <button className="header-icon-btn" aria-label="Menu">
+                <button className="header-icon-btn" aria-label="Menu"
+                    onClick={toggleMenu}
+                >
                     <img src="/menu.svg" alt="Menu" className="header-icon" />
                 </button>
                 <button className="header-icon-btn" aria-label="Cart"

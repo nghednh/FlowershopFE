@@ -1,4 +1,5 @@
 import React from 'react';
+import './ProductPage/ProductPage.css';
 import ProductImageGallery from './ProductPage/ProductImageGallery';
 import ProductDetails from './ProductPage/ProductDetails';
 import RecommendedProducts from './ProductPage/RecommendedProducts';

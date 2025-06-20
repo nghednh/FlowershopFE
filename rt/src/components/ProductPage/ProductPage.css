@@ -236,13 +236,27 @@
     border-top: black solid 1px;
 }
 
+@media (max-width: 768px) {
+    .recommended-products {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 375px) {
+    .recommended-products {
+        grid-template-columns: 1fr;
+    }
+}
+
 .recommended-product {
     display: flex;
     flex-direction: column;
     border-right: black solid 1px;
+    border-bottom: black solid 1px;
     text-align: center;
     transition: transform 0.3s;
     gap: 4px;
+    padding-bottom: 8px;
 }
 
 .recommended-product:hover {

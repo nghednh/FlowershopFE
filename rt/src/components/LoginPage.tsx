@@ -35,8 +35,8 @@ export default function LoginPage() {
         setMessage("✅ Login successful!");
         navigate("/home");
       } else {
-        setMessage("❌ Login failed. " + (data.message || data.errors?.join(", ")));
-        setPassword(""); // clear password for retry
+        setMessage(`❌ Login failed. ${data.errors?.join(", ")}.`);
+        setPassword("");
       }
     } catch (error) {
       setMessage("⚠️ Network error.");

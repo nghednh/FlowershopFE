@@ -1,4 +1,5 @@
 import Header from "./Header";
+import Footer from "./Footer";
 
 export default function CategoryPage() {
     return (
@@ -32,6 +33,7 @@ export default function CategoryPage() {
             <section className="h-[15vh] bg-gray-100">
                 {/* More scrollable content */}
             </section>
+            <Footer />
         </div>
     )
 }

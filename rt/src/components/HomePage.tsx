@@ -209,30 +209,69 @@ export default function HomePage() {
             <div className="w-full md:w-1/2 text-center p-2 text-gray-800 text-[clamp(1rem,3vw,2rem)]  border border-gray-400">
               Follow us
             </div>
-            <div className="ml-auto w-full md:w-1/2 bg-orange-500 border border-gray-400">
-              Placeholder for icon
+            <div className="ml-auto w-full md:w-1/2 bg-gray-100 border border-gray-400">
+              <div className="flex flex-row items-center justify-center w-max md:w-full h-full">
+                <img src="/Instagram.svg" alt="instagram" className="flex-1 w-7 h-7 m-3"/>
+                <img src="/Pinterest.svg" alt="pinterest" className="flex-1 w-7 h-7 m-3"/>
+                <img src="/Facebook.svg" alt="facebook" className="flex-1 w-7 h-7 m-3"/>
+                <img src="/Twitter.svg" alt="twitter" className="flex-1 w-7 h-7 m-3"/>
+                <img src="/Telegram.svg" alt="telegram" className="flex-1 w-7 h-7 m-3"/>
+              </div>
             </div>
           </div>
         </div>
         
         <div className="w-full lg:w-1/2">
-          <div className="w-full aspect-2/1 lg:h-1/2 bg-cyan-500">
+          <div className="w-full h-max lg:h-1/2 bg-white border border-gray-400">
+            <div className="pt-10 pl-10 font-bold text-[clamp(1.5rem,4vw,2.5rem)]">
+              To Contact Us
+            </div>
+            <div className="pt-3 pl-10 text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)]">
+              We will call you back
+            </div>
+            <div className="my-[clamp(0.5rem,3vw,1.5rem)] mx-auto w-7/9 flex flex-col md:flex-row">
+              <input
+                type="text"
+                placeholder="+84 XXX XXX XX XX"
+                className="w-full md:w-1/2 border border-gray-300 md:-translate-x-3 p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              >
+              </input>
+              <button className="w-full md:w-1/2 bg-black text-white md:translate-x-3 p-2 mt-3 md:my-0 hover:bg-gray-800">
+                BOOK A CALL
+              </button>
+            </div>
           </div>
           <div className="w-full lg:h-1/2 flex flex-col md:flex-row">
             <div className="flex flex-col w-full md:w-1/2">
               <div className="text-center p-2 text-gray-800 text-[clamp(1rem,3vw,2rem)]  border border-gray-400">
                 Phone
               </div>
-              <div className="lg:flex-1 bg-green-500 border border-gray-400">
-                PhonePlaceholder
+              <div className="flex flex-col flex-1 item:left md:items-center justify-center bg-gray-100 border border-gray-400">
+                <p className="m-3">
+                  <img src="/phone.svg" alt="phonecall" className="mr-1 w-7 h-7 inline-block">
+                  </img>
+                    <span className="font-bold">+0123456789</span>
+                </p>
+                <a className="m-3">
+                 <img src="/phone.svg" alt="phonecall" className="mr-1 w-7 h-7 inline-block">
+                  </img>
+                    <span className="font-bold">+0123456789</span>
+                </a>
               </div>
             </div>
             <div className="flex flex-col w-full md:w-1/2">
               <div className="text-center p-2 text-gray-800 text-[clamp(1rem,3vw,2rem)]  border border-gray-400">
                 Address
               </div>
-              <div className="lg:flex-1 bg-purple-500 border border-gray-400">
-                AddressPlaceholder
+              <div className="flex flex-col flex-1 item:left md:items-center justify-center bg-gray-100 border border-gray-400">
+                <p className="m-3">
+                  OPENING HOURS: 8 A.M. TO 11 P.M.
+                </p>
+                <a className="m-3">
+                 <img src="/address.svg" alt="address" className="mr-1 w-7 h-7 inline-block">
+                  </img>
+                    <span className="font-bold">Somewhere on earth</span>
+                </a>
               </div>
             </div>
           </div>
@@ -246,12 +285,26 @@ export default function HomePage() {
         <div className="w-full h-[75vh] md:h-screen lg:w-1/2 lg:h-auto lg:aspect-square bg-pink-500 border border-gray-400">
           Pic placeholder
         </div>
-        <div className="w-full h-screen lg:w-1/2 lg:h-auto lg:aspect-square bg-blue-500 border border-gray-400">
-          Flower description placeholder
+        <div className="w-full h-screen lg:w-1/2 lg:h-auto lg:aspect-square flex flex-col items-center justify-center bg-gray-100 border border-gray-400 p-[clamp(1rem,9vw,4.5rem)]">
+          <div className="text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)]">SERVICE</div>
+          <div className="text-[clamp(1.25rem,6.25vw,3.75rem)] lg:text-[clamp(0.625rem,3.125vw,1.875rem)] my-3">Flower Subscriptions</div>
+          <div className="text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)] text-center my-3">
+            Experience the convenience and savings of regular flower deliveries with our flexible subscription service - up to 30% more profitable than one-time purchases.
+          </div>
+          <button className="w-max text-[clamp(0.75rem,2vw,1.25rem)] py-4 px-8 border border-gray-400 mt-10 hover:bg-gray-200">
+            SUBSCRIBE NOW
+          </button>
         </div>
       </div>
-      <div className="w-full h-[75vh] md:h-screen lg:h-auto lg:aspect-[2/1] bg-green-200 border border-gray-400">
-        Wedding & Event Decor Placeholder
+      <div className="w-full h-[75vh] md:h-screen lg:h-auto lg:aspect-[2/1] flex flex-col items-center justify-center p-[clamp(1rem,9vw,4.5rem)] bg-green-200 border border-gray-400">
+        <div className="text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)]">SERVICE</div>
+        <div className="text-[clamp(1.25rem,6.25vw,3.75rem)] lg:text-[clamp(0.625rem,3.125vw,1.875rem)] my-3">Wedding & Event Decor</div>
+        <div className="text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)] text-center my-3">
+          Let our team of expert florists and designers create stunning, on-trend floral décor for your special day. Trust us to bring your vision to life.
+        </div>
+        <button className="w-max text-[clamp(0.75rem,2vw,1.25rem)] py-4 px-8 border border-gray-400 mt-10 hover:bg-white/50">
+          INQUIRE NOW
+        </button>
       </div>
 
       <div className="w-full h-[75vh] lg:h-[50vh] bg-purple-300 border border-gray-400"> 

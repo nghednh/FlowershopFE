@@ -317,10 +317,121 @@ export default function HomePage() {
         <button className="max-w-screen md:w-max text-[clamp(0.75rem,2vw,1.25rem)] py-4 px-8 border border-gray-400 m-10 bg-gray-100 hover:bg-gray-200 cursor-pointer">READ REVIEWS</button>
       </div>
       <div className="w-full flex flex-col md:grid md:grid-cols-2 lg:flex lg:flex-row">
-        <div className="flex-1 md:grid lg:flex-1 aspect-square bg-yellow-200 border border-gray-400"/> 
-        <div className="flex-1 md:grid lg:flex-1 aspect-square bg-orange-200 border border-gray-400"/>
-        <div className="flex-1 md:grid lg:flex-1 aspect-square bg-green-200 border border-gray-400"/>
-        <div className="flex-1 md:grid lg:flex-1 aspect-square bg-blue-200 border border-gray-400"/>
+        <div className="flex-1 md:grid lg:flex-1 aspect-square bg-yellow-200 border border-gray-400">
+          <div className="pt-3 pl-10 text-[clamp(1rem,3vw,4rem)] lg:text-[clamp(0.5rem,1.5vw,2rem)] ">
+              Remember to offer beautiful flowers from FlowerShop Valentines Day, Mothers Day, Christmas... Reminds you 7 days before. No spam or sharing your address
+          </div>
+          <div className="my-[clamp(0.5rem,3vw,1.5rem)] mx-auto w-7/9 flex flex-col">
+            <input
+              type="text"
+              placeholder="Your email"
+              className="w-full border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+            </input>
+            <button className="w-full bg-black text-white p-2 mt-3 hover:bg-gray-800 cursor-pointer">
+              REMIND
+            </button>
+          </div>
+        </div> 
+        <div className="flex-1 md:grid lg:flex-1 aspect-square bg-orange-200 border border-gray-400">
+          <div className="text-gray-600 m-[clamp(1rem,3vw,2rem)] text-[clamp(1rem,3vw,4rem)] lg:text-[clamp(0.5rem,1.5vw,2rem)] ">
+            Contact Us
+            <div className="my-[clamp(0.35rem,2vw,1rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)]">
+              <div className="text-gray-400">
+                Address
+              </div>
+              <div className="text-black">
+                Somewhere on Earth
+              </div>
+            </div>
+            <div className="my-[clamp(0.35rem,2vw,1rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)]">
+              <div className="text-gray-400">
+                Phone
+              </div>
+              <div className="text-black">
+                +840123456789
+              </div>
+            </div>
+            <div className="my-[clamp(0.35rem,2vw,1rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)]">
+              <div className="text-gray-400">
+                General Inquiry:
+              </div>
+              <div className="text-black">
+                FlowerShop.Shop@gmail.com
+              </div>
+            </div>
+            <div className="text-gray-600 text-[clamp(1rem,3vw,4rem)] lg:text-[clamp(0.5rem,1.5vw,2rem)] ">
+              Follow Us
+              <div className="flex flex-row items-center justify-center w-max md:w-full h-full">
+                <img src="/Instagram.svg" alt="instagram" className="flex-1 w-7 h-7 m-3 cursor-pointer" onClick={() => alert("You clicked the Instagram button!")}/>
+                <img src="/Pinterest.svg" alt="pinterest" className="flex-1 w-7 h-7 m-3 cursor-pointer" onClick={() => alert("You clicked the Pinterest button!")}/>
+                <img src="/Facebook.svg" alt="facebook" className="flex-1 w-7 h-7 m-3 cursor-pointer" onClick={() => alert("You clicked the Facebook button!")}/>
+                <img src="/Twitter.svg" alt="twitter" className="flex-1 w-7 h-7 m-3 cursor-pointer" onClick={() => alert("You clicked the Twitter button!")}/>
+                <img src="/Telegram.svg" alt="telegram" className="flex-1 w-7 h-7 m-3 cursor-pointer" onClick={() => alert("You clicked the Telegram button!")}/>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        <div className="flex-1 md:grid lg:flex-1 aspect-square bg-green-200 border border-gray-400">
+          <div className="text-gray-600 m-[clamp(1rem,3vw,2rem)] text-[clamp(1rem,3vw,4rem)] lg:text-[clamp(0.5rem,1.5vw,2rem)] ">
+            Shop
+            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+              All Products             
+            </div>
+            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+              Fresh Flowers             
+            </div>
+            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+              Dried Flowers
+            </div>
+            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+              Live Plants
+            </div>
+            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+              Designer Vases
+            </div>
+            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+              Aroma Candles
+            </div>
+            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+              Freshener Diffuser
+            </div>
+            <div className="text-gray-600 text-[clamp(1rem,3vw,4rem)] lg:text-[clamp(0.5rem,1.5vw,2rem)] ">
+              Service
+              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+                Flower Subscription
+              </div>
+              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+                Wedding & Event Decor
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 md:grid lg:flex-1 aspect-square bg-blue-200 border border-gray-400">
+          <div className="text-gray-600 m-[clamp(1rem,3vw,2rem)] text-[clamp(1rem,3vw,4rem)] lg:text-[clamp(0.5rem,1.5vw,2rem)] ">
+            About Us
+            <div>
+              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+                Our Story             
+              </div>
+              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+                Blog             
+              </div>
+            </div>
+            <div className="my-[clamp(1rem,2vw,3rem)]">
+              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+                Shipping & Returns
+              </div>
+              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+                Terms & Conditions
+              </div>
+              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
+                Privacy Policy
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <section className="h-[20vh] bg-gray-100">

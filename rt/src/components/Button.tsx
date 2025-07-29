@@ -1,36 +1,16 @@
-import { ButtonHTMLAttributes } from 'react';
+import React from "react";
 
-type ButtonProps = {
-  variant?: 'primary' | 'secondary';
-} & ButtonHTMLAttributes<HTMLButtonElement>;
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick: () => void;
+  className?: string;
+}
 
-export default function Button({ 
-  children, 
-  variant = 'primary', 
-  className = '',
-  ...props 
-}: ButtonProps) {
-  const baseClasses = "px-4 py-2 rounded font-medium transition-colors";
-  
-  const variantStyle = {
-    backgroundColor: variant === 'primary' 
-      ? 'var(--color-primary)' 
-      : 'transparent',
-    color: variant === 'primary' 
-      ? 'white' 
-      : 'var(--color-text)',
-    border: variant === 'secondary' 
-      ? '1px solid var(--color-border)' 
-      : 'none',
-  };
-  
-  return (
-    <button
-      className={`${baseClasses} ${className}`}
-      style={variantStyle}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-} 
+export const Button: React.FC<ButtonProps> = ({ children, onClick, className = "" }) => (
+  <button
+    className={`bg-black text-white uppercase font-semibold py-2 px-4 rounded hover:bg-gray-800 transition-colors ${className}`}
+    onClick={onClick}
+  >
+    {children}
+  </button>
+);

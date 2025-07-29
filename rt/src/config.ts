@@ -1,1 +1,1 @@
-export const API_BASE_URL = "https://flower-shop-api-dsfuhnh0h4f0bka4.southeastasia-01.azurewebsites.net";
+export const API_BASE_URL = "https://flower-shop-api-dsfuhnh0h4f0bka4.southeastasia-01.azurewebsites.net/swagger/index.html?fbclid=IwY2xjawLts3RleHRuA2FlbQIxMQABHiX0ckO0_YNVkis0_30HzVwtJ0Q5bLHxyyEFS2eIUYXMV_7kDt2crR5w8oGp_aem_venJMK3DYsf3mGsOi2x3lA";

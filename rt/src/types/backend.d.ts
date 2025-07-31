@@ -21,7 +21,7 @@ export interface IProduct {
     condition?: string;
     stockQuantity: number;
     isActive?: boolean;
-    images: string[];
+    imagesUrls: string[];
     categoryIds: number[];
 }
 
@@ -93,6 +93,7 @@ export interface IOrder {
 }
 
 export interface IUser {
+    id: number;
     firstName: string;
     lastName: string;
     email: string;
@@ -100,10 +101,8 @@ export interface IUser {
     password?: string; // Optional for editing existing users
     confirmPassword?: string; // Optional for editing existing users
     phoneNumber?: string | null;
-    roleName: string;
+    roles: string[];
     isActive?: boolean;
-    createdAt?: string; // ISO date-time string
-    updatedAt?: string; // ISO date-time string
 }
 
 export interface IPricingRule {

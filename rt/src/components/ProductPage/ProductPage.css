@@ -61,7 +61,7 @@
 }
 
 .product-description {
-    font-size: 16px;
+    font-size: 18px;
     /* text-base */
     color: #1a1a1a;
     line-height: 1.5;
@@ -154,7 +154,30 @@
 .vase-item {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: px;
+    transition: transform 0.2s ease, border 0.2s ease;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 4px;
+
+    img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.3s;
+    }
+}
+
+.vase-item:hover {
+    transform: scale(1.05);
+    border-color: #ccc;
+}
+
+.vase-item.selected {
+    border-color: #007bff;
+    background-color: #f0f8ff;
 }
 
 .vase-info {
@@ -224,6 +247,73 @@
     background-color: #333;
 }
 
+.product-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.price-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.current-price {
+    font-size: 36px;
+    font-weight: bold;
+    color: black;
+}
+
+.original-price {
+    font-size: 28px;
+    color: gray;
+    text-decoration: line-through;
+}
+
+.discount-badge {
+    background-color: #e74c3c;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.stock-info {
+    margin: 16px 0;
+}
+
+.stock-text {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.in-stock {
+    color: #27ae60;
+}
+
+.out-of-stock {
+    color: #e74c3c;
+}
+
+.price-option.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.add-to-basket-button.disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+.add-to-basket-button.disabled:hover {
+    background-color: #cccccc;
+}
+
 .you-may-also-like {
     margin: 80px 0;
     font-size: 38px;
@@ -271,4 +361,10 @@
 .re-product-price {
     font-size: 14px;
     color: gray;
+}
+
+.quantity-and-stock {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }

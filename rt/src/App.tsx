@@ -8,6 +8,7 @@ import CategoryPage from "./components/CategoryPage";
 import CheckoutPage from "./components/CheckoutPage";
 import Admin from "./components/Admin";
 import ProductListingsPage from "./components/ProductListing";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -18,12 +19,20 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route element={<Layout />}>
           <Route path="/products" element={<ProductPage />} />
+          <Route path="/products/:id" element={<ProductPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
         </Route>
-        <Route path="/admin" element={<Admin />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requiredRole="Admin">
+              <Admin />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/category" element={<CategoryPage/> } />
-        <Route path="/list" element={<ProductListingsPage/> } />
+        <Route path="/category" element={<CategoryPage />} />
+        <Route path="/list" element={<ProductListingsPage />} />
       </Routes>
     </Router>
   );

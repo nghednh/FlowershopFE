@@ -1,1 +1,25 @@
-export const API_BASE_URL = "https://flower-shop-api-dsfuhnh0h4f0bka4.southeastasia-01.azurewebsites.net/swagger/index.html?fbclid=IwY2xjawLts3RleHRuA2FlbQIxMQABHiX0ckO0_YNVkis0_30HzVwtJ0Q5bLHxyyEFS2eIUYXMV_7kDt2crR5w8oGp_aem_venJMK3DYsf3mGsOi2x3lA";
+export const API_BASE_URL = "https://localhost:5001";
+
+export const config = {
+  API_BASE_URL: 'https://localhost:5001',
+  API_TIMEOUT: 10000,
+  
+  // Token storage keys
+  ACCESS_TOKEN_KEY: 'access_token',
+  REFRESH_TOKEN_KEY: 'refresh_token',
+  USER_ROLE_KEY: 'user.role',
+  
+  // API endpoints
+  ENDPOINTS: {
+    AUTH: {
+      LOGIN: '/api/auth/login',
+      REGISTER: '/api/auth/register',
+      REFRESH: '/api/auth/refresh',
+      LOGOUT: '/api/auth/logout',
+    },
+    CATEGORY: '/api/category',
+    PRODUCT: '/api/product',
+    ORDER: '/api/order',
+    USER: '/api/user',
+  }
+};

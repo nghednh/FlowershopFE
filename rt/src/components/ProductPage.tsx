@@ -61,10 +61,6 @@ const ProductPage: React.FC = () => {
     );
   }
 
-  const primaryImage = product.images && product.images.length > 0
-    ? product.images.map(img => img.imageUrl)
-    : ['https://via.placeholder.com/800x600/FFDDC1/800000?text=No+Image'];
-
   const categoryName = product.categories && product.categories.length > 0
     ? product.categories[0].name
     : 'Uncategorized';
@@ -82,6 +78,7 @@ const ProductPage: React.FC = () => {
           onVaseSelect={handleVaseSelection}
         />
         <ProductDetails
+          id={product.id}
           name={product.name}
           description={product.description || ''}
           category={categoryName}

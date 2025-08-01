@@ -9,6 +9,7 @@ import CheckoutPage from "./components/CheckoutPage";
 import Admin from "./components/Admin";
 import ProductListingsPage from "./components/ProductListing";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { CartProvider } from "./contexts/CartContext";
 
 function App() {
   return (
@@ -17,7 +18,14 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route element={<Layout />}>
+        <Route
+          element={
+            <CartProvider>
+              <Layout />
+            </CartProvider>
+          }
+        >
+          <Route path="/home" element={<HomePage />} />
           <Route path="/products" element={<ProductPage />} />
           <Route path="/products/:id" element={<ProductPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
@@ -30,7 +38,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/home" element={<HomePage />} />
         <Route path="/category" element={<CategoryPage />} />
         <Route path="/list" element={<ProductListingsPage />} />
       </Routes>

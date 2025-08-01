@@ -1,0 +1,160 @@
+import { IBackendRes, ICart, ICategory, IProduct, IUser, PaymentMethod } from "../types/backend";
+import instance from "./axios-customize";
+
+// Category service to interact with the backend API
+export const getCategories = () => {
+  return instance.get<IBackendRes<ICategory[]>>('/api/category');
+};
+
+export const createCategory = (category: Omit<ICategory, 'id'>) => {
+  return instance.post<IBackendRes<ICategory>>('/api/category', category);
+};
+
+export const updateCategory = (id: number, category: Partial<ICategory>) => {
+  return instance.put<IBackendRes<ICategory>>(`/api/category/${id}`, category);
+};
+
+export const deleteCategory = (id: number) => {
+  return instance.delete<IBackendRes<{ success: boolean }>>(`/api/category/${id}`);
+};
+
+// User
+export const loginUser = (email: string, password: string) => {
+  return instance.post<IBackendRes<{ token: string; user: any }>>('/api/login', { email, password });
+};
+
+export const registerUser = (user: Omit<IUser, 'id'>) => {
+  return instance.post<IBackendRes<{ user: IUser }>>('/api/admin/register-new-user', user);
+};
+
+export const getUsers = () => {
+  return instance.get<IBackendRes<{ users: IUser[] }>>('/api/admin/users');
+};
+
+export const updateUserRole = (id: string, roles: string[]) => {
+  return instance.post<IBackendRes<IUser>>(`/api/admin/update-user-role`, { id, roles });
+};
+
+// Order
+export const createOrder = (orderData: { cartId: number; addressId: number; paymentMethod: PaymentMethod }) => {
+  return instance.post<IBackendRes<{ order: any }>>('/api/order', orderData);
+};
+
+export const getOrderHistory = () => {
+  return instance.get<IBackendRes<{ orders: any[] }>>('/api/order/history');
+}; 
+
+export const getOrderDetails = (orderId: number) => {
+  return instance.get<IBackendRes<{ order: any }>>(`/api/order/${orderId}`);
+};
+
+export const cancelOrder = (orderId: number) => {
+  return instance.delete<IBackendRes<{ success: boolean }>>(`/api/order/${orderId}`);
+};
+
+export const updateOrderStatus = (orderId: number, status: string) => {
+  return instance.put<IBackendRes<{ order: any }>>(`/api/order/${orderId}/status`, { status });
+};
+
+// Product
+export const getProducts = () => {
+  return instance.get<IBackendRes<IProduct[]>>('/api/products');
+};
+
+export const getProductDetails = (productId: number) => {
+  return instance.get<IBackendRes<IProduct>>(`/api/products/${productId}`);
+};
+
+export const createProduct = (product: Omit<IProduct, 'id'>) => {
+  return instance.post<IBackendRes<{ product: IProduct }>>('/api/products', product);
+};
+
+export const updateProduct = (productId: number, productData: IProduct) => {
+  return instance.put<IBackendRes<{ product: IProduct }>>(`/api/products/${productId}`, productData);
+};
+
+export const deleteProduct = (productId: number) => {
+  return instance.delete<IBackendRes<{ success: boolean }>>(`/api/products/${productId}`);
+};
+
+export const searchProducts = (query: string) => {
+  return instance.get<IBackendRes<{ products: any[] }>>(`/api/products/search?query=${encodeURIComponent(query)}`);
+};
+
+// Cart
+export const getCart = () => {
+  return instance.get<IBackendRes<{ cart: any[] }>>('/api/cart');
+};
+
+export const addToCart = (productId: number, quantity: number) => {
+  return instance.post<IBackendRes<ICart>>('/api/Cart/add', { productId, quantity });
+};
+
+export const updateCartItem = (cartItemId: number, quantity: number) => {
+  return instance.put<IBackendRes<ICart>>('/api/Cart/update', [{ cartItemId, quantity }]);
+};
+
+export const removeFromCart = (cartItemId: number) => {
+  return instance.delete<IBackendRes<{ success: boolean }>>(`/api/Cart/remove/${cartItemId}`);
+};
+
+export const clearCart = () => {
+  return instance.delete<IBackendRes<{ success: boolean }>>('/api/Cart');
+};
+
+export const checkoutCart = () => {
+  return instance.post<IBackendRes<{ order: any }>>('/api/cart/checkout');
+};
+
+export const getCartTotal = () => {
+  return instance.get<IBackendRes<{ total: number }>>('/api/Cart/total');
+};
+
+export const getCartItemCount = () => {
+  return instance.get<IBackendRes<{ count: number }>>('/api/Cart/count');
+};
+
+export const updateCartItemQuantity = (cartItemId: number, quantity: number) => {
+  return instance.put<IBackendRes<{ cartItem: any }>>(`/api/Cart/${cartItemId}/quantity`, { quantity });
+};
+
+export const getCartDetails = () => {
+  return instance.get<IBackendRes<ICart>>('/api/Cart');
+};
+
+// Pricing Rules
+export const getPricingRules = () => {
+  return instance.get<IBackendRes<{ rules: any[] }>>('/api/pricing/rules');
+};
+
+export const createPricingRule = (ruleData: any) => {
+  return instance.post<IBackendRes<{ rule: any }>>('/api/pricing/rules', ruleData);
+};
+
+export const updatePricingRule = (ruleId: number, ruleData: any) => {
+  return instance.put<IBackendRes<{ rule: any }>>(`/api/pricing/rules/${ruleId}`, ruleData);
+};
+
+export const deletePricingRule = (ruleId: number) => {
+  return instance.delete<IBackendRes<{ success: boolean }>>(`/api/pricing/rules/${ruleId}`);
+};
+
+export const applyPricingRule = (cartId: number, ruleId: number) => {
+  return instance.post<IBackendRes<{ cart: any }>>(`/api/cart/${cartId}/apply-rule`, { ruleId });
+};
+
+export const removePricingRule = (cartId: number, ruleId: number) => {
+  return instance.delete<IBackendRes<{ success: boolean }>>(`/api/cart/${cartId}/remove-rule/${ruleId}`);
+};
+
+export const getPricingRuleDetails = (ruleId: number) => {
+  return instance.get<IBackendRes<{ rule: any }>>(`/api/pricing/rules/${ruleId}`);
+};
+
+export const getPricingRuleHistory = () => {
+  return instance.get<IBackendRes<{ history: any[] }>>('/api/pricing/rules/history');
+};
+
+export const getPricingRuleById = (ruleId: number) => {
+  return instance.get<IBackendRes<{ rule: any }>>(`/api/pricing/rules/${ruleId}`);
+};

@@ -1,8 +1,10 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { useCart } from '../../contexts/CartContext';
+import QuantitySelector from '../QuantitySelector';
 import './ProductPage.css';
 
 interface ProductDetailsProps {
+    id: number;
     name: string;
     description?: string;
     category: string;
@@ -17,6 +19,7 @@ interface ProductDetailsProps {
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({
     name,
+    id,
     description,
     category,
     price,
@@ -29,6 +32,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 }) => {
     const [quantity, setQuantity] = useState(1);
     const [selectedOption, setSelectedOption] = useState('oneTime');
+    const [addToCartSuccess, setAddToCartSuccess] = useState(false);
+    const [addToCartError, setAddToCartError] = useState<string | null>(null);
+
+    const { addItemToCart, isLoading } = useCart();
+
     const [selectedVaseIndex, setSelectedVaseIndex] = useState<number | null>(null);
 
     const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,15 +51,28 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
         }
     };
 
-    const vases = [
-        { name: 'Glass Vase', price: 20, image: 'https://placehold.co/100x100/A0A0A0/FFFFFF?text=Vase' },
-        { name: 'Hammershol', price: 26, image: 'https://placehold.co/100x100/A0A0A0/FFFFFF?text=Vase' },
-        { name: 'Ceramic Vase', price: 50, image: 'https://placehold.co/100x100/A0A0A0/FFFFFF?text=Vase' },
-        { name: 'Steel Vase', price: 35, image: 'https://placehold.co/100x100/A0A0A0/FFFFFF?text=Vase' },
-        { name: 'Bamboo', price: 15, image: 'https://placehold.co/100x100/A0A0A0/FFFFFF?text=Vase' },
-    ];
-
     const isOutOfStock = stockQuantity === 0;
+
+    const handleAddToCart = async () => {
+        if (isOutOfStock || isLoading) return;
+
+        setAddToCartError(null);
+        setAddToCartSuccess(false);
+
+        try {
+            const success = await addItemToCart(id, quantity);
+            if (success) {
+                setAddToCartSuccess(true);
+                // Reset success message after 3 seconds
+                setTimeout(() => setAddToCartSuccess(false), 3000);
+            } else {
+                setAddToCartError('Failed to add item to cart. Please try again.');
+            }
+        } catch (error) {
+            setAddToCartError('An error occurred while adding to cart.');
+            console.error('Add to cart error:', error);
+        }
+    };
 
     return (
         <div className="product-details">
@@ -82,35 +103,13 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
             <div className="quantity-and-stock">
                 {/* Quantity Selector */}
-                <div className="quantity-selector">
-                    <label htmlFor="quantity" className='quantity-label'>Quantity</label>
-                    <div className="quantity-input">
-                        <button
-                            className="quantity-button"
-                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                            disabled={isOutOfStock}
-                        >
-                            <img src="/button-minus.svg" />
-                        </button>
-                        <input
-                            type="number"
-                            id="quantity"
-                            value={quantity}
-                            min="1"
-                            max={stockQuantity}
-                            onChange={(e) => setQuantity(Math.min(stockQuantity, Math.max(1, Number(e.target.value))))}
-                            className="quantity-field"
-                            disabled={isOutOfStock}
-                        />
-                        <button
-                            className="quantity-button"
-                            onClick={() => setQuantity(Math.min(stockQuantity, quantity + 1))}
-                            disabled={isOutOfStock || quantity >= stockQuantity}
-                        >
-                            <img src="/button-plus.svg" />
-                        </button>
-                    </div>
-                </div>
+                <QuantitySelector
+                    quantity={quantity}
+                    onQuantityChange={setQuantity}
+                    max={stockQuantity}
+                    disabled={isOutOfStock}
+                    label="Quantity"
+                />
 
                 {/* Stock Information */}
                 <div className="stock-info">
@@ -133,8 +132,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                     </button>
                     <div className="vase-selection">
                         {imageUrls.map((vase, index) => (
-                            <div 
-                                key={index} 
+                            <div
+                                key={index}
                                 className={`vase-item ${selectedVaseIndex === index ? 'selected' : ''}`}
                                 onClick={() => handleVaseClick(vase, index)}
                                 style={{ cursor: 'pointer' }}
@@ -184,10 +183,23 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                 </div>
             </div>
 
+            {/* Success/Error Messages */}
+            {addToCartSuccess && (
+                <div className="add-to-cart-success">
+                    ✅ Item successfully added to cart!
+                </div>
+            )}
+            {addToCartError && (
+                <div className="add-to-cart-error">
+                    ❌ {addToCartError}
+                </div>
+            )}
+
             {/* Add to Basket Button */}
             <button
                 className={`add-to-basket-button ${isOutOfStock ? 'disabled' : ''}`}
                 disabled={isOutOfStock}
+                onClick={handleAddToCart}
             >
                 {isOutOfStock ? 'Out of Stock' : 'Add to Basket'}
             </button>

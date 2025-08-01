@@ -7,7 +7,7 @@ import { MultiImageUpload } from "../../MultiImageUpload";
 import { ICategory, IProduct } from "../../../types/backend";
 import { createProduct, updateProduct } from "../../../config/api";
 
-const isNameAZ = (name: string) => /^[a-zA-Z]+$/.test(name);
+const isNameAZ = (name: string) => /^[a-zA-Z0-9 ]+$/.test(name);
 const isValidPrice = (price: number) => price >= 0;
 const isValidStock = (stock: number) => stock >= 0;
 const isValidCategoryIds = (ids: number[]) => ids.length > 0;
@@ -35,6 +35,8 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categori
       categories: [],
     }
   );
+
+  console.log("FlowerForm initial data:", formData);
   
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 

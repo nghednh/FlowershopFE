@@ -239,7 +239,6 @@ const Admin = () => {
             if (modal.data) {
                 // Update existing product
                 console.log('Updating existing productttttt');
-                await updateProduct(data.id, data);
                 setProducts(products.map(p => p.id === data.id ? data : p));
             } else {
                 console.log('Creating new producttttt');

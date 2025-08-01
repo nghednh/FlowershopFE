@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { IProduct, ICategory, IPricingRule, IOrder, IUser } from "../types/backend"
-import { Button } from "./Button";
-import {Sidebar } from "./Admin/Sidebar";
+import { Sidebar } from "./Admin/Sidebar";
 import { FlowerList } from "./Admin/Flower/FlowerList";
 import { FlowerForm } from "./Admin/Flower/FlowerForm";
 import { PricingRuleList } from "./Admin/PricingRule/PricingRuleList";
@@ -13,150 +12,278 @@ import { UserForm } from "./Admin/User/UserForm";
 import { CategoryList } from "./Admin/Category/CategoryList";
 import { CategoryForm } from "./Admin/Category/CategoryForm";
 import { Modal } from "./Modal";
-
-// Mock data
-const mockCategories: ICategory[] = [
-    { id: 1, name: "Roses", description: "Classic romantic flowers" },
-    { id: 2, name: "Tulips", description: "Spring favorites" },
-    { id: 3, name: "Lilies", description: "Elegant and fragrant" },
-];
-
-const mockProducts: IProduct[] = [
-    {
-        id: 1,
-        name: "Red Rose Bouquet",
-        flowerStatus: 1,
-        description: "A bouquet of fresh red roses.",
-        basePrice: 29.99,
-        condition: "Fresh",
-        stockQuantity: 15,
-        isActive: true,
-        images: ["rose1.jpg"],
-        categoryIds: [1],
-    },
-    {
-        id: 2,
-        name: "White Lily Arrangement",
-        flowerStatus: 1,
-        description: "Elegant white lilies in a vase.",
-        basePrice: 34.99,
-        condition: "Fresh",
-        stockQuantity: 10,
-        isActive: true,
-        images: ["lily1.jpg"],
-        categoryIds: [3],
-    },
-    {
-        id: 3,
-        name: "Mixed Tulip Bunch",
-        flowerStatus: 1,
-        description: "Colorful tulips for spring.",
-        basePrice: 19.99,
-        condition: "Fresh",
-        stockQuantity: 20,
-        isActive: true,
-        images: ["tulip1.jpg"],
-        categoryIds: [2],
-    },
-];
-
-const mockPricingRules: IPricingRule[] = [
-    {
-        id: 1,
-        description: "Valentine's Day Special",
-        condition: "date",
-        specialDay: "Valentine's Day",
-        startTime: "08:00",
-        endTime: "20:00",
-        startDate: "2024-02-14T00:00:00Z",
-        endDate: "2024-02-14T23:59:59Z",
-        priceMultiplier: 1.2,
-        fixedPrice: null,
-        priority: 1,
-        productIds: [1],
-    },
-    {
-        id: 2,
-        description: "Spring Discount",
-        condition: "season",
-        specialDay: null,
-        startTime: null,
-        endTime: null,
-        startDate: "2024-03-01T00:00:00Z",
-        endDate: "2024-05-31T23:59:59Z",
-        priceMultiplier: 0.9,
-        fixedPrice: null,
-        priority: 2,
-        productIds: [2, 3],
-    },
-];
-
-const mockOrders: IOrder[] = [
-    {
-        id: 1,
-        userId: 1,
-        cartId: 101,
-        addressId: 201,
-        paymentMethod: 0,
-        totalAmount: 59.98,
-        status: "Completed",
-        createdAt: "2024-06-01T10:30:00Z",
-        updatedAt: "2024-06-01T12:00:00Z",
-    },
-    {
-        id: 2,
-        userId: 2,
-        cartId: 102,
-        addressId: 202,
-        paymentMethod: 1,
-        totalAmount: 34.99,
-        status: "Pending",
-        createdAt: "2024-06-02T14:15:00Z",
-        updatedAt: undefined,
-    },
-];
-
-const mockUsers: IUser[] = [
-    {
-        firstName: "Alice",
-        lastName: "Smith",
-        email: "alice@example.com",
-        userName: "alice",
-        roleName: "admin",
-        isActive: true,
-        createdAt: "2024-01-10T09:00:00Z",
-        updatedAt: "2024-05-01T08:00:00Z",
-    },
-    {
-        firstName: "Bob",
-        lastName: "Johnson",
-        email: "bob@example.com",
-        userName: "bobby",
-        roleName: "user",
-        isActive: true,
-        createdAt: "2024-02-15T11:30:00Z",
-        updatedAt: undefined,
-    },
-];
+import { createCategory, deleteCategory, getCategories, getUsers, updateCategory, updateUserRole, getProducts, createProduct, updateProduct, deleteProduct, deletePricingRule, cancelOrder, getPricingRules } from "../config/api";
 
 const Admin = () => {
     const [activeSection, setActiveSection] = React.useState("flowers");
-    const [products, setProducts] = React.useState(mockProducts);
-    const [pricingRules, setPricingRules] = React.useState(mockPricingRules);
-    const [orders, setOrders] = React.useState(mockOrders);
-    const [users, setUsers] = React.useState(mockUsers);
-    const [categories, setCategories] = React.useState(mockCategories);
+    const [products, setProducts] = React.useState<IProduct[]>([]);
+    const [pricingRules, setPricingRules] = React.useState<IPricingRule[]>([]);
+    const [orders, setOrders] = React.useState<IOrder[]>([]);
+    const [users, setUsers] = React.useState<IUser[]>([]);
+    const [categories, setCategories] = React.useState<ICategory[]>([]);
+    const [loading, setLoading] = React.useState(false);
+    const [error, setError] = React.useState<string | null>(null);
     const [modal, setModal] = React.useState({ isOpen: false, type: "", data: null });
-
     const openModal = (type: string, data: any = null) => setModal({ isOpen: true, type, data });
     const closeModal = () => setModal({ isOpen: false, type: "", data: null });
 
-    const handleDelete = (type: string, id: number | string) => {
-        if (type === "flowers") setProducts(products.filter(p => p.id !== id));
-        if (type === "pricing") setPricingRules(pricingRules.filter(r => r.id !== id));
-        if (type === "orders") setOrders(orders.filter(o => o.id !== id));
-        if (type === "users") setUsers(users.filter(u => u.userName !== id));
-        if (type === "categories") setCategories(categories.filter(c => c.id !== id));
+    useEffect(() => {
+        loadProducts();
+        loadCategories();
+        loadUsers();
+        loadPricingRules();
+        loadOrders();
+    }, []);
+
+    const loadPricingRules = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            // Check if user has admin role - fix the localStorage access
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                throw new Error('User not found');
+            }
+
+            try {
+                const user = JSON.parse(userStr);
+                if (user.role !== 'Admin') {
+                    throw new Error('Admin access required');
+                }
+            } catch (parseError) {
+                throw new Error('Invalid user data');
+            }
+
+            const rulesData = await getPricingRules();
+            console.log('Loaded pricing rules:', rulesData);
+            setPricingRules(rulesData.data.pricingRules);
+        } catch (err: any) {
+            setError(err.message || 'Failed to load pricing rules');
+            console.error('Error loading pricing rules:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadOrders = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            // Check if user has admin role - fix the localStorage access
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                throw new Error('User not found');
+            }
+
+            try {
+                const user = JSON.parse(userStr);
+                if (user.role !== 'Admin') {
+                    throw new Error('Admin access required');
+                }
+            } catch (parseError) {
+                throw new Error('Invalid user data');
+            }
+
+            const ordersData = await getProducts();
+            setOrders(ordersData.data.orders);
+        } catch (err: any) {
+            setError(err.message || 'Failed to load orders');
+            console.error('Error loading orders:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadProducts = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            // Check if user has admin role - fix the localStorage access
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                throw new Error('User not found');
+            }
+
+            try {
+                const user = JSON.parse(userStr);
+                if (user.role !== 'Admin') {
+                    throw new Error('Admin access required');
+                }
+            } catch (parseError) {
+                throw new Error('Invalid user data');
+            }
+
+            const productsData = await getProducts();
+            setProducts(productsData.data.products);
+        } catch (err: any) {
+            setError(err.message || 'Failed to load products');
+            console.error('Error loading products:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadCategories = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            // Check if user has admin role - fix the localStorage access
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                throw new Error('User not found');
+            }
+
+            try {
+                const user = JSON.parse(userStr);
+                if (user.role !== 'Admin') {
+                    throw new Error('Admin access required');
+                }
+            } catch (parseError) {
+                throw new Error('Invalid user data');
+            }
+
+            const categoriesData = await getCategories();
+            setCategories(categoriesData);
+        } catch (err: any) {
+            setError(err.message || 'Failed to load categories');
+            console.error('Error loading categories:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadUsers = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            // Check if user has admin role - fix the localStorage access
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                throw new Error('User not found');
+            }
+
+            try {
+                const user = JSON.parse(userStr);
+                if (user.role !== 'Admin') {
+                    throw new Error('Admin access required');
+                }
+            } catch (parseError) {
+                throw new Error('Invalid user data');
+            }
+
+            const usersData = await getUsers();
+            setUsers(usersData);
+
+        } catch (err: any) {
+            setError(err.message || 'Failed to load users');
+            console.error('Error loading users:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (type: string, id: number | string) => {
+        if (type === "flowers") {
+            try {
+                setError(null);
+                await deleteProduct(id as number);
+                setProducts(products.filter(p => p.id !== id));
+            } catch (err: any) {
+                setError(err.message || 'Failed to delete product');
+                console.error('Error deleting product:', err);
+            }
+            return;
+        }
+        if (type === "pricing") {
+            try {
+                setError(null);
+                await deletePricingRule(id as number);
+                setPricingRules(pricingRules.filter(r => r.id !== id));
+            } catch (err: any) {
+                setError(err.message || 'Failed to delete pricing rule');
+                console.error('Error deleting pricing rule:', err);
+            }
+            return;
+        }
+        if (type === "orders") {
+            try {
+                setError(null);
+                await cancelOrder(id as number);
+                setOrders(orders.filter(o => o.id !== id));
+            } catch (err: any) {
+                setError(err.message || 'Failed to cancel order');
+                console.error('Error canceling order:', err);
+            }
+            return;
+        }
+        if (type === "categories") {
+            try {
+                setError(null);
+                await deleteCategory(id as number);
+                setCategories(categories.filter(c => c.id !== id));
+            } catch (err: any) {
+                setError(err.message || 'Failed to delete category');
+                console.error('Error deleting category:', err);
+            }
+        }
+    };
+
+    const handleProductSave = async (data: IProduct) => {
+        try {
+            setError(null);
+            if (modal.data) {
+                // Update existing product
+                console.log('Updating existing productttttt');
+                await updateProduct(data.id, data);
+                setProducts(products.map(p => p.id === data.id ? data : p));
+            } else {
+                console.log('Creating new producttttt');
+                // Create new product
+                setProducts([...products, data]);
+            }
+            closeModal();
+        } catch (err: any) {
+            setError(err.message || 'Failed to save product');
+            console.error('Error saving product:', err);
+        }
+    };
+
+    const handleCategorySave = async (data: ICategory) => {
+        try {
+            setError(null);
+            if (modal.data) {
+                // Update existing category
+                await updateCategory(data.id, data);
+                setCategories(categories.map(c => c.id === data.id ? data : c));
+            } else {
+                // Create new category
+                await createCategory(data);
+                setCategories([...categories, data]);
+            }
+            closeModal();
+        } catch (err: any) {
+            setError(err.message || 'Failed to save category');
+            console.error('Error saving category:', err);
+        }
+    };
+
+    const handleUserRoleChange = async (user: IUser) => {
+        try {
+            setError(null);
+            console.log('Updating user role:', user);
+            await updateUserRole(user.id.toString(), user.roles);
+            setUsers(users.map(u => u.id === user.id ? user : u));
+        } catch (err: any) {
+            setError(err.message || 'Failed to update user role');
+            console.error('Error updating user role:', err);
+        } finally {
+            closeModal();
+        }
     };
 
     const renderSection = () => {
@@ -173,7 +300,7 @@ const Admin = () => {
                         <Modal isOpen={modal.isOpen && modal.type === "flower"} onClose={closeModal}>
                             <FlowerForm
                                 flower={modal.data ?? undefined}
-                                onSave={(data) => setProducts(modal.data ? products.map(p => p.id === data.id ? data : p) : [...products, data])}
+                                onSave={handleProductSave}
                                 categories={categories}
                                 onClose={closeModal}
                             />
@@ -211,7 +338,7 @@ const Admin = () => {
                         <Modal isOpen={modal.isOpen && modal.type === "order"} onClose={closeModal}>
                             <OrderForm
                                 order={modal.data ?? undefined}
-                                onSave={(data) => setOrders(modal.data  ? orders.map(o => o.id === data.id ? data : o) : [...orders, data])}
+                                onSave={(data) => setOrders(modal.data ? orders.map(o => o.id === data.id ? data : o) : [...orders, data])}
                                 onClose={closeModal}
                             />
                         </Modal>
@@ -222,14 +349,12 @@ const Admin = () => {
                     <>
                         <UserList
                             users={users}
-                            onAdd={() => openModal("user")}
                             onEdit={(u) => openModal("user", u)}
-                            onDelete={(id) => handleDelete("users", id)}
                         />
                         <Modal isOpen={modal.isOpen && modal.type === "user"} onClose={closeModal}>
                             <UserForm
                                 user={modal.data ?? undefined}
-                                onSave={(data) => setUsers(modal.data ? users.map(u => u.userName === data.userName ? data : u) : [...users, data])}
+                                onSave={handleUserRoleChange}
                                 onClose={closeModal}
                             />
                         </Modal>
@@ -238,16 +363,31 @@ const Admin = () => {
             case "categories":
                 return (
                     <>
-                        <CategoryList
-                            categories={categories}
-                            onAdd={() => openModal("category")}
-                            onEdit={(c) => openModal("category", c)}
-                            onDelete={(id) => handleDelete("categories", id)}
-                        />
+                        {error && (
+                            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                                {error}
+                                <button
+                                    onClick={() => setError(null)}
+                                    className="ml-2 text-red-900 hover:text-red-700"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        )}
+                        {loading ? (
+                            <div className="text-center py-8">Loading categories...</div>
+                        ) : (
+                            <CategoryList
+                                categories={categories}
+                                onAdd={() => openModal("category")}
+                                onEdit={(c) => openModal("category", c)}
+                                onDelete={(id) => handleDelete("categories", id)}
+                            />
+                        )}
                         <Modal isOpen={modal.isOpen && modal.type === "category"} onClose={closeModal}>
                             <CategoryForm
                                 category={modal.data ?? undefined}
-                                onSave={(data) => setCategories(modal.data ? categories.map(c => c.id === data.id ? data : c) : [...categories, data])}
+                                onSave={handleCategorySave}
                                 onClose={closeModal}
                             />
                         </Modal>

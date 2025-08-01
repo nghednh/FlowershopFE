@@ -42,7 +42,7 @@ export const createOrder = (orderData: { cartId: number; addressId: number; paym
 
 export const getOrderHistory = () => {
   return instance.get<IBackendRes<{ orders: any[] }>>('/api/order/history');
-}; 
+};
 
 export const getOrderDetails = (orderId: number) => {
   return instance.get<IBackendRes<{ order: any }>>(`/api/order/${orderId}`);
@@ -65,12 +65,20 @@ export const getProductDetails = (productId: number) => {
   return instance.get<IBackendRes<IProduct>>(`/api/products/${productId}`);
 };
 
-export const createProduct = (product: Omit<IProduct, 'id'>) => {
-  return instance.post<IBackendRes<{ product: IProduct }>>('/api/products', product);
+export const createProduct = (formData: FormData) => {
+  return instance.post<IBackendRes<{ product: IProduct }>>('/api/products', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data', // Ensure multipart/form-data is set
+    },
+  });
 };
 
-export const updateProduct = (productId: number, productData: IProduct) => {
-  return instance.put<IBackendRes<{ product: IProduct }>>(`/api/products/${productId}`, productData);
+export const updateProduct = (productId: number, formData: FormData) => {
+  return instance.put<IBackendRes<{ product: IProduct }>>(`/api/products/${productId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data', // Ensure multipart/form-data is set
+    },
+  });
 };
 
 export const deleteProduct = (productId: number) => {

@@ -22,7 +22,7 @@ export interface IProduct {
     stockQuantity: number;
     isActive?: boolean;
     imagesUrls: string[];
-    categoryIds: number[];
+    categories: ICategory[];
 }
 
 export interface ICartItem {

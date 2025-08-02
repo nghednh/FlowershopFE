@@ -10,6 +10,7 @@ import Admin from "./components/Admin";
 import ProductListingsPage from "./components/ProductListing";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { CartProvider } from "./contexts/CartContext";
+import AdminDashboard from "./components/AdminDashboard";
 
 function App() {
   return (
@@ -40,6 +41,14 @@ function App() {
         />
         <Route path="/category" element={<CategoryPage />} />
         <Route path="/list" element={<ProductListingsPage />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            // <ProtectedRoute requiredRole="Admin">
+              <AdminDashboard />
+            // </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );

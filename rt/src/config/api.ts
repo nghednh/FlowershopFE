@@ -31,8 +31,8 @@ export const getUsers = () => {
   return instance.get<IBackendRes<{ users: IUser[] }>>('/api/admin/users');
 };
 
-export const updateUserRole = (userId: string, roles: string[]) => {
-  return instance.post<IBackendRes<IUser>>(`/api/admin/update-user-role`, { userId, newRoleName: roles[0] });
+export const updateUserRole = (userId: string, roleName: string[]) => {
+  return instance.post<IBackendRes<IUser>>(`/api/admin/update-user-role`, { userId, newRoleName: roleName[0] });
 };
 
 // Order

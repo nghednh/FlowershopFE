@@ -1,106 +1,131 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../../Button";
 import { IUser } from "../../../types/backend";
+import { getUsers } from "../../../config/api";
 
 interface UserListProps {
-  users: IUser[];
   onEdit: (user: IUser) => void;
+  refreshTrigger?: number;
 }
 
-export const UserList: React.FC<UserListProps> = ({ users, onEdit }) => {
+export const UserList: React.FC<UserListProps> = ({ onEdit, refreshTrigger }) => {
+  const [users, setUsers] = useState<IUser[]>();
   const [searchTerm, setSearchTerm] = useState("");
-  const [showSort, setShowSort] = useState(false);
-  const [sortField, setSortField] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [roleFilters, setRoleFilters] = useState<{ [key: string]: boolean }>({
-    admin: false,
-    user: false,
-  });
+  const [sortInput, setSortInput] = useState<{ field: string; order: 'asc' | 'desc' }>({ field: 'name', order: 'asc' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value);
-
-  const handleSort = (field: string) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const usersData = await getUsers();
+      setUsers(usersData);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load users');
+      console.error('Error loading users:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleRoleFilter = (role: string) => {
-    setRoleFilters((prev) => ({ ...prev, [role]: !prev[role] }));
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  useEffect(() => {
+    if (refreshTrigger && refreshTrigger > 0) {
+      loadUsers();
+    }
+  }, [refreshTrigger]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value);
+
+  const handleSortInputChange = (field: string, order: 'asc' | 'desc') => {
+    setSortInput({ field, order });
   };
 
   const resetFilters = () => {
     setSearchTerm("");
-    setSortField(null);
-    setSortOrder("asc");
-    setRoleFilters({ admin: false, user: false });
+    setSortInput({ field: 'name', order: 'asc' });
   };
 
-  const filteredUsers = users
+  const filteredUsers = (users ?? [])
     .filter((u) => `${u.firstName} ${u.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()))
-    .filter((u) => {
-      if (Object.values(roleFilters).every((v) => !v)) return true;
-      return roleFilters[u.roles[0]];
-    })
     .sort((a, b) => {
-      if (!sortField) return 0;
-      const multiplier = sortOrder === "asc" ? 1 : -1;
-      if (sortField === "name") return multiplier * `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
-      if (sortField === "role") return multiplier * a.roles[0].localeCompare(b.roles[0]);
+      if (!sortInput.field) return 0;
+      const multiplier = sortInput.order === "asc" ? 1 : -1;
+      if (sortInput.field === "name") return multiplier * `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+      if (sortInput.field === "email") return multiplier * a.email.localeCompare(b.email);
+      if (sortInput.field === "role") return multiplier * a.roles[0].localeCompare(b.roles[0]);
       return 0;
     });
+
+  console.log("Filtered Users id:", filteredUsers.map(u => u.userName));
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-black font-bold uppercase text-2xl">User List</h2>
-      </div>
-
-      <div className="flex items-center justify-between mb-4">
-        <input
-          type="text"
-          placeholder="Search by name..."
-          value={searchTerm}
-          onChange={handleSearch}
-          className="border border-gray-300 p-2 rounded w-1/2"
-        />
-        <div className="flex gap-2">
-          <Button onClick={() => setShowSort(!showSort)}>Sort</Button>
+        <h2 className="text-black font-bold uppercase text-2xl">Users</h2>
+        <div className="flex items-center gap-2">
+          {/* <Button onClick={onAdd}>Add User</Button> */}
           <Button onClick={resetFilters}>Reset</Button>
         </div>
       </div>
-      {showSort && (
-        <div className="mb-4 p-4 border border-gray-300 rounded flex flex-col items-end">
-          <div className="flex gap-4">
-            <Button onClick={() => handleSort("name")}>Sort by Name</Button>
+      <div className="flex flex-col mb-4 p-4 bg-gray-50 gap-2 rounded">
+
+        <div className="flex items-center gap-4">
+          <input
+            type="text"
+            placeholder="Search by name..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="border border-gray-300 p-2 rounded text-sm"
+          />
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Sort by:</span>
+            <select
+              value={sortInput.field || ""}
+              onChange={(e) => {
+                const [field, order] = e.target.value.split('|');
+                handleSortInputChange(field, order as 'asc' | 'desc');
+              }}
+              className="border border-gray-300 p-2 rounded text-sm"
+            >
+              <option value="name|asc">Name Ascending</option>
+              <option value="name|desc">Name Descending</option>
+              <option value="email|asc">Email Ascending</option>
+              <option value="email|desc">Email Descending</option>
+              <option value="role|asc">Role Ascending</option>
+              <option value="role|desc">Role Descending</option>
+            </select>
           </div>
-          <div className="mt-2">
-            {["admin", "user"].map((role) => (
-              <label key={role} className="mr-4" style={{ fontSize: "18px" }}>
-                <input
-                  type="checkbox"
-                  className="mr-1"
-                  checked={roleFilters[role]}
-                  onChange={() => handleRoleFilter(role)}
-                />
-                {role}
-              </label>
-            ))}
-          </div>
+
+        </div>
+
+      </div>
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
         </div>
       )}
+      {loading && <div className="text-center text-gray-500 py-8">Loading...</div>}
       {filteredUsers.length === 0 ? (
         <div className="text-center text-gray-500 py-8">No data found.</div>
       ) : (
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-100">
-              <th className="text-black font-bold uppercase p-2 border border-gray-300">Name</th>
-              <th className="text-black font-bold uppercase p-2 border border-gray-300">Email</th>
-              <th className="text-black font-bold uppercase p-2 border border-gray-300">Role</th>
+              <th className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
+                onClick={() => handleSortInputChange('name', sortInput.order === 'asc' ? 'desc' : 'asc')}
+              >Name {sortInput.field === 'name' && (sortInput.order === 'asc' ? '↑' : '↓')}</th>
+              <th className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
+                onClick={() => handleSortInputChange('email', sortInput.order === 'asc' ? 'desc' : 'asc')}
+              >Email {sortInput.field === 'email' && (sortInput.order === 'asc' ? '↑' : '↓')}</th>
+              <th className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
+                onClick={() => handleSortInputChange('role', sortInput.order === 'asc' ? 'desc' : 'asc')}
+              >Role {sortInput.field === 'role' && (sortInput.order === 'asc' ? '↑' : '↓')}</th>
               <th className="text-black font-bold uppercase p-2 border border-gray-300">Actions</th>
             </tr>
           </thead>

@@ -96,7 +96,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categori
         console.error("Response data:", error.response?.data);
         console.error("Request data:", error.config?.data);
       });
-    } else {
+    } else if (flower) {
       // Update existing flower
       updateProduct(flower.id, formDataToSend)
         .then(response => {

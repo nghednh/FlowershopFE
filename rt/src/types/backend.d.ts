@@ -106,7 +106,7 @@ export interface IUser {
 }
 
 export interface IPricingRule {
-    id: number;
+    pricingRuleId: number;
     description: string;
     condition?: string | null;
     specialDay?: string | null;

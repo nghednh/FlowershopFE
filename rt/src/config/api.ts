@@ -1,4 +1,4 @@
-import { IBackendRes, ICart, ICategory, IProduct, IUser, PaymentMethod } from "../types/backend";
+import { IBackendRes, ICart, ICategory, IPricingRule, IProduct, IUser, PaymentMethod } from "../types/backend";
 import instance from "./axios-customize";
 
 // Category service to interact with the backend API
@@ -31,8 +31,8 @@ export const getUsers = () => {
   return instance.get<IBackendRes<{ users: IUser[] }>>('/api/admin/users');
 };
 
-export const updateUserRole = (id: string, roles: string[]) => {
-  return instance.post<IBackendRes<IUser>>(`/api/admin/update-user-role`, { id, roles });
+export const updateUserRole = (userId: string, roles: string[]) => {
+  return instance.post<IBackendRes<IUser>>(`/api/admin/update-user-role`, { userId, newRoleName: roles[0] });
 };
 
 // Order
@@ -139,8 +139,9 @@ export const createPricingRule = (ruleData: any) => {
   return instance.post<IBackendRes<{ rule: any }>>('/api/pricing/rules', ruleData);
 };
 
-export const updatePricingRule = (ruleId: number, ruleData: any) => {
-  return instance.put<IBackendRes<{ rule: any }>>(`/api/pricing/rules/${ruleId}`, ruleData);
+export const updatePricingRule = (ruleId: number, ruleData: Omit<IPricingRule, 'pricingRuleId'>) => {
+  console.log("Updating Pricing Rule:", ruleData);
+  return instance.put<IBackendRes<{ rule: IPricingRule }>>(`/api/pricing/rules/${ruleId}`, ruleData);
 };
 
 export const deletePricingRule = (ruleId: number) => {

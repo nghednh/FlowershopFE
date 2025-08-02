@@ -4,12 +4,14 @@ interface ButtonProps {
   children: React.ReactNode;
   onClick: () => void;
   className?: string;
+  disabled?: boolean;
 }
 
-export const Button: React.FC<ButtonProps> = ({ children, onClick, className = "" }) => (
+export const Button: React.FC<ButtonProps> = ({ children, onClick, className = "", disabled }) => (
   <button
     className={`bg-black text-white uppercase font-semibold py-2 px-4 rounded hover:bg-gray-800 transition-colors ${className}`}
     onClick={onClick}
+    disabled={disabled}
   >
     {children}
   </button>

@@ -14,6 +14,7 @@ export const PricingRuleList: React.FC<PricingRuleListProps> = ({ rules, onAdd, 
   const [showSort, setShowSort] = useState(false);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  console.log("Current Rules:", rules);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value);
 
@@ -43,11 +44,13 @@ export const PricingRuleList: React.FC<PricingRuleListProps> = ({ rules, onAdd, 
       return 0;
     });
 
+    console.log("Filtered Rules id:", filteredRules.map(r => r.pricingRuleId));
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-black font-bold uppercase text-2xl">Flower Products</h2>
-        <Button onClick={onAdd}>Add Flower</Button>
+        <h2 className="text-black font-bold uppercase text-2xl">Pricing Rules</h2>
+        <Button onClick={onAdd}>Add Pricing Rule</Button>
       </div>
       <div className="flex items-center justify-between mb-4">
         <input
@@ -85,14 +88,14 @@ export const PricingRuleList: React.FC<PricingRuleListProps> = ({ rules, onAdd, 
           </thead>
           <tbody>
             {filteredRules.map((r) => (
-              <tr key={r.id} className="border-b border-gray-300">
+              <tr key={r.pricingRuleId} className="border-b border-gray-300">
                 <td className="p-2 border-x border-gray-300">{r.description}</td>
                 <td className="p-2 border-x border-gray-300">{r.priceMultiplier}</td>
                 <td className="p-2 border-x border-gray-300">{r.priority}</td>
                 <td className="p-2 border-x border-gray-300">
                   <div className="flex items-center justify-center gap-2">
                     <Button onClick={() => onEdit(r)} className="mr-2">Edit</Button>
-                    <Button onClick={() => onDelete(r.id)}>Delete</Button>
+                    <Button onClick={() => onDelete(r.pricingRuleId)}>Delete</Button>
                   </div>
                 </td>
               </tr>

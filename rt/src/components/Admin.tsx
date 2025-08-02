@@ -57,7 +57,7 @@ const Admin = () => {
 
             const rulesData = await getPricingRules();
             console.log('Loaded pricing rules:', rulesData);
-            setPricingRules(rulesData.data.pricingRules);
+            setPricingRules(rulesData.data);
         } catch (err: any) {
             setError(err.message || 'Failed to load pricing rules');
             console.error('Error loading pricing rules:', err);
@@ -203,7 +203,7 @@ const Admin = () => {
             try {
                 setError(null);
                 await deletePricingRule(id as number);
-                setPricingRules(pricingRules.filter(r => r.id !== id));
+                setPricingRules(pricingRules.filter(r => r.pricingRuleId !== id));
             } catch (err: any) {
                 setError(err.message || 'Failed to delete pricing rule');
                 console.error('Error deleting pricing rule:', err);
@@ -238,10 +238,8 @@ const Admin = () => {
             setError(null);
             if (modal.data) {
                 // Update existing product
-                console.log('Updating existing productttttt');
                 setProducts(products.map(p => p.id === data.id ? data : p));
             } else {
-                console.log('Creating new producttttt');
                 // Create new product
                 setProducts([...products, data]);
             }
@@ -280,10 +278,30 @@ const Admin = () => {
         } catch (err: any) {
             setError(err.message || 'Failed to update user role');
             console.error('Error updating user role:', err);
+            console.error("Response status:", err.response?.status);
+            console.error("Response data:", err.response?.data);
+            console.error("Request data:", err.config?.data);
         } finally {
             closeModal();
         }
     };
+
+    const handleRuleChange = (data: IPricingRule) => {
+        try {
+            setError(null);
+            if (modal.data) {
+                // Update existing rule
+                setPricingRules(pricingRules.map(r => r.pricingRuleId === data.pricingRuleId ? data : r));
+            } else {
+                // Create new rule
+                setPricingRules([...pricingRules, data]);
+            }
+            closeModal();
+        } catch (err: any) {
+            setError(err.message || 'Failed to save pricing rule');
+            console.error('Error saving pricing rule:', err);
+        }
+    }
 
     const renderSection = () => {
         switch (activeSection) {
@@ -318,9 +336,9 @@ const Admin = () => {
                         <Modal isOpen={modal.isOpen && modal.type === "pricing"} onClose={closeModal}>
                             <PricingRuleForm
                                 rule={modal.data ?? undefined}
-                                onSave={(data) => setPricingRules(modal.data ? pricingRules.map(r => r.id === data.id ? data : r) : [...pricingRules, data])}
                                 products={products}
                                 onClose={closeModal}
+                                onSave={handleRuleChange}
                             />
                         </Modal>
                     </>

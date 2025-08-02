@@ -139,7 +139,7 @@ export const createPricingRule = (ruleData: any) => {
   return instance.post<IBackendRes<{ rule: any }>>('/api/pricing/rules', ruleData);
 };
 
-export const updatePricingRule = (ruleId: number, ruleData: Omit<IPricingRule, 'pricingRuleId'>) => {
+export const updatePricingRule = (ruleId: number, ruleData: IPricingRule) => {
   console.log("Updating Pricing Rule:", ruleData);
   return instance.put<IBackendRes<{ rule: IPricingRule }>>(`/api/pricing/rules/${ruleId}`, ruleData);
 };

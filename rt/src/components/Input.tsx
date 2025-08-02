@@ -3,12 +3,15 @@ import React from "react";
 interface InputProps {
   label: string;
   value: string | number;
+  step?: number;
+  min?: string | number;
+  max?: string | number;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   type?: string;
 }
 
-export const Input: React.FC<InputProps> = ({ label, value, onChange, required = false, type = "text" }) => (
+export const Input: React.FC<InputProps> = ({ label, value, onChange, required = false, type = "text", step, min, max }) => (
   <div className="mb-4">
     <label className="block text-black font-bold uppercase mb-1">
       {label} {required && "*"}
@@ -19,6 +22,9 @@ export const Input: React.FC<InputProps> = ({ label, value, onChange, required =
       onChange={onChange}
       className="w-full border border-gray-300 bg-gray-100 text-black p-2 rounded"
       required={required}
+      step={step}
+      min={min}
+      max={max}
     />
     {required && !value && (
       <span className="text-red-500 text-sm mt-1 block">This field is required.</span>

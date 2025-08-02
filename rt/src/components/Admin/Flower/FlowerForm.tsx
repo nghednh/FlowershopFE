@@ -49,6 +49,10 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categori
       alert("Name must contain only letters A-Z.");
       return;
     }
+    if(!isNameAZ(formData.description || "")) {
+      alert("Description must contain only letters A-Z.");
+      return;
+    }
     if (!isValidPrice(formData.basePrice)) {
       alert("Base Price must be a non-negative number.");
       return;
@@ -61,7 +65,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categori
       alert("Please select at least one category.");
       return;
     }
-    if (selectedFiles.length === 0) {
+    if (formData.imageUrls.length === 0 && selectedFiles.length === 0) {
       alert("Please upload at least one image for the flower.");
       return;
     }
@@ -133,6 +137,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categori
         label="Description"
         value={formData.description || ""}
         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+        required
       />
       <Input
         label="Base Price"
@@ -184,7 +189,9 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categori
         }}
         options={categories.map((c) => ({ value: c.id, label: c.name ?? "" }))}
       />
-      <Button onClick={handleSubmit}>Save</Button>
+      <div className="flex justify-center">
+        <Button onClick={handleSubmit}>Save</Button>
+      </div>
     </div>
   );
 };

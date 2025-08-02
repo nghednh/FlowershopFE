@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "../config/api";
 import { API_BASE_URL } from "../config.ts";
 
 export default function LoginPage() {
@@ -21,27 +22,35 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
+      const response = await loginUser(email, password);
+      const data = response;
 
       if (data.success) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         setMessage("✅ Login successful!");
-        navigate("/home");
+
+        // Navigate based on user role
+        const userRole = data.user.role;
+        if (userRole === "Admin") {
+          navigate("/admin");
+        } else {
+          navigate("/home");
+        }
       } else {
-        setMessage(`❌ Login failed. ${data.errors?.join(", ")}.`);
+        setMessage(`❌ Login failed. ${data.message || "Invalid credentials"}`);
         setPassword("");
       }
-    } catch (error) {
-      setMessage("⚠️ Network error.");
+    } catch (error: any) {
+      console.error("Login error:", error);
+      setMessage(
+        `❌ Login failed. ${error.response?.data?.message || "Network error"
+        }`
+      );
+      setPassword("");
     } finally {
       setLoading(false);
+      return;
     }
   };
 
@@ -74,9 +83,8 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2 rounded text-white ${
-              loading ? "bg-blue-300" : "bg-blue-600 hover:bg-blue-700"
-            }`}
+            className={`w-full py-2 rounded text-white ${loading ? "bg-blue-300" : "bg-blue-600 hover:bg-blue-700"
+              }`}
           >
             {loading ? "Logging in..." : "Login"}
           </button>
@@ -94,13 +102,12 @@ export default function LoginPage() {
 
         {message && (
           <p
-            className={`mt-4 text-center text-sm ${
-              message.startsWith("✅")
-                ? "text-green-600"
-                : message.startsWith("❌")
+            className={`mt-4 text-center text-sm ${message.startsWith("✅")
+              ? "text-green-600"
+              : message.startsWith("❌")
                 ? "text-red-600"
                 : "text-yellow-600"
-            }`}
+              }`}
           >
             {message}
           </p>

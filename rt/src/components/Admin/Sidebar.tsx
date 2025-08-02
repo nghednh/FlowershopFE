@@ -10,7 +10,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ setActiveSection }) => (
       <h2 className="text-black uppercase text-[34px]">Admin CMS</h2>
     </div>
     <ul>
-      {["Flowers", "Pricing", "Orders", "Users", "Categories"].map((section) => (
+      {["Flowers", "Pricing", "Orders", "Users", "Categories", "Reports"].map((section) => (
         <li key={section} className="text-[18px] mb-6">
           <button
             onClick={() => setActiveSection(section.toLowerCase())}

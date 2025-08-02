@@ -11,6 +11,8 @@ import { UserList } from "./Admin/User/UserList";
 import { UserForm } from "./Admin/User/UserForm";
 import { CategoryList } from "./Admin/Category/CategoryList";
 import { CategoryForm } from "./Admin/Category/CategoryForm";
+import { ReportList } from "./Admin/Reports/ReportList";
+// import { AdminDashboard } from "./Admin/Report/Report.tsx";
 import { Modal } from "./Modal";
 import { createCategory, deleteCategory, getCategories, getUsers, updateCategory, updateUserRole, getProducts, createProduct, updateProduct, deleteProduct, deletePricingRule, cancelOrder, getPricingRules } from "../config/api";
 
@@ -392,6 +394,11 @@ const Admin = () => {
                         </Modal>
                     </>
                 );
+            case "reports":
+                return (
+                    <ReportList />
+                );
+                
             default:
                 return null;
         }

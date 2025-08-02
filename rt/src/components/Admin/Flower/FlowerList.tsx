@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Button } from "../../Button";
 import { ICategory, IProduct } from "../../../types/backend";
 import { getCategories, getProducts } from "../../../config/api";
-import { get } from "lodash";
-import { ca } from "zod/v4/locales";
 
 interface FlowerListProps {
   onAdd: () => void;

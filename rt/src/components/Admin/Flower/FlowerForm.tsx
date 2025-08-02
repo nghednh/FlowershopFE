@@ -5,7 +5,7 @@ import { MultiSelect } from "../../MultiSelect";
 import { Button } from "../../Button";
 import { MultiImageUpload } from "../../MultiImageUpload";
 import { ICategory, IProduct } from "../../../types/backend";
-import { createProduct, updateProduct } from "../../../config/api";
+import { createProduct, updateProduct, getCategories } from "../../../config/api";
 
 const isNameAZ = (name: string) => /^[a-zA-Z0-9 ]+$/.test(name);
 const isValidPrice = (price: number) => price >= 0;
@@ -15,12 +15,11 @@ const isValidCategoryIds = (ids: number[]) => ids.length > 0;
 interface FlowerFormProps {
   flower?: IProduct;
   onSave: (flower: IProduct) => void;
-  categories: ICategory[];
   onClose: () => void;
 
 }
 
-export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categories, onClose }) => {
+export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, onClose }) => {
   const [formData, setFormData] = useState<IProduct>(
     flower || {
       id: 0,
@@ -36,12 +35,25 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categori
     }
   );
 
-  console.log("FlowerForm initial data:", formData);
-  
+  const [categories, setCategories] = useState<ICategory[]>([]);
+
+  React.useEffect(() => {
+    loadCategories();
+  }, []);
+
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const handleImageUpload = (files: File[]) => {
     setSelectedFiles(files);
+  };
+
+  const loadCategories = async () => {
+    try {
+      const response = await getCategories();
+      setCategories(response);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
   };
 
   const handleSubmit = async () => {
@@ -49,7 +61,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categori
       alert("Name must contain only letters A-Z.");
       return;
     }
-    if(!isNameAZ(formData.description || "")) {
+    if (!isNameAZ(formData.description || "")) {
       alert("Description must contain only letters A-Z.");
       return;
     }
@@ -84,8 +96,6 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categori
     formData.categories.forEach(category => {
       formDataToSend.append('categoryIds', category.id.toString());
     });
-
-    console.log('FormData contents:', [...formDataToSend.entries()]);
 
     if (!flower || flower.id === 0) {
       createProduct(formDataToSend)

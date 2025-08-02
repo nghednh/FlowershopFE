@@ -13,7 +13,7 @@ import { CategoryList } from "./Admin/Category/CategoryList";
 import { CategoryForm } from "./Admin/Category/CategoryForm";
 import { Modal } from "./Modal";
 import { ReportList } from "./Admin/Reports/ReportList";
-import { createCategory, deleteCategory, getCategories, getUsers, updateCategory, updateUserRole, deleteProduct, deletePricingRule, cancelOrder, getPricingRules } from "../config/api";
+import { createCategory, deleteCategory, getCategories, getUsers, updateCategory, deleteProduct, deletePricingRule, cancelOrder, getPricingRules } from "../config/api";
 
 const Admin = () => {
   const [activeSection, setActiveSection] = React.useState("flowers");
@@ -166,48 +166,37 @@ const Admin = () => {
     }
   };
 
+  const handleUserSave = async (user: IUser) => {
+    try {
+      setError(null);
+      closeModal();
+      setRefreshTrigger(prev => prev + 1);
+    } catch (err: any) {
+      setError(err.message || 'Failed to save user');
+      console.error('Error saving user:', err);
+    }
+  };
+
+  const handlePricingRuleSave = async (data: IPricingRule) => {
+    try {
+      setError(null);
+      closeModal();
+      setRefreshTrigger(prev => prev + 1);
+    }
+    catch (err: any) {
+      setError(err.message || 'Failed to save pricing rule');
+      console.error('Error saving pricing rule:', err);
+    }
+  }
+
   const handleCategorySave = async (data: ICategory) => {
     try {
       setError(null);
-      if (modal.data) {
-        await updateCategory(data.id, data);
-        setCategories(categories.map(c => c.id === data.id ? data : c));
-      } else {
-        const newCategory = await createCategory(data);
-        setCategories([...categories, newCategory]);
-      }
       closeModal();
+      setRefreshTrigger(prev => prev + 1);
     } catch (err: any) {
       setError(err.message || 'Failed to save category');
       console.error('Error saving category:', err);
-    }
-  };
-
-  const handleUserRoleChange = async (user: IUser) => {
-    try {
-      setError(null);
-      await updateUserRole(user.id.toString(), user.roles);
-      setUsers(users.map(u => u.id === user.id ? user : u));
-    } catch (err: any) {
-      setError(err.message || 'Failed to update user role');
-      console.error('Error updating user role:', err);
-    } finally {
-      closeModal();
-    }
-  };
-
-  const handleRuleChange = (data: IPricingRule) => {
-    try {
-      setError(null);
-      if (modal.data) {
-        setPricingRules(pricingRules.map(r => r.pricingRuleId === data.pricingRuleId ? data : r));
-      } else {
-        setPricingRules([...pricingRules, data]);
-      }
-      closeModal();
-    } catch (err: any) {
-      setError(err.message || 'Failed to save pricing rule');
-      console.error('Error saving pricing rule:', err);
     }
   };
 
@@ -238,7 +227,6 @@ const Admin = () => {
               <FlowerForm
                 flower={modal.data ?? undefined}
                 onSave={handleProductSave}
-                categories={categories}
                 onClose={closeModal}
               />
             </Modal>
@@ -248,17 +236,16 @@ const Admin = () => {
         return (
           <>
             <PricingRuleList
-              rules={pricingRules}
               onAdd={() => openModal("pricing")}
               onEdit={(r) => openModal("pricing", r)}
               onDelete={(id) => handleDelete("pricing", id)}
+              refreshTrigger={refreshTrigger}
             />
             <Modal isOpen={modal.isOpen && modal.type === "pricing"} onClose={closeModal}>
               <PricingRuleForm
                 rule={modal.data ?? undefined}
-                products={products}
                 onClose={closeModal}
-                onSave={handleRuleChange}
+                onSave={handlePricingRuleSave}
               />
             </Modal>
           </>
@@ -285,13 +272,13 @@ const Admin = () => {
         return (
           <>
             <UserList
-              users={users}
               onEdit={(u) => openModal("user", u)}
+              refreshTrigger={refreshTrigger}
             />
             <Modal isOpen={modal.isOpen && modal.type === "user"} onClose={closeModal}>
               <UserForm
                 user={modal.data ?? undefined}
-                onSave={handleUserRoleChange}
+                onSave={handleUserSave}
                 onClose={closeModal}
               />
             </Modal>
@@ -315,10 +302,10 @@ const Admin = () => {
               <div className="text-center py-8">Loading categories...</div>
             ) : (
               <CategoryList
-                categories={categories}
                 onAdd={() => openModal("category")}
                 onEdit={(c) => openModal("category", c)}
                 onDelete={(id) => handleDelete("categories", id)}
+                refreshTrigger={refreshTrigger}
               />
             )}
             <Modal isOpen={modal.isOpen && modal.type === "category"} onClose={closeModal}>

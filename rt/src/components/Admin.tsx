@@ -12,12 +12,10 @@ import { UserForm } from "./Admin/User/UserForm";
 import { CategoryList } from "./Admin/Category/CategoryList";
 import { CategoryForm } from "./Admin/Category/CategoryForm";
 import { Modal } from "./Modal";
-import { createCategory, deleteCategory, getCategories, getUsers, updateCategory, updateUserRole, getProducts, createProduct, updateProduct, deleteProduct, deletePricingRule, cancelOrder, getPricingRules } from "../config/api";
+import { createCategory, deleteCategory, getCategories, getUsers, updateCategory, updateUserRole, deleteProduct, deletePricingRule, cancelOrder, getPricingRules } from "../config/api";
 
 const Admin = () => {
   const [activeSection, setActiveSection] = React.useState("flowers");
-  const [products, setProducts] = React.useState<IProduct[]>([]);
-  const [totalProducts, setTotalProducts] = React.useState(0);
   const [pricingRules, setPricingRules] = React.useState<IPricingRule[]>([]);
   const [orders, setOrders] = React.useState<IOrder[]>([]);
   const [users, setUsers] = React.useState<IUser[]>([]);
@@ -25,20 +23,12 @@ const Admin = () => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [modal, setModal] = React.useState({ isOpen: false, type: "", data: null });
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(20);
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [statusFilters, setStatusFilters] = React.useState<{ [key: string]: boolean }>({
-    New: false,
-    Old: false,
-    "Low Stock": false,
-  });
+  const [refreshTrigger, setRefreshTrigger] = React.useState(0);
 
   const openModal = (type: string, data: any = null) => setModal({ isOpen: true, type, data });
   const closeModal = () => setModal({ isOpen: false, type: "", data: null });
 
   useEffect(() => {
-    loadProducts();
     loadCategories();
     loadUsers();
     loadPricingRules();
@@ -71,35 +61,11 @@ const Admin = () => {
       if (!userStr) throw new Error('User not found');
       const user = JSON.parse(userStr);
       if (user.role !== 'Admin') throw new Error('Admin access required');
-    //   const ordersData = await getOrders();
-    //   setOrders(ordersData.data);
+      //   const ordersData = await getOrders();
+      //   setOrders(ordersData.data);
     } catch (err: any) {
       setError(err.message || 'Failed to load orders');
       console.error('Error loading orders:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadProducts = async (page: number = 1, pageSize: number = 20, search: string = searchTerm, filters: { [key: string]: boolean } = statusFilters) => {
-    try {
-      console.log('Loading products with:', { page, pageSize, search, filters });
-      setLoading(true);
-      setError(null);
-      const userStr = localStorage.getItem('user');
-      if (!userStr) throw new Error('User not found');
-      const user = JSON.parse(userStr);
-      if (user.role !== 'Admin') throw new Error('Admin access required');
-      const productsData = await getProducts({ page, pageSize, search, statusFilters: filters });
-      setProducts(productsData.data.products);
-      setTotalProducts(productsData.data.pagination.totalItems);
-      setCurrentPage(page);
-      setPageSize(pageSize);
-      setSearchTerm(search);
-      setStatusFilters(filters);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load products');
-      console.error('Error loading products:', err);
     } finally {
       setLoading(false);
     }
@@ -146,10 +112,11 @@ const Admin = () => {
       try {
         setError(null);
         await deleteProduct(id as number);
-        await loadProducts(currentPage, pageSize, searchTerm, statusFilters);
+        // No need to reload products here anymore - FlowerList handles it
       } catch (err: any) {
         setError(err.message || 'Failed to delete product');
         console.error('Error deleting product:', err);
+        throw err; // Re-throw so FlowerList can handle the error
       }
       return;
     }
@@ -191,7 +158,7 @@ const Admin = () => {
     try {
       setError(null);
       closeModal();
-      await loadProducts(currentPage, pageSize, searchTerm, statusFilters);
+      setRefreshTrigger(prev => prev + 1);
     } catch (err: any) {
       setError(err.message || 'Failed to save product');
       console.error('Error saving product:', err);
@@ -243,17 +210,6 @@ const Admin = () => {
     }
   };
 
-  const handlePageChange = async (page: number, newPageSize: number) => {
-    console.log('Admin handlePageChange called:', { page, newPageSize });
-    await loadProducts(page, newPageSize, searchTerm, statusFilters);
-  };
-
-  const handleFilterChange = async (search: string, filters: { [key: string]: boolean }) => {
-    setSearchTerm(search);
-    setStatusFilters(filters);
-    await loadProducts(1, pageSize, search, filters);
-  };
-
   const renderSection = () => {
     switch (activeSection) {
       case "flowers":
@@ -270,23 +226,13 @@ const Admin = () => {
                 </button>
               </div>
             )}
-            {loading ? (
-              <div className="text-center py-8">Loading products...</div>
-            ) : (
-              <FlowerList
-                products={products}
-                onAdd={() => openModal("flower")}
-                onEdit={(p) => openModal("flower", p)}
-                onDelete={(id) => handleDelete("flowers", id)}
-                totalProducts={totalProducts}
-                onPageChange={handlePageChange}
-                currentPage={currentPage}
-                pageSize={pageSize}
-                onFilterChange={handleFilterChange}
-                searchTerm={searchTerm}
-                statusFilters={statusFilters}
-              />
-            )}
+            <FlowerList
+              onAdd={() => openModal("flower")}
+              onEdit={(p) => openModal("flower", p)}
+              onDelete={(id) => handleDelete("flowers", id)}
+              onDeleteSuccess={() => setError(null)}
+              refreshTrigger={refreshTrigger}
+            />
             <Modal isOpen={modal.isOpen && modal.type === "flower"} onClose={closeModal}>
               <FlowerForm
                 flower={modal.data ?? undefined}

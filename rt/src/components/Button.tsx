@@ -9,7 +9,7 @@ interface ButtonProps {
 
 export const Button: React.FC<ButtonProps> = ({ children, onClick, className = "", disabled }) => (
   <button
-    className={`bg-black text-white uppercase font-semibold py-2 px-4 rounded hover:bg-gray-800 transition-colors ${className}`}
+    className={`bg-black text-white uppercase font-semibold py-1 px-2 rounded text-sm hover:bg-gray-800 transition-colors ${className}`}
     onClick={onClick}
     disabled={disabled}
   >

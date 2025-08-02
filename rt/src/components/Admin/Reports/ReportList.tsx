@@ -7,16 +7,17 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
-import { API_BASE_URL } from "../../../config.ts";
+import { getReportSummary, getBestSellingProducts, getAllOrders } from "../../../config/api";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ReportPDF } from "./GenerateReport.tsx";
+import { set } from "zod/v4";
 
 type SalesData = { date: string; total: number };
 type ProductData = {
-    productID: string;
+    productId: string;
     productName: string;
-    numberOfSellingProduct: number;
-    totalPrice: number;
+    totalQuantitySold: number;
+    totalRevenue: number;
 };
 
 export const ReportList: React.FC = () => {
@@ -27,9 +28,10 @@ export const ReportList: React.FC = () => {
     });
     const [salesData, setSalesData] = useState<SalesData[]>([]);
     const [topProducts, setTopProducts] = useState<ProductData[]>([]);
-    const [summary, setSummary] = useState<{ totalRevenue: number; totalOrders: number }>({
+    const [summary, setSummary] = useState<{ totalRevenue: number; totalOrders: number, averageOrderValue?: number }>({
         totalRevenue: 0,
         totalOrders: 0,
+        averageOrderValue: 0,
     });
 
     // Generate all dates in a month with start + end times
@@ -74,22 +76,35 @@ export const ReportList: React.FC = () => {
         }
     };
 
+    const getAllOrdersInRange = async (start: string, end: string) => {
+        try {
+            const response = await getAllOrders();
+            const orders = response.data.data?.orders || [];
+            const filteredOrders = orders.filter((order: any) => {
+                const orderDate = new Date(order.createdAt);
+                return orderDate >= new Date(start) && orderDate <= new Date(end);
+            });
+            return filteredOrders;
+        } catch (error: any) {
+            console.error('Error fetching orders:', error);
+            return [];
+        }
+    }
+
     // Lấy tổng doanh thu và tổng số đơn
     const fetchSummary = async () => {
         const { start, end } = getCurrentRange();
         try {
-            const res0 = await fetch(
-                `${API_BASE_URL}/api/orders/`
-            );
-            const res = await fetch(
-                `${API_BASE_URL}/api/reports/summary?starttime=${encodeURIComponent(start)}&endtime=${encodeURIComponent(end)}`
-            );
-            const json = await res.json();
+            const summaryResponse = await getReportSummary(start, end);
+            console.log('Response: summary data:', summaryResponse);
+
             setSummary({
-                totalRevenue: json?.totalRevenue ?? 0,
-                totalOrders: json?.totalOrders ?? 0,
+                totalRevenue: summaryResponse.totalRevenue ?? 0,
+                totalOrders: summaryResponse.totalOrders ?? 0,
+                averageOrderValue: summaryResponse.averageOrderValue ?? 0,
             });
-        } catch {
+        } catch (error: any) {
+            console.error('Error fetching summary:', error);
             setSummary({ totalRevenue: 0, totalOrders: 0 });
         }
     };
@@ -104,20 +119,11 @@ export const ReportList: React.FC = () => {
         for (let s of slots) {
             if (new Date(s.start) > new Date()) break;
             try {
-                const res = await fetch(`${API_BASE_URL}/api/reports/gettotalprice`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        starttime: s.start,
-                        endtime: s.end,
-                    }),
-                }
-                );
-                const json = await res.json();
-                data.push({ date: s.label, total: json?.totalPrice ?? 0 });
+                const response = await getReportSummary(s.start, s.end);
+                console.log(`Response: sales data for ${s.label}:`, response);
+                data.push({ date: s.label, total: response.totalRevenue ?? 0 });
             } catch (e) {
+                console.error('Error fetching sales data:', e);
                 data.push({ date: s.label, total: 0 });
             }
         }
@@ -128,16 +134,22 @@ export const ReportList: React.FC = () => {
     const fetchTopProducts = async () => {
         const { start, end } = getCurrentRange();
         try {
-            const res = await fetch(
-                `${API_BASE_URL}/api/reports/bestselling?starttime=${start}&endtime=${end}`
-            );
-            const json = await res.json();
-            if (json.success && Array.isArray(json.products)) {
-                setTopProducts(json.products);
+            const response = await getBestSellingProducts(10, start, end);
+            console.log(`Response: top products in range: ${start} - ${end}:`, response);
+
+            if (Array.isArray(response)) {
+                const topProducts = response.map((p: ProductData) => ({
+                    productId: p.productId,
+                    productName: p.productName,
+                    totalQuantitySold: p.totalQuantitySold,
+                    totalRevenue: p.totalRevenue,
+                }));
+                setTopProducts(topProducts);
             } else {
                 setTopProducts([]);
             }
-        } catch {
+        } catch (error: any) {
+            console.error('Error fetching top products:', error);
             setTopProducts([]);
         }
     };
@@ -240,6 +252,9 @@ export const ReportList: React.FC = () => {
                     <div className="text-lg font-semibold text-blue-700">
                         Total Orders: {summary.totalOrders}
                     </div>
+                    <div className="text-lg font-semibold text-purple-700">
+                        Average Value/Order: ${summary.averageOrderValue?.toFixed(2) || 0}
+                    </div>
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={salesData}>
@@ -285,8 +300,8 @@ export const ReportList: React.FC = () => {
                         <tr className="bg-gray-100">
                             <th className="p-2 border border-gray-300">Product ID</th>
                             <th className="p-2 border border-gray-300">Product Name</th>
-                            <th className="p-2 border border-gray-300">Units Sold</th>
-                            <th className="p-2 border border-gray-300">Total Price</th>
+                            <th className="p-2 border border-gray-300">Total Quantity Sold</th>
+                            <th className="p-2 border border-gray-300">Revenue</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -298,12 +313,12 @@ export const ReportList: React.FC = () => {
                             </tr>
                         ) : (
                             topProducts.map((p) => (
-                                <tr key={p.productID}>
-                                    <td className="p-2 border border-gray-300">{p.productID}</td>
+                                <tr key={p.productId}>
+                                    <td className="p-2 border border-gray-300">{p.productId}</td>
                                     <td className="p-2 border border-gray-300">{p.productName}</td>
-                                    <td className="p-2 border border-gray-300">{p.numberOfSellingProduct}</td>
+                                    <td className="p-2 border border-gray-300">{p.totalQuantitySold}</td>
                                     <td className="p-2 border border-gray-300">
-                                        ${p.totalPrice?.toLocaleString?.() ?? 0}
+                                        ${p.totalRevenue?.toLocaleString?.() ?? 0}
                                     </td>
                                 </tr>
                             ))

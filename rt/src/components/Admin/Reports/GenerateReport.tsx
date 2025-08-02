@@ -42,13 +42,13 @@ const styles = StyleSheet.create({
 });
 
 type Props = {
-  summary: { totalOrders: number; totalRevenue: number };
+  summary: { totalOrders: number; totalRevenue: number, averageOrderValue: number };
   salesData: { date: string; total: number }[];
   topProducts: {
-    productID: string;
+    productId: string;
     productName: string;
-    numberOfSellingProduct: number;
-    totalPrice: number;
+    totalQuantitySold: number;
+    totalRevenue: number;
   }[];
   reportPeriod: string,
   viewMode: "month" | "year";
@@ -79,12 +79,9 @@ export const ReportPDF: React.FC<Props> = ({
       {/* Summary */}
       <View style={styles.section}>
         <Text style={styles.tableTitle}>I. Summary</Text>
-        <Text>Total Orders: {summary.totalOrders}</Text>
         <Text>Total Revenue: ${summary.totalRevenue.toLocaleString()}</Text>
-        <Text>
-          Average Order Value: $
-          {(summary.totalRevenue / summary.totalOrders || 0).toFixed(0)}
-        </Text>
+        <Text>Total Quantity Sold: ${summary.totalOrders}</Text>
+        <Text>Average Value/Order: ${summary.averageOrderValue}</Text>
       </View>
 
       {/* Revenue Table */}
@@ -116,8 +113,8 @@ export const ReportPDF: React.FC<Props> = ({
           {topProducts.map((p, i) => (
             <View style={styles.tableRow} key={i}>
               <Text style={styles.tableCol}>{p.productName}</Text>
-              <Text style={styles.tableCol}>{p.numberOfSellingProduct}</Text>
-              <Text style={styles.tableCol}>{p.totalPrice.toLocaleString()}</Text>
+              <Text style={styles.tableCol}>{p.totalQuantitySold}</Text>
+              <Text style={styles.tableCol}>{p.totalRevenue.toLocaleString()}</Text>
             </View>
           ))}
         </View>

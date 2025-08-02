@@ -14,6 +14,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
   required = false,
   maxImages = 5,
 }) => {
+  console.log("MultiImageUpload initialImages:", initialImages);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>(initialImages);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -130,7 +131,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
         </div>
       )}
 
-      {required && selectedFiles.length === 0 && (
+      {required && imageUrls.length === 0 && (
         <p className="mt-4 text-red-500 text-sm">At least one image is required</p>
       )}
 

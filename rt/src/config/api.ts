@@ -57,8 +57,47 @@ export const updateOrderStatus = (orderId: number, status: string) => {
 };
 
 // Product
-export const getProducts = () => {
-  return instance.get<IBackendRes<IProduct[]>>('/api/products');
+export const getProducts = (params?: {
+  page?: number;
+  pageSize?: number;
+  flowerTypes?: number[];
+  occasions?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  conditions?: string[];
+  categoryIds?: number[];
+  isActive?: boolean;
+  searchTerm?: string;
+  sortBy?: number; // 0: Name, 1: Price, 2: Stock, 3: Status
+  sortDirection?: number; // 0: Asc, 1: Desc
+}) => {
+  const queryParams = new URLSearchParams();
+
+  if (params) {
+    if (params.page) queryParams.append('Page', params.page.toString());
+    if (params.pageSize) queryParams.append('PageSize', params.pageSize.toString());
+    if (params.flowerTypes?.length) {
+      params.flowerTypes.forEach(type => queryParams.append('FlowerTypes', type.toString()));
+    }
+    if (params.occasions?.length) {
+      params.occasions.forEach(occasion => queryParams.append('Occasions', occasion));
+    }
+    if (params.minPrice !== undefined) queryParams.append('MinPrice', params.minPrice.toString());
+    if (params.maxPrice !== undefined) queryParams.append('MaxPrice', params.maxPrice.toString());
+    if (params.conditions?.length) {
+      params.conditions.forEach(condition => queryParams.append('Conditions', condition));
+    }
+    if (params.categoryIds?.length) {
+      params.categoryIds.forEach(id => queryParams.append('CategoryIds', id.toString()));
+    }
+    if (params.isActive !== undefined) queryParams.append('IsActive', params.isActive.toString());
+    if (params.searchTerm) queryParams.append('SearchTerm', params.searchTerm);
+    if (params.sortBy !== undefined) queryParams.append('SortBy', params.sortBy.toString());
+    if (params.sortDirection !== undefined) queryParams.append('SortDirection', params.sortDirection.toString());
+  }
+
+  const url = `/api/products${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+  return instance.get<IBackendRes<{ products: IProduct[]; totalCount: number }>>(url);
 };
 
 export const getProductDetails = (productId: number) => {

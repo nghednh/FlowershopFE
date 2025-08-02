@@ -190,11 +190,6 @@ const Admin = () => {
   const handleProductSave = async (data: IProduct) => {
     try {
       setError(null);
-      if (modal.data) {
-        await updateProduct(data.id, data);
-      } else {
-        await createProduct(data);
-      }
       closeModal();
       await loadProducts(currentPage, pageSize, searchTerm, statusFilters);
     } catch (err: any) {

@@ -21,8 +21,9 @@ export interface IProduct {
     condition?: string;
     stockQuantity: number;
     isActive?: boolean;
-    imagesUrls: string[];
+    imageUrls: string[];
     categories: ICategory[];
+    reviews?: IReview[];
 }
 
 export interface ICartItem {
@@ -129,5 +130,14 @@ export interface IAddress {
     city?: string | null;
     zipCode?: string | null;
     applicationUserId?: number | null;
+}
+
+export interface IReview {
+    id: number;
+    rating: number;
+    comment: string;
+    userId: number;
+    userName: string;
+    createdAt: string; // ISO date-time string
 }
 

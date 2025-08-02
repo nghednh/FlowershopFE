@@ -7,10 +7,9 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
-import { getReportSummary, getBestSellingProducts, getAllOrders } from "../../../config/api";
+import { getReportSummary, getBestSellingProducts } from "../../../config/api";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ReportPDF } from "./GenerateReport.tsx";
-import { set } from "zod/v4";
 
 type SalesData = { date: string; total: number };
 type ProductData = {
@@ -63,7 +62,7 @@ export const ReportList: React.FC = () => {
         });
     };
 
-    // Lấy thời gian bắt đầu và kết thúc theo filter hiện tại
+    // Get current start and end time based on current filter
     const getCurrentRange = () => {
         if (viewMode === "month") {
             const start = new Date(Date.UTC(filters.year, filters.month - 1, 1, 0, 0, 0, 0)).toISOString();
@@ -75,23 +74,8 @@ export const ReportList: React.FC = () => {
             return { start, end };
         }
     };
-
-    const getAllOrdersInRange = async (start: string, end: string) => {
-        try {
-            const response = await getAllOrders();
-            const orders = response.data.data?.orders || [];
-            const filteredOrders = orders.filter((order: any) => {
-                const orderDate = new Date(order.createdAt);
-                return orderDate >= new Date(start) && orderDate <= new Date(end);
-            });
-            return filteredOrders;
-        } catch (error: any) {
-            console.error('Error fetching orders:', error);
-            return [];
-        }
-    }
-
-    // Lấy tổng doanh thu và tổng số đơn
+    
+    // Get total revenue and total orders
     const fetchSummary = async () => {
         const { start, end } = getCurrentRange();
         try {
@@ -130,7 +114,7 @@ export const ReportList: React.FC = () => {
         setSalesData(data);
     };
 
-    // Lấy sản phẩm bán chạy theo filter hiện tại
+    // Get best-selling products based on current filter
     const fetchTopProducts = async () => {
         const { start, end } = getCurrentRange();
         try {
@@ -244,7 +228,7 @@ export const ReportList: React.FC = () => {
                         </label>
                     )}
                 </div>
-                {/* Tổng doanh thu và tổng số đơn */}
+                {/* Total revenue and total orders */}
                 <div className="flex gap-8 mb-4">
                     <div className="text-lg font-semibold text-green-700">
                         Total Revenue: ${summary.totalRevenue.toLocaleString()}

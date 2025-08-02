@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
 });
 
 type Props = {
-  summary: { totalOrders: number; totalRevenue: number, averageOrderValue: number };
+  summary: { totalRevenue: number, totalOrders: number, averageOrderValue: number };
   salesData: { date: string; total: number }[];
   topProducts: {
     productId: string;

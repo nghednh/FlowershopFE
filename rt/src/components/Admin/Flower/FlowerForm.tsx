@@ -83,20 +83,20 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categori
 
     console.log('FormData contents:', [...formDataToSend.entries()]);
 
-    if (flower === null) {
-    createProduct(formDataToSend)
-      .then(response => {
-        onSave(response.data);
-        console.log("Product saved successfully:", response);
-        onClose();
-      })
-      .catch(error => {
-        alert('Error saving product: ' + (error.message || 'Unknown error'));
-        console.error("Response status:", error.response?.status);
-        console.error("Response data:", error.response?.data);
-        console.error("Request data:", error.config?.data);
-      });
-    } else if (flower) {
+    if (!flower || flower.id === 0) {
+      createProduct(formDataToSend)
+        .then(response => {
+          onSave(response.data);
+          console.log("Product saved successfully:", response);
+          onClose();
+        })
+        .catch(error => {
+          alert('Error saving product: ' + (error.message || 'Unknown error'));
+          console.error("Response status:", error.response?.status);
+          console.error("Response data:", error.response?.data);
+          console.error("Request data:", error.config?.data);
+        });
+    } else {
       // Update existing flower
       updateProduct(flower.id, formDataToSend)
         .then(response => {

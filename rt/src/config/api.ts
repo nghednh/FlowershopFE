@@ -1,4 +1,4 @@
-import { IBackendRes, ICart, ICategory, IProduct, IUser, PaymentMethod } from "../types/backend";
+import { IBackendRes, ICart, ICategory, IPricingRule, IProduct, IUser, PaymentMethod } from "../types/backend";
 import instance from "./axios-customize";
 
 // Category service to interact with the backend API
@@ -31,8 +31,8 @@ export const getUsers = () => {
   return instance.get<IBackendRes<{ users: IUser[] }>>('/api/admin/users');
 };
 
-export const updateUserRole = (id: string, roles: string[]) => {
-  return instance.post<IBackendRes<IUser>>(`/api/admin/update-user-role`, { id, roles });
+export const updateUserRole = (userId: string, roles: string[]) => {
+  return instance.post<IBackendRes<IUser>>(`/api/admin/update-user-role`, { userId, newRoleName: roles[0] });
 };
 
 // Order
@@ -57,8 +57,47 @@ export const updateOrderStatus = (orderId: number, status: string) => {
 };
 
 // Product
-export const getProducts = () => {
-  return instance.get<IBackendRes<IProduct[]>>('/api/products');
+export const getProducts = (params?: {
+  page?: number;
+  pageSize?: number;
+  flowerTypes?: number[];
+  occasions?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  conditions?: string[];
+  categoryIds?: number[];
+  isActive?: boolean;
+  searchTerm?: string;
+  sortBy?: number; // 0: Name, 1: Price, 2: Stock, 3: Status
+  sortDirection?: number; // 0: Asc, 1: Desc
+}) => {
+  const queryParams = new URLSearchParams();
+
+  if (params) {
+    if (params.page) queryParams.append('Page', params.page.toString());
+    if (params.pageSize) queryParams.append('PageSize', params.pageSize.toString());
+    if (params.flowerTypes?.length) {
+      params.flowerTypes.forEach(type => queryParams.append('FlowerTypes', type.toString()));
+    }
+    if (params.occasions?.length) {
+      params.occasions.forEach(occasion => queryParams.append('Occasions', occasion));
+    }
+    if (params.minPrice !== undefined) queryParams.append('MinPrice', params.minPrice.toString());
+    if (params.maxPrice !== undefined) queryParams.append('MaxPrice', params.maxPrice.toString());
+    if (params.conditions?.length) {
+      params.conditions.forEach(condition => queryParams.append('Conditions', condition));
+    }
+    if (params.categoryIds?.length) {
+      params.categoryIds.forEach(id => queryParams.append('CategoryIds', id.toString()));
+    }
+    if (params.isActive !== undefined) queryParams.append('IsActive', params.isActive.toString());
+    if (params.searchTerm) queryParams.append('SearchTerm', params.searchTerm);
+    if (params.sortBy !== undefined) queryParams.append('SortBy', params.sortBy.toString());
+    if (params.sortDirection !== undefined) queryParams.append('SortDirection', params.sortDirection.toString());
+  }
+
+  const url = `/api/products${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+  return instance.get<IBackendRes<{ products: IProduct[]; totalCount: number }>>(url);
 };
 
 export const getProductDetails = (productId: number) => {
@@ -139,8 +178,9 @@ export const createPricingRule = (ruleData: any) => {
   return instance.post<IBackendRes<{ rule: any }>>('/api/pricing/rules', ruleData);
 };
 
-export const updatePricingRule = (ruleId: number, ruleData: any) => {
-  return instance.put<IBackendRes<{ rule: any }>>(`/api/pricing/rules/${ruleId}`, ruleData);
+export const updatePricingRule = (ruleId: number, ruleData: IPricingRule) => {
+  console.log("Updating Pricing Rule:", ruleData);
+  return instance.put<IBackendRes<{ rule: IPricingRule }>>(`/api/pricing/rules/${ruleId}`, ruleData);
 };
 
 export const deletePricingRule = (ruleId: number) => {
@@ -166,3 +206,28 @@ export const getPricingRuleHistory = () => {
 export const getPricingRuleById = (ruleId: number) => {
   return instance.get<IBackendRes<{ rule: any }>>(`/api/pricing/rules/${ruleId}`);
 };
+
+// Report: summary of total revenue and total orders
+export const getReportSummary = (starttime: string, endtime: string) => {
+  return instance.get<IBackendRes<{ totalRevenue: number; totalOrders: number }>>(
+    '/api/reports/summary',
+    { params: { starttime, endtime } }
+  );
+};
+
+// Report: total price for a given slot range
+export const getReportTotalPrice = (starttime: string, endtime: string) => {
+  return instance.get<IBackendRes<{ totalPrice: number }>>(
+    '/api/reports/gettotalprice',
+    { params: { starttime, endtime } }
+  );
+};
+
+// Report: best-selling products in a range
+export const getReportBestSelling = (starttime: string, endtime: string) => {
+  return instance.get<IBackendRes<{ products: any[] }>>(
+    '/api/reports/bestselling',
+    { params: { starttime, endtime } }
+  );
+};
+

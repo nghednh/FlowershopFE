@@ -8,6 +8,8 @@ import CategoryPage from "./components/CategoryPage";
 import CheckoutPage from "./components/CheckoutPage";
 import Admin from "./components/Admin";
 import ProductListingsPage from "./components/ProductListing";
+import OrderHistoryPage from "./components/OrderHistoryPage";
+import OrderTracking from "./components/OrderListing/OrderTracking";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { CartProvider } from "./contexts/CartContext";
 
@@ -40,6 +42,8 @@ function App() {
         />
         <Route path="/category" element={<CategoryPage />} />
         <Route path="/list" element={<ProductListingsPage />} />
+        <Route path="/orderhistory" element={<OrderHistoryPage/>} />
+        <Route path="/orders/:orderId" element={<OrderTracking />} />
       </Routes>
     </Router>
   );

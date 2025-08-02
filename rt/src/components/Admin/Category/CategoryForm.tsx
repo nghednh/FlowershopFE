@@ -9,7 +9,7 @@ interface CategoryFormProps {
   onClose: () => void;
 }
 
-const isNameAZ = (name: string) => /^[a-zA-Z]+$/.test(name);
+const isNameAZ = (name: string) => /^[a-zA-Z0-9 ]+$/.test(name);
 
 export const CategoryForm: React.FC<CategoryFormProps> = ({ category, onSave, onClose }) => {
   const [formData, setFormData] = useState<ICategory>(category || { id: 0, name: "", description: "" });
@@ -23,7 +23,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ category, onSave, on
     }
 
     if (!isNameAZ(formData.name)) {
-      alert("Name must contain only letters A-Z.");
+      alert("Name must contain only letters A-Z, numbers, and spaces.");
       return;
     }
     onSave({ ...formData, id: category?.id || Date.now() });

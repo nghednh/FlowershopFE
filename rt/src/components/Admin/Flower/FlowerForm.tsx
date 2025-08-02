@@ -31,7 +31,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categori
       condition: "",
       stockQuantity: 0,
       isActive: true,
-      imagesUrls: [],
+      imageUrls: [],
       categories: [],
     }
   );
@@ -83,19 +83,19 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categori
 
     console.log('FormData contents:', [...formDataToSend.entries()]);
 
-    if (flower === null) {
-    createProduct(formDataToSend)
-      .then(response => {
-        onSave(response.data);
-        console.log("Product saved successfully:", response);
-        onClose();
-      })
-      .catch(error => {
-        alert('Error saving product: ' + (error.message || 'Unknown error'));
-        console.error("Response status:", error.response?.status);
-        console.error("Response data:", error.response?.data);
-        console.error("Request data:", error.config?.data);
-      });
+    if (!flower || flower.id === 0) {
+      createProduct(formDataToSend)
+        .then(response => {
+          onSave(response.data);
+          console.log("Product saved successfully:", response);
+          onClose();
+        })
+        .catch(error => {
+          alert('Error saving product: ' + (error.message || 'Unknown error'));
+          console.error("Response status:", error.response?.status);
+          console.error("Response data:", error.response?.data);
+          console.error("Request data:", error.config?.data);
+        });
     } else {
       // Update existing flower
       updateProduct(flower.id, formDataToSend)
@@ -166,7 +166,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, categori
         <label className="text-black font-bold uppercase block mb-2">Images *</label>
         <MultiImageUpload
           onImagesChange={handleImageUpload}
-          initialImages={formData.imagesUrls ? formData.imagesUrls : []}
+          initialImages={formData.imageUrls || []}
           required
         />
         {selectedFiles.length > 0 && (

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './ShoppingCart.css';
 import { useCart } from '../contexts/CartContext';
 import QuantitySelector from './QuantitySelector';
@@ -10,6 +11,7 @@ interface ShoppingCartProps {
 
 const ShoppingCart: React.FC<ShoppingCartProps> = ({ isOpen, onClose }) => {
     const { cartItems, totalAmount, isLoading, removeFromCart, updateCartItem } = useCart();
+    const navigate = useNavigate();
 
     if (!isOpen) return null;
 
@@ -20,6 +22,16 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ isOpen, onClose }) => {
         } else {
             await updateCartItem(itemId, newQuantity);
         }
+    };
+
+    // Add checkout handler
+    const handleCheckout = () => {
+        if (cartItems.length === 0) {
+            alert('Your cart is empty. Please add items before checking out.');
+            return;
+        }
+        onClose(); // Close the cart
+        navigate('/checkout'); // Navigate to checkout page
     };
 
     return (
@@ -74,7 +86,13 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ isOpen, onClose }) => {
                             <p>Shipping & taxes calculated at checkout</p>
                             <p>Free standard shipping within Kyiv</p>
                         </div>
-                        <button className="checkout-button">Check out</button>
+                        <button
+                            className="checkout-button"
+                            onClick={handleCheckout}
+                            disabled={cartItems.length === 0}
+                        >
+                            Check out
+                        </button>
                     </>
                 )}
             </div>

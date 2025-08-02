@@ -4,12 +4,10 @@ import { IUser } from "../../../types/backend";
 
 interface UserListProps {
   users: IUser[];
-  onAdd: () => void;
   onEdit: (user: IUser) => void;
-  onDelete: (userName: string) => void;
 }
 
-export const UserList: React.FC<UserListProps> = ({ users, onEdit, onDelete, onAdd }) => {
+export const UserList: React.FC<UserListProps> = ({ users, onEdit }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showSort, setShowSort] = useState(false);
   const [sortField, setSortField] = useState<string | null>(null);
@@ -45,21 +43,20 @@ export const UserList: React.FC<UserListProps> = ({ users, onEdit, onDelete, onA
     .filter((u) => `${u.firstName} ${u.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()))
     .filter((u) => {
       if (Object.values(roleFilters).every((v) => !v)) return true;
-      return roleFilters[u.roleName];
+      return roleFilters[u.roles[0]];
     })
     .sort((a, b) => {
       if (!sortField) return 0;
       const multiplier = sortOrder === "asc" ? 1 : -1;
       if (sortField === "name") return multiplier * `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
-      if (sortField === "role") return multiplier * a.roleName.localeCompare(b.roleName);
+      if (sortField === "role") return multiplier * a.roles[0].localeCompare(b.roles[0]);
       return 0;
     });
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-black font-bold uppercase text-2xl">Flower Products</h2>
-        <Button onClick={onAdd}>Add Flower</Button>
+        <h2 className="text-black font-bold uppercase text-2xl">User List</h2>
       </div>
 
       <div className="flex items-center justify-between mb-4">
@@ -112,11 +109,10 @@ export const UserList: React.FC<UserListProps> = ({ users, onEdit, onDelete, onA
               <tr key={u.userName} className="border-b border-gray-300">
                 <td className="p-2 border-x border-gray-300">{u.firstName} {u.lastName}</td>
                 <td className="p-2 border-x border-gray-300">{u.email}</td>
-                <td className="p-2 border-x border-gray-300">{u.roleName}</td>
+                <td className="p-2 border-x border-gray-300">{u.roles[0]}</td>
                 <td className="p-2 border-x border-gray-300">
                   <div className="flex items-center justify-center gap-2">
                     <Button onClick={() => onEdit(u)} className="mr-2">Edit</Button>
-                    <Button onClick={() => onDelete(u.userName)}>Delete</Button>
                   </div>
                 </td>
               </tr>

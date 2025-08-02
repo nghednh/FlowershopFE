@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { Button } from "../../Button";
 import { IProduct } from "../../../types/backend";
 
@@ -7,32 +7,66 @@ interface FlowerListProps {
   onAdd: () => void;
   onEdit: (product: IProduct) => void;
   onDelete: (id: number) => void;
+  totalProducts?: number;
+  onPageChange?: (page: number, pageSize: number) => void;
+  currentPage?: number;
+  pageSize?: number;
+  onFilterChange?: (search: string, filters: { [key: string]: boolean }) => void;
+  searchTerm?: string;
+  statusFilters?: { [key: string]: boolean };
 }
 
-export const FlowerList: React.FC<FlowerListProps> = ({ products, onAdd, onEdit, onDelete }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showSort, setShowSort] = useState(false);
-  const [sortField, setSortField] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [statusFilters, setStatusFilters] = useState<{ [key: string]: boolean }>({
-    New: false,
-    Old: false,
-    "Low Stock": false,
-  });
+export const FlowerList: React.FC<FlowerListProps> = ({
+  products,
+  onAdd,
+  onEdit,
+  onDelete,
+  totalProducts = 0,
+  onPageChange,
+  currentPage: propCurrentPage = 1,
+  pageSize: propPageSize = 20,
+  onFilterChange,
+  searchTerm: propSearchTerm = "",
+  statusFilters: propStatusFilters = { New: false, Old: false, "Low Stock": false },
+}) => {
+  const [searchTerm, setSearchTerm] = React.useState(propSearchTerm);
+  const [showSort, setShowSort] = React.useState(false);
+  const [sortField, setSortField] = React.useState<string | null>(null);
+  const [sortOrder, setSortOrder] = React.useState<"asc" | "desc">("asc");
+  const [statusFilters, setStatusFilters] = React.useState(propStatusFilters);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value);
+  const currentPage = propCurrentPage;
+  const pageSize = propPageSize;
+  const pageSizeOptions = [10, 20, 50, 100];
+
+  useEffect(() => {
+    setSearchTerm(propSearchTerm);
+    setStatusFilters(propStatusFilters);
+  }, [propSearchTerm, propStatusFilters]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
+    if (onFilterChange) {
+      onFilterChange(newSearchTerm, statusFilters);
+    }
+  };
 
   const handleSort = (field: string) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
+    const newSortOrder = sortField === field && sortOrder === "asc" ? "desc" : "asc";
+    setSortField(field);
+    setSortOrder(newSortOrder);
+    if (onFilterChange) {
+      onFilterChange(searchTerm, statusFilters);
     }
   };
 
   const handleStatusFilter = (status: string) => {
-    setStatusFilters((prev) => ({ ...prev, [status]: !prev[status] }));
+    const newFilters = { ...statusFilters, [status]: !statusFilters[status] };
+    setStatusFilters(newFilters);
+    if (onFilterChange) {
+      onFilterChange(searchTerm, newFilters);
+    }
   };
 
   const resetFilters = () => {
@@ -40,23 +74,39 @@ export const FlowerList: React.FC<FlowerListProps> = ({ products, onAdd, onEdit,
     setSortField(null);
     setSortOrder("asc");
     setStatusFilters({ New: false, Old: false, "Low Stock": false });
+    if (onFilterChange) {
+      onFilterChange("", { New: false, Old: false, "Low Stock": false });
+    }
   };
 
-  const filteredProducts = products
-    .filter((p) => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    .filter((p) => {
-      if (Object.values(statusFilters).every((v) => !v)) return true;
-      return statusFilters[["New", "Old", "Low Stock"][p.flowerStatus]];
-    })
-    .sort((a, b) => {
-      if (!sortField) return 0;
-      const multiplier = sortOrder === "asc" ? 1 : -1;
-      if (sortField === "name") return multiplier * a.name.localeCompare(b.name);
-      if (sortField === "status") return multiplier * a.flowerStatus - b.flowerStatus;
-      if (sortField === "price") return multiplier * (a.basePrice - b.basePrice);
-      if (sortField === "stock") return multiplier * (a.stockQuantity - b.stockQuantity);
-      return 0;
+  const handlePageChange = (page: number, newPageSize?: number) => {
+    const actualPageSize = newPageSize || pageSize;
+    const validPage = Math.max(1, Math.min(page, Math.ceil(totalProducts / actualPageSize) || 1));
+    console.log('FlowerList handlePageChange:', { page, validPage, actualPageSize, totalProducts });
+    if (onPageChange) {
+      onPageChange(validPage, actualPageSize);
+    }
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    console.log('Page size changed to:', newPageSize);
+    handlePageChange(1, newPageSize);
+  };
+
+  const totalPages = totalProducts > 0 ? Math.ceil(totalProducts / pageSize) : 0;
+  const startItem = totalProducts > 0 ? Math.max(1, (currentPage - 1) * pageSize + 1) : 0;
+  const endItem = totalProducts > 0 ? Math.min(currentPage * pageSize, totalProducts) : 0;
+  const validCurrentPage = totalProducts > 0 ? Math.max(1, Math.min(currentPage, totalPages)) : 0;
+
+  useEffect(() => {
+    console.log('FlowerList pagination state:', {
+      currentPage: validCurrentPage,
+      pageSize,
+      totalProducts,
+      totalPages,
+      hasOnPageChange: !!onPageChange,
     });
+  }, [validCurrentPage, pageSize, totalProducts, onPageChange]);
 
   return (
     <div>
@@ -78,6 +128,50 @@ export const FlowerList: React.FC<FlowerListProps> = ({ products, onAdd, onEdit,
           <Button onClick={resetFilters}>Reset</Button>
         </div>
       </div>
+
+      <div className="flex items-center justify-between mb-4 p-4 bg-gray-50 rounded">
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600">
+            {totalProducts > 0
+              ? `Showing ${startItem}-${endItem} of ${totalProducts} products`
+              : 'No products found'}
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Show:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              className="border border-gray-300 p-1 rounded text-sm"
+            >
+              {pageSizeOptions.map((size) => (
+                <option key={size} value={size}>{size}</option>
+              ))}
+            </select>
+            <span className="text-sm text-gray-600">per page</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => handlePageChange(validCurrentPage - 1)}
+            disabled={validCurrentPage <= 1 || totalProducts === 0}
+            className="px-3 py-1 text-sm"
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-gray-600">
+            {totalProducts > 0 ? `Page ${validCurrentPage} of ${totalPages}` : ''}
+          </span>
+          <Button
+            onClick={() => handlePageChange(validCurrentPage + 1)}
+            disabled={validCurrentPage >= totalPages || totalProducts === 0}
+            className="px-3 py-1 text-sm"
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+
       {showSort && (
         <div className="mb-4 p-4 border border-gray-300 rounded flex flex-col items-end">
           <div className="flex gap-4">
@@ -87,7 +181,7 @@ export const FlowerList: React.FC<FlowerListProps> = ({ products, onAdd, onEdit,
           </div>
           <div className="mt-2">
             {["New", "Old", "Low Stock"].map((status) => (
-                <label key={status} className="mr-4" style={{ fontSize: "18px" }}>
+              <label key={status} className="mr-4" style={{ fontSize: "18px" }}>
                 <input
                   type="checkbox"
                   className="mr-1"
@@ -95,42 +189,92 @@ export const FlowerList: React.FC<FlowerListProps> = ({ products, onAdd, onEdit,
                   onChange={() => handleStatusFilter(status)}
                 />
                 {status}
-                </label>
+              </label>
             ))}
           </div>
         </div>
       )}
-      {filteredProducts.length === 0 ? (
-        <div className="text-center text-gray-500 py-8">No data found.</div>
+
+      {products.length === 0 ? (
+        <div className="text-center text-gray-500 py-8">
+          {totalProducts === 0 ? 'No products available.' : 'No data found.'}
+        </div>
       ) : (
         <table className="w-full border-collapse">
           <thead>
-        <tr className="bg-gray-100">
-          <th className="text-black font-bold uppercase p-2 border border-gray-300">Name</th>
-          <th className="text-black font-bold uppercase p-2 border border-gray-300">Status</th>
-          <th className="text-black font-bold uppercase p-2 border border-gray-300">Price</th>
-          <th className="text-black font-bold uppercase p-2 border border-gray-300">Stock</th>
-          <th className="text-black font-bold uppercase p-2 border border-gray-300">Actions</th>
-        </tr>
+            <tr className="bg-gray-100">
+              <th className="text-black font-bold uppercase p-2 border border-gray-300">Name</th>
+              <th className="text-black font-bold uppercase p-2 border border-gray-300">Status</th>
+              <th className="text-black font-bold uppercase p-2 border border-gray-300">Price</th>
+              <th className="text-black font-bold uppercase p-2 border border-gray-300">Stock</th>
+              <th className="text-black font-bold uppercase p-2 border border-gray-300">Actions</th>
+            </tr>
           </thead>
           <tbody>
-        {filteredProducts.map((p) => (
-          <tr key={p.id} className="border-b border-gray-300">
-            <td className="p-2 border-x border-gray-300">{p.name}</td>
-            <td className="p-2 border-x border-gray-300">{["New", "Old", "Low Stock"][p.flowerStatus]}</td>
-            <td className="p-2 border-x border-gray-300">${p.basePrice}</td>
-            <td className="p-2 border-x border-gray-300">{p.stockQuantity}</td>
-            <td className="p-2 border-x border-gray-300">
-          <div className="flex items-center justify-center gap-2">
-            <Button onClick={() => onEdit(p)} className="mr-2">Edit</Button>
-            <Button onClick={() => onDelete(p.id)}>Delete</Button>
-          </div>
-            </td>
-          </tr>
-        ))}
+            {products.map((p) => (
+              <tr key={p.id} className="border-b border-gray-300">
+                <td className="p-2 border-x border-gray-300">{p.name}</td>
+                <td className="p-2 border-x border-gray-300">{["New", "Old", "Low Stock"][p.flowerStatus]}</td>
+                <td className="p-2 border-x border-gray-300">${p.basePrice}</td>
+                <td className="p-2 border-x border-gray-300">{p.stockQuantity}</td>
+                <td className="p-2 border-x border-gray-300">
+                  <div className="flex items-center justify-center gap-2">
+                    <Button onClick={() => onEdit(p)} className="mr-2">Edit</Button>
+                    <Button onClick={() => onDelete(p.id)}>Delete</Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       )}
+
+      <div className="flex items-center justify-center gap-2 mt-4 p-4">
+        <Button
+          onClick={() => handlePageChange(1)}
+          disabled={totalProducts === 0}
+          className="px-3 py-1 text-sm"
+        >
+          First
+        </Button>
+        <Button
+          onClick={() => handlePageChange(validCurrentPage - 1)}
+          disabled={validCurrentPage <= 1 || totalProducts === 0}
+          className="px-3 py-1 text-sm"
+        >
+          Previous
+        </Button>
+        {totalProducts > 0 &&
+          Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            const pageNum = Math.max(1, Math.min(totalPages - 4, validCurrentPage - 2)) + i;
+            if (pageNum <= totalPages) {
+              return (
+                <Button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`px-3 py-1 text-sm ${validCurrentPage === pageNum ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                >
+                  {pageNum}
+                </Button>
+              );
+            }
+            return null;
+          })}
+        <Button
+          onClick={() => handlePageChange(validCurrentPage + 1)}
+          disabled={validCurrentPage >= totalPages || totalProducts === 0}
+          className="px-3 py-1 text-sm"
+        >
+          Next
+        </Button>
+        <Button
+          onClick={() => handlePageChange(totalPages)}
+          disabled={totalProducts === 0 || validCurrentPage >= totalPages}
+          className="px-3 py-1 text-sm"
+        >
+          Last
+        </Button>
+      </div>
     </div>
   );
 };

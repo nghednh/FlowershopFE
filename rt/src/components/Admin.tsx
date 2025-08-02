@@ -165,6 +165,18 @@ const Admin = () => {
     }
   };
 
+  const handlePricingRuleSave = async (data: IPricingRule) => {
+    try {
+      setError(null);
+      closeModal();
+      setRefreshTrigger(prev => prev + 1);
+    }
+    catch (err: any) {
+      setError(err.message || 'Failed to save pricing rule');
+      console.error('Error saving pricing rule:', err);
+    }
+  }
+
   const handleCategorySave = async (data: ICategory) => {
     try {
       setError(null);
@@ -195,21 +207,6 @@ const Admin = () => {
     }
   };
 
-  const handleRuleChange = (data: IPricingRule) => {
-    try {
-      setError(null);
-      if (modal.data) {
-        setPricingRules(pricingRules.map(r => r.pricingRuleId === data.pricingRuleId ? data : r));
-      } else {
-        setPricingRules([...pricingRules, data]);
-      }
-      closeModal();
-    } catch (err: any) {
-      setError(err.message || 'Failed to save pricing rule');
-      console.error('Error saving pricing rule:', err);
-    }
-  };
-
   const renderSection = () => {
     switch (activeSection) {
       case "flowers":
@@ -237,7 +234,6 @@ const Admin = () => {
               <FlowerForm
                 flower={modal.data ?? undefined}
                 onSave={handleProductSave}
-                categories={categories}
                 onClose={closeModal}
               />
             </Modal>
@@ -247,17 +243,16 @@ const Admin = () => {
         return (
           <>
             <PricingRuleList
-              rules={pricingRules}
               onAdd={() => openModal("pricing")}
               onEdit={(r) => openModal("pricing", r)}
               onDelete={(id) => handleDelete("pricing", id)}
+              refreshTrigger={refreshTrigger}
             />
             <Modal isOpen={modal.isOpen && modal.type === "pricing"} onClose={closeModal}>
               <PricingRuleForm
                 rule={modal.data ?? undefined}
-                products={products}
                 onClose={closeModal}
-                onSave={handleRuleChange}
+                onSave={handlePricingRuleSave}
               />
             </Modal>
           </>

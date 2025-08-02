@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "../../Input";
 import { TimePicker } from "../../TimePicker";
 import { DatePicker } from "../../DatePicker"
@@ -6,16 +6,15 @@ import { MultiSelect } from "../../MultiSelect";
 import { Button } from "../../Button";
 import { IProduct } from "../../../types/backend";
 import { IPricingRule } from "../../../types/backend";
-import { createPricingRule, updatePricingRule } from "../../../config/api";
+import { createPricingRule, updatePricingRule, getProducts } from "../../../config/api";
 
 interface PricingRuleFormProps {
   rule?: IPricingRule;
   onSave: (data: IPricingRule) => void;
-  products: IProduct[];
   onClose: () => void;
 }
 
-export const PricingRuleForm: React.FC<PricingRuleFormProps> = ({ rule, onSave, products, onClose }) => {
+export const PricingRuleForm: React.FC<PricingRuleFormProps> = ({ rule, onSave, onClose }) => {
   const [formData, setFormData] = useState<IPricingRule>(
     rule || {
       pricingRuleId: 0,
@@ -24,6 +23,31 @@ export const PricingRuleForm: React.FC<PricingRuleFormProps> = ({ rule, onSave, 
       priority: 1,
     }
   );
+  const [products, setProducts] = useState<IProduct[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadProducts = async (
+
+  ) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+
+      const productsData = await getProducts();
+      setProducts(productsData.data.products);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load products');
+      console.error('Error loading products:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
   const [validationError, setValidationError] = useState<string>("");
 
@@ -167,16 +191,31 @@ export const PricingRuleForm: React.FC<PricingRuleFormProps> = ({ rule, onSave, 
         pricingRuleId: rule?.pricingRuleId || 0
       };
 
-      if (rule) {
-        // Update existing pricing rule
-        const response = await updatePricingRule(rule.pricingRuleId, ruleData);
-        console.log("Pricing rule updated successfully:", response);
-        onSave(response.data);
+      if (!rule || rule.pricingRuleId === 0) {
+        createPricingRule(ruleData)
+          .then(response => {
+            onSave(response.data);
+            console.log("Pricing rule created successfully:", response);
+            onClose();
+          })
+          .catch(error => {
+            alert('Error creating pricing rule: ' + (error.message || 'Unknown error'));
+            console.error("Response status:", error.response?.status);
+            console.error("Response data:", error.response?.data);
+            console.error("Request data:", error.config?.data);
+          });
       } else {
-        // Create new pricing rule
-        const response = await createPricingRule(ruleData);
-        onSave(response.data);
-        console.log("Pricing rule created successfully:", response);
+        updatePricingRule(rule.pricingRuleId, ruleData)
+          .then(response => {
+            onSave(response.data.rule);
+            console.log("Pricing rule updated successfully:", response);
+          })
+          .catch(error => {
+            alert('Error updating pricing rule: ' + (error.message || 'Unknown error'));
+            console.error("Response status:", error.response?.status);
+            console.error("Response data:", error.response?.data);
+            console.error("Request data:", error.config?.data);
+          });
       }
 
       onClose();
@@ -289,13 +328,13 @@ export const PricingRuleForm: React.FC<PricingRuleFormProps> = ({ rule, onSave, 
         onChange={(ids) => setFormData({ ...formData, productIds: ids })}
         options={products.map((p) => ({ value: p.id, label: p.name }))}
       />
-      <Button
-        onClick={handleSubmit}
-        disabled={!!validationError}
-        className={validationError ? "opacity-50 cursor-not-allowed" : ""}
-      >
-        Save
-      </Button>
+      <div className="flex justify-center">
+        <Button
+          disabled={!!validationError}
+          className={validationError ? "opacity-50 cursor-not-allowed" : ""}
+          onClick={handleSubmit}
+        >Save</Button>
+      </div>
     </div>
   );
 };

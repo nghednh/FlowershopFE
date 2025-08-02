@@ -37,23 +37,23 @@ export const updateUserRole = (userId: string, roleName: string[]) => {
 
 // Order
 export const createOrder = (orderData: { cartId: number; addressId: number; paymentMethod: PaymentMethod }) => {
-  return instance.post<IBackendRes<{ order: any }>>('/api/order', orderData);
+  return instance.post<IBackendRes<{ order: any }>>('/api/orders', orderData);
 };
 
 export const getOrderHistory = () => {
-  return instance.get<IBackendRes<{ orders: any[] }>>('/api/order/history');
+  return instance.get<IBackendRes<{ orders: any[] }>>('/api/orders/history');
 };
 
 export const getOrderDetails = (orderId: number) => {
-  return instance.get<IBackendRes<{ order: any }>>(`/api/order/${orderId}`);
+  return instance.get<IBackendRes<{ order: any }>>(`/api/orders/${orderId}`);
 };
 
 export const cancelOrder = (orderId: number) => {
-  return instance.delete<IBackendRes<{ success: boolean }>>(`/api/order/${orderId}`);
+  return instance.delete<IBackendRes<{ success: boolean }>>(`/api/orders/${orderId}`);
 };
 
 export const updateOrderStatus = (orderId: number, status: string) => {
-  return instance.put<IBackendRes<{ order: any }>>(`/api/order/${orderId}/status`, { status });
+  return instance.put<IBackendRes<{ order: any }>>(`/api/orders/${orderId}/status`, { status });
 };
 
 // Product
@@ -208,26 +208,18 @@ export const getPricingRuleById = (ruleId: number) => {
 };
 
 // Report: summary of total revenue and total orders
-export const getReportSummary = (starttime: string, endtime: string) => {
-  return instance.get<IBackendRes<{ totalRevenue: number; totalOrders: number }>>(
-    '/api/reports/summary',
-    { params: { starttime, endtime } }
-  );
-};
-
-// Report: total price for a given slot range
-export const getReportTotalPrice = (starttime: string, endtime: string) => {
-  return instance.get<IBackendRes<{ totalPrice: number }>>(
-    '/api/reports/gettotalprice',
-    { params: { starttime, endtime } }
+export const getReportSummary = (startDate: string, endDate: string) => {
+  return instance.get<IBackendRes<{ totalOrders: Number, totalRevenue: number, averageOrderValue: number }>>(
+    '/api/admin/reports/sales-summary',
+    { params: { startDate, endDate } }
   );
 };
 
 // Report: best-selling products in a range
-export const getReportBestSelling = (starttime: string, endtime: string) => {
+export const getBestSellingProducts = (topN: number, startDate: string, endDate: string) => {
   return instance.get<IBackendRes<{ products: any[] }>>(
-    '/api/reports/bestselling',
-    { params: { starttime, endtime } }
+    '/api/admin/reports/best-selling-products',
+    { params: { topN, startDate, endDate } }
   );
 };
 

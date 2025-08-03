@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import Chatbot from "../Chatbot";
 
 const rawSlides = [
   <div className="bg-white w-full h-fit flex flex-col items-center justify-center">
@@ -126,7 +125,6 @@ export default function LoopingCarousel() {
           />
         ))}
       </div>
-      <Chatbot />
     </div>
   );
 }

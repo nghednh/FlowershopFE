@@ -6,6 +6,7 @@ import ProductPage from "./components/ProductPage";
 import HomePage from "./components/HomePage";
 import CategoryPage from "./components/CategoryPage";
 import CheckoutPage from "./components/CheckoutPage";
+import ContactPage from "./components/ContactPage";
 import Admin from "./components/Admin";
 import ProductListingsPage from "./components/ProductListing";
 import OrderHistoryPage from "./components/OrderHistoryPage";
@@ -33,6 +34,7 @@ function App() {
             <Route path="/products" element={<ProductPage />} />
             <Route path="/products/:id" element={<ProductPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
           </Route>
           <Route
             path="/admin"

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Menu.css';
 
 interface MenuProps {
@@ -7,6 +8,29 @@ interface MenuProps {
 }
 
 const Menu: React.FC<MenuProps> = ({ isOpen, onClose }) => {
+    const navigate = useNavigate();
+
+    // Check if user is logged in
+    const user = localStorage.getItem('user');
+    const isLoggedIn = user && user !== 'null';
+
+    const handleLogout = () => {
+        // Clear user data from localStorage
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user.role');
+        
+        // Close menu and navigate to login page
+        onClose();
+        navigate('/login');
+    };
+
+    const handleMenuItemClick = (path: string) => {
+        onClose();
+        navigate(path);
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -21,17 +45,28 @@ const Menu: React.FC<MenuProps> = ({ isOpen, onClose }) => {
 
                 <div className="menu-content">
                     <ul className="menu-list">
+                        {!isLoggedIn ? (
+                            <li>
+                                <a onClick={() => handleMenuItemClick('/login')}>Sign in</a>
+                            </li>
+                        ) : (
+                            <>
+                                <li>
+                                    <a onClick={() => handleMenuItemClick('/orderhistory')}>Order History</a>
+                                </li>
+                                <li>
+                                    <a onClick={handleLogout}>Logout</a>
+                                </li>
+                            </>
+                        )}
                         <li>
-                            <a href="/login">Sign in</a>
+                            <a onClick={() => handleMenuItemClick('/products')}>Shop</a>
                         </li>
                         <li>
-                            <a href="/shop">Shop</a>
+                            <a onClick={() => handleMenuItemClick('/home#contact')}>Contact</a>
                         </li>
                         <li>
-                            <a href="/contact">Contact</a>
-                        </li>
-                        <li>
-                            <a href="/about">About Us</a>
+                            <a onClick={() => handleMenuItemClick('/about')}>About Us</a>
                         </li>
                     </ul>
                     <ul className="menu-service-list">
@@ -76,7 +111,6 @@ const Menu: React.FC<MenuProps> = ({ isOpen, onClose }) => {
             </div>
         </>
     );
-    
 };
 
 export default Menu;

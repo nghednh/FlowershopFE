@@ -1,10 +1,8 @@
-import Header from "../components/HomePage/Header";
 import GoogleSlides from "./HomePage/GoogleSlides"
 
 export default function HomePage() {
     return (
     <div className="min-h-screen">
-      <Header/>
       <div className="flex flex-col lg:flex-row w-full">
         <div className="w-full lg:w-1/2 border border-gray-400">
           <div className="aspect-square bg-gray-100 border border-gray-400">
@@ -185,7 +183,7 @@ export default function HomePage() {
         </div>
         
         <div className="w-full lg:w-1/2">
-          <div className="w-full h-max lg:h-1/2 bg-white border border-gray-400">
+          <div className="w-full h-max lg:h-1/2 bg-white border border-gray-400" id="contact">
             <div className="pt-10 pl-10 font-bold text-[clamp(1.5rem,4vw,2.5rem)]">
               To Contact Us
             </div>

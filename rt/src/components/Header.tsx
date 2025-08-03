@@ -41,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({ toggleCart, toggleMenu }) => {
     };
 
     const handleShop = () => {
-        navigate('/products');
+        navigate('/list');
     };
 
     const handleContact = () => {

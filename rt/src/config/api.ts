@@ -60,6 +60,10 @@ export const updateOrder = (orderId: number, orderStatus: string, trackingNumber
   return instance.put<IBackendRes<{ order: any }>>(`/api/Orders/${orderId}`, { status: orderStatus, trackingNumber });
 };
 
+export const getMyOrders = () => {
+  return instance.get<IBackendRes<{ order: any}>>(`api/Orders/my-orders`);
+}
+
 // Product
 export const getProducts = (params?: {
   page?: number;

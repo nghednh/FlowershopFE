@@ -1,185 +1,269 @@
-import React, { useState, useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Button } from "./Button"
-import { Input } from "./Input"
-import { Card, CardContent } from "./Card"
-import { Select } from "./Select"
-import { IProduct, ICategory } from "../types/backend"
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { IProduct, ICategory } from "../types/backend.d";
+import { getCategories, getProducts } from "../config/api"
+import { mockProducts } from './ProductListing/mockProducts';
 
-const myCategories = ["All", "Electronics", "Books", "Clothing", "Home"];
-const tagOptions = ["New", "Popular", "Discount", "Limited"];
-const ratings = ["All", "1+", "2+", "3+", "4+", "5"];
+import { SearchBarWithAutocomplete } from './ProductListing/SearchBarAutocomplete';
 
-const mockCategories: ICategory[] = Array.from({ length: 4 }).map((_, index) => ({
-  id:index,
-  name:myCategories[index % 4 + 1],
-  description: 'This is a short description of the category',
-}))
+import { Card, CardContent } from "./Card";
+import { Button } from "./Button";
+import { Input } from "./Input";
+import { Select } from "./Select";
 
-const mockProducts: IProduct[] = Array.from({ length: 200 }).map((_, index) => ({
-  id: index,
-  name: `Product ${index + 1}`,
-  flowerStatus: index % 3,
-  description: `This is a short description of Product ${index + 1}.`,
-  basePrice: Math.floor(Math.random() * 1000),
-  condition: ["New", "Used", "Refurbished"][index % 3],
-  stockQuantity: index % 10 === 0 ? 0 : Math.floor(Math.random() * 50) + 1,
-  isActive: index % 5 !== 0,
-  imagesUrls: [`https://picsum.photos/seed/${index}/300/200`],
-  categories: [mockCategories[index % 4]],
-}));
+import ProductCard from './ProductListing/ProductCard';
+import ProductFilter from './ProductListing/ProductFilter';
+import Pagination from './ProductListing/Pagination';
 
-const PRODUCTS_PER_PAGE = 20;
 
-export default function ProductListingsPage() {
+const PAGE_SIZE = 8;
+
+const flowerTypesOptions = [0, 1, 2]; // Example IDs
+const occasionOptions = ['Birthday', "Valentine's Day"];
+const conditionOptions = ['All', 'New', 'Old'];
+const sortOptions = [
+  { value: 0, label: 'Name A–Z' },
+  { value: 1, label: 'Price' },
+  { value: 2, label: 'Stock' },
+  { value: 3, label: 'Status' },
+];
+
+const ProductListingPage: React.FC = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [sortBy, setSortBy] = useState("name-asc");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [minRating, setMinRating] = useState(0);
-  const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
-  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
 
+  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Controlled filter/search/sort states
+  const [searchInput, setSearchInput] = useState("");
+  const [filtersInput, setFiltersInput] = useState({ New: false, Old: false, "Low Stock": false });
+  const [sortInput, setSortInput] = useState<{ field: string; order: 'asc' | 'desc' }>({ field: 'name', order: 'asc' });
+
+  // Applied filter/search/sort states
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<{ field: string; order: 'asc' | 'desc' }>({ field: 'name', order: 'asc' });
+
+  const pageSizeOptions = [10, 20, 50, 100];
   const navigate = useNavigate();
 
+  const matchesFilters = (product: IProduct) => {
+    const searchTerm = searchParams.get('searchTerm')?.toLowerCase() || '';
+    const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined;
+    const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined;
+    const flowerTypes = searchParams.getAll('flowerTypes').map(Number);
+    const occasions = searchParams.getAll('occasions');
+    const conditions = searchParams.getAll('conditions');
+
+    if (searchTerm && !product.name.toLowerCase().includes(searchTerm)) return false;
+    if (minPrice !== undefined && product.basePrice < minPrice) return false;
+    if (maxPrice !== undefined && product.basePrice > maxPrice) return false;
+    if (flowerTypes.length && !flowerTypes.includes(product.flowerStatus)) return false;
+    if (occasions.length && !occasions.includes(product.description || '')) return false;
+    if (conditions.length && !conditions.includes(product.condition || '')) return false;
+
+    return true;
+  };
+
+  const loadProducts = async (
+    page: number = 1,
+    size: number = PAGE_SIZE,
+    flowerTypes: number[] = [],
+    categoryIds: number[] = [],
+    searchTerm: string = search,
+    sortParam: { field: string; order: 'asc' | 'desc' } = sort
+  ) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Map sort field and order to sortBy and sortDirection numbers
+      const sortFieldMap: { [key: string]: number } = { name: 0, basePrice: 1, stockQuantity: 2, flowerStatus: 3 };
+      const sortBy = sortFieldMap[sortParam.field] ?? 0;
+      const sortDirection = sortParam.order === 'asc' ? 0 : 1;
+
+      const productsData = await getProducts({
+        page,
+        pageSize: size,
+        flowerTypes: flowerTypes.length > 0 ? flowerTypes : undefined,
+        categoryIds: categoryIds.length > 0 ? categoryIds : undefined,
+        searchTerm: searchTerm,
+        sortBy,
+        sortDirection,
+      });
+      setProducts(productsData.data.products);
+      setTotalProducts(productsData.data.pagination.totalItems);
+      setCurrentPage(page);
+      setPageSize(size);
+      setSearch(searchTerm);
+      setSort(sortParam);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load products');
+      console.error('Error loading products:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProducts = async () => {
+    const page = Number(searchParams.get('page')) || 1;
+    const sortBy = Number(searchParams.get('sortBy')) || 0;
+    const sortDirection = Number(searchParams.get('sortDirection')) || 0;
+    const searchTerm = searchParams.get('searchTerm') || undefined;
+    const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined;
+    const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined;
+    const flowerTypes = searchParams.getAll('flowerTypes').map(Number);
+    const occasions = searchParams.getAll('occasions');
+    const conditions = searchParams.getAll('conditions');
+
+    const res = await getProducts({
+      page,
+      pageSize: PAGE_SIZE,
+      sortBy,
+      sortDirection,
+      searchTerm,
+      minPrice,
+      maxPrice,
+      flowerTypes,
+      occasions,
+      conditions,
+      isActive: true,
+    });
+    if (res.success) {
+      const realProducts = res.data.products || [];
+      const filteredMockProducts = mockProducts.filter(matchesFilters);
+      const combinedProducts = [...filteredMockProducts, ...realProducts];
+      setProducts(realProducts);
+      setTotalCount(res.data.pagination.totalItems);// + filteredMockProducts.length);
+    }
+  };
+  
   useEffect(() => {
-    let filtered = mockProducts;
-
-    if (selectedCategory !== "All") {
-      filtered = filtered.filter(p => p.categories.some(c => c.name === selectedCategory));
-
-    }
-
-    if (search.trim()) {
-      filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.description?.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter(p => selectedTags.every(tag => p.condition?.includes(tag)));
-    }
-
-    if (minRating > 0) {
-      filtered = filtered.filter(p => p.flowerStatus >= minRating);
-    }
-
-    if (showOnlyAvailable) {
-      filtered = filtered.filter(p => p.stockQuantity > 0);
-    }
-
-    if (sortBy === "name-asc") {
-      filtered.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortBy === "name-desc") {
-      filtered.sort((a, b) => b.name.localeCompare(a.name));
-    } else if (sortBy === "price-asc") {
-      filtered.sort((a, b) => a.basePrice - b.basePrice);
-    } else if (sortBy === "price-desc") {
-      filtered.sort((a, b) => b.basePrice - a.basePrice);
-    }
-
-    setProducts(filtered);
-  }, [search, selectedCategory, sortBy, selectedTags, minRating, showOnlyAvailable]);
-
-  const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
-  const paginatedProducts = products.slice((page - 1) * PRODUCTS_PER_PAGE, page * PRODUCTS_PER_PAGE);
+    fetchProducts();
+  }, [searchParams]);
 
   return (
-    <div className="p-4 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Browse Products</h1>
-      <div className="flex flex-wrap gap-4 mb-6">
-        <Input
-          label="Search..."
-          type="text"
-          //placeholder="Search..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        <Select
-          label="Category"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          options={myCategories.map((cat) => ({ value: cat, label: cat }))}
-        />
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">All Flowers</h1>
 
-        <Select
-          label="Sort By"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          options={[
-            { value: "name-asc", label: "Name (A-Z)" },
-            { value: "name-desc", label: "Name (Z-A)" },
-            { value: "price-asc", label: "Price (Low-High)" },
-            { value: "price-desc", label: "Price (High-Low)" },
-          ]}
-        />
+      {/* Wrapper grid: sidebar + content */}
+      <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-4">
 
-        <Select
-          label="Minimum Rating"
-          value={minRating.toString()}
-          onChange={(e) => setMinRating(Number(e.target.value))}
-          options={ratings.map((r) => ({
-            value: r === "All" ? "0" : r[0],
-            label: `${r} Stars`,
-          }))}
-        />
-        <label className="flex items-center space-x-2">
-          <input type="checkbox" checked={showOnlyAvailable} onChange={e => setShowOnlyAvailable(e.target.checked)} />
-          <span className="text-sm">In Stock Only</span>
-        </label>
-      </div>
+        {/* Sidebar */}
+        <div className="flex flex-col gap-4">
+          <Select
+            label="Sort By"
+            value={searchParams.get('sortBy') || '0'}
+            onChange={(e) => {
+              searchParams.set('sortBy', e.target.value);
+              setSearchParams(searchParams);
+            }}
+            options={sortOptions.map(opt => ({
+              value: opt.value,
+              label: opt.label,
+            }))}
+          />
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        {tagOptions.map(tag => (
-          <Button
-            key={tag}
-            //variant={selectedTags.includes(tag) ? "default" : "outline"}
-            onClick={() =>
-              setSelectedTags(prev =>
-                prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-              )
-            }
-          >
-            {tag}
-          </Button>
-        ))}
-      </div>
+          <Select
+            label="Condition"
+            value={searchParams.get('conditions') || ''}
+            onChange={(e) => {
+              const selected = Array.from(e.target.selectedOptions).map(opt => opt.value);
+              searchParams.delete('conditions');
+              selected.forEach(cond => searchParams.append('conditions', cond));
+              setSearchParams(searchParams);
+            }}
+            options={conditionOptions.map(cond => ({
+              value: cond,
+              label: cond,
+            }))}
+          />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {paginatedProducts.map(product => (
-          <motion.div
-            key={product.id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card className="rounded-2xl shadow-lg hover:shadow-xl transition">
-              <img
-                src={product.imagesUrls[0]}
-                alt={product.name}
-                className="rounded-t-2xl object-cover h-48 w-full"
+          <Select
+            label="Flower Types"
+            value={searchParams.get('flowerTypes') || ''}
+            onChange={(e) => {
+              const selected = Array.from(e.target.selectedOptions).map(opt => Number(opt.value));
+              searchParams.delete('flowerTypes');
+              selected.forEach(type => searchParams.append('flowerTypes', String(type)));
+              setSearchParams(searchParams);
+            }}
+            options={flowerTypesOptions.map(type => ({
+              value: type,
+              label: `Type ${type}`,
+            }))}
+          />
+
+          <Select
+            label="Occasion"
+            value={searchParams.get('occasions') || ''}
+            onChange={(e) => {
+              const selected = Array.from(e.target.selectedOptions).map(opt => opt.value);
+              searchParams.delete('occasions');
+              selected.forEach(occ => searchParams.append('occasions', occ));
+              setSearchParams(searchParams);
+            }}
+            options={occasionOptions.map(occ => ({
+              value: occ,
+              label: occ,
+            }))}
+          />
+        </div>
+
+        {/* Main content area */}
+        <div className="flex flex-col gap-4">
+          {/* Inline filters (search + price) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <SearchBarWithAutocomplete />
+
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                label="Min Price"
+                value={searchParams.get('minPrice') || ''}
+                onChange={(e) => {
+                  searchParams.set('minPrice', e.target.value);
+                  setSearchParams(searchParams);
+                }}
               />
-              <CardContent className="p-4 space-y-2">
-                <h2 className="text-lg font-semibold truncate">{product.name}</h2>
-                <p className="text-sm text-gray-500 truncate">{product.description}</p>
-                <p className="text-blue-600 font-bold">${product.basePrice.toFixed(2)}</p>
-                <p className="text-xs text-yellow-500">Status: {product.flowerStatus} / 5</p>
-                {product.stockQuantity === 0 && <p className="text-red-600 text-sm">Out of Stock</p>}
-                <Button className="w-full" onClick={() => navigate(`/products/${product.id}`)}>View Details</Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+              <Input
+                type="number"
+                label="Max Price"
+                value={searchParams.get('maxPrice') || ''}
+                onChange={(e) => {
+                  searchParams.set('maxPrice', e.target.value);
+                  setSearchParams(searchParams);
+                }}
+              />
+            </div>
+          </div>
 
-      <div className="flex justify-center mt-8 gap-2">
-        <Button disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Previous</Button>
-        <span className="px-4 py-2">Page {page} of {totalPages}</span>
-        <Button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
+          {/* Product Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {products.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <Pagination
+            total={totalCount}
+            pageSize={PAGE_SIZE}
+            currentPage={Number(searchParams.get('page')) || 1}
+            onPageChange={(newPage) => {
+              searchParams.set('page', String(newPage));
+              setSearchParams(searchParams);
+            }}
+          />
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default ProductListingPage;

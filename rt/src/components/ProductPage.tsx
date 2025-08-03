@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import './ProductPage/ProductPage.css';
 import ProductImageGallery from './ProductPage/ProductImageGallery';
 import ProductDetails from './ProductPage/ProductDetails';
-import { getProductDetails } from '../config/api';
+import { getProductDetails, getSimilarProducts } from '../config/api';
 import { IProduct } from '../types/backend';
 
 const ProductPage: React.FC = () => {
@@ -13,6 +13,7 @@ const ProductPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [currentDisplayImage, setCurrentDisplayImage] = useState<string>('');
+  const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -29,6 +30,18 @@ const ProductPage: React.FC = () => {
           : ['https://via.placeholder.com/800x600/FFDDC1/800000?text=No+Image'];
         setGalleryImages(primaryImage);
         setCurrentDisplayImage(primaryImage[0]); // Set initial display image
+
+        // Fetch related products based on category
+        if (response.categories && response.categories.length > 0) {
+          try {
+            const relatedResponse = await getSimilarProducts(response.id, 6);
+            const filtered = relatedResponse.data?.products || relatedResponse.products || [];
+            setRelatedProducts(filtered);
+          } catch (relatedError) {
+            console.error('Error fetching related products:', relatedError);
+            // Don't set error state for related products failure
+          }
+        }
 
       } catch (err) {
         setError('Failed to fetch product details');

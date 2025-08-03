@@ -125,7 +125,39 @@ export const deleteProduct = (productId: number) => {
 };
 
 export const searchProducts = (query: string) => {
-  return instance.get<IBackendRes<{ products: any[] }>>(`/api/products/search?query=${encodeURIComponent(query)}`);
+  return instance.get<IBackendRes<{ query: string; totalCount: number; products: any[] }>>(`/api/products/search?query=${encodeURIComponent(query)}`);
+};
+
+// Product Autocomplete
+export const getProductSuggestions = (query: string) => {
+  return instance.get<IBackendRes<string[]>>(`/api/products/autocomplete?query=${encodeURIComponent(query)}`);
+};
+
+// Product Reviews
+export const addProductReview = (reviewData: { productId: number; rating: number; comment: string }) => {
+  return instance.post<IBackendRes<any>>('/api/products/reviews', reviewData);
+};
+
+// Product View Tracking
+export const trackProductView = (productId: number) => {
+  return instance.post<IBackendRes<{ message: string }>>(`/api/products/${productId}/track-view`);
+};
+
+// Product Recommendations
+export const getRecommendationsForUser = (count: number = 6) => {
+  return instance.get<IBackendRes<{ products: IProduct[]; type: string; count: number }>>(`/api/products/recommendations/for-you?count=${count}`);
+};
+
+export const getPopularProducts = (count: number = 6) => {
+  return instance.get<IBackendRes<{ products: IProduct[]; type: string; count: number }>>(`/api/products/recommendations/popular?count=${count}`);
+};
+
+export const getSimilarProducts = (productId: number, count: number = 6) => {
+  return instance.get<IBackendRes<{ products: IProduct[]; type: string; count: number }>>(`/api/products/${productId}/similar?count=${count}`);
+};
+
+export const getRecentlyViewedProducts = (count: number = 6) => {
+  return instance.get<IBackendRes<{ products: IProduct[]; type: string; count: number }>>(`/api/products/recommendations/recently-viewed?count=${count}`);
 };
 
 // Cart
@@ -222,4 +254,3 @@ export const getBestSellingProducts = (topN: number, startDate: string, endDate:
     { params: { topN, startDate, endDate } }
   );
 };
-

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { IProduct, ICategory, IPricingRule, IOrder, IUser } from "../types/backend";
+import { IProduct, ICategory, IPricingRule, IOrder, IUser, IUserSummaryLoyalty } from "../types/backend";
 import { Sidebar } from "./Admin/Sidebar";
 import { FlowerList } from "./Admin/Flower/FlowerList";
 import { FlowerForm } from "./Admin/Flower/FlowerForm";
@@ -14,6 +14,8 @@ import { CategoryForm } from "./Admin/Category/CategoryForm";
 import { Modal } from "./Modal";
 import { ReportList } from "./Admin/Reports/ReportList";
 import { createCategory, deleteCategory, getCategories, getUsers, updateCategory, deleteProduct, deletePricingRule, cancelOrder, getPricingRules } from "../config/api";
+import { LoyaltyList } from "./Admin/Loyalty/LoyaltyList";
+import { LoyaltyForm } from "./Admin/Loyalty/LoyaltyForm";
 
 const Admin = () => {
   const [activeSection, setActiveSection] = React.useState("flowers");
@@ -21,6 +23,7 @@ const Admin = () => {
   const [orders, setOrders] = React.useState<IOrder[]>([]);
   const [users, setUsers] = React.useState<IUser[]>([]);
   const [categories, setCategories] = React.useState<ICategory[]>([]);
+  const [loyaltyUsers, setLoyaltyUsers] = React.useState<IUserSummaryLoyalty[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [modal, setModal] = React.useState({ isOpen: false, type: "", data: null });
@@ -200,6 +203,17 @@ const Admin = () => {
     }
   };
 
+  const handleLoyaltySave = async (data: IUserSummaryLoyalty) => {
+    try {
+      setError(null);
+      closeModal();
+      setRefreshTrigger(prev => prev + 1);
+    } catch (err: any) {
+      setError(err.message || 'Failed to update loyalty points');
+      console.error('Error updating loyalty points:', err);
+    }
+  };
+
   const renderSection = () => {
     switch (activeSection) {
       case "flowers":
@@ -312,6 +326,33 @@ const Admin = () => {
               <CategoryForm
                 category={modal.data ?? undefined}
                 onSave={handleCategorySave}
+                onClose={closeModal}
+              />
+            </Modal>
+          </>
+        );
+      case "loyalty":
+        return (
+          <>
+            {error && (
+              <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                {error}
+                <button
+                  onClick={() => setError(null)}
+                  className="ml-2 text-red-900 hover:text-red-700"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+            <LoyaltyList
+              onEdit={(u) => openModal("loyalty", u)}
+              refreshTrigger={refreshTrigger}
+            />
+            <Modal isOpen={modal.isOpen && modal.type === "loyalty"} onClose={closeModal}>
+              <LoyaltyForm
+                user={modal.data ?? undefined}
+                onSave={handleLoyaltySave}
                 onClose={closeModal}
               />
             </Modal>

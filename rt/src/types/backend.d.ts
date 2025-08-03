@@ -140,3 +140,22 @@ export interface IReview {
     userName: string;
     createdAt: string; // ISO date-time string
 }
+
+export interface ILoyaltyTransaction {
+    id: number;
+    pointsChange: number;
+    description: string;
+    createdAt: string; // ISO date-time string
+}
+
+export interface IUserLoyalty {
+    currentPoints: number;
+    transactions: ILoyaltyTransaction[];
+}
+
+export interface IUserSummaryLoyalty {
+    id: number;
+    userName: string;
+    email: string;
+    loyaltyPoints: number;
+}

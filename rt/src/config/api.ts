@@ -1,4 +1,4 @@
-import { IBackendRes, ICart, ICategory, IPricingRule, IProduct, IUser, PaymentMethod } from "../types/backend";
+import { IBackendRes, ICart, ICategory, IPricingRule, IProduct, IUser, PaymentMethod, IUserLoyalty, IUserSummaryLoyalty } from "../types/backend";
 import instance from "./axios-customize";
 
 // Category service to interact with the backend API
@@ -253,4 +253,21 @@ export const getBestSellingProducts = (topN: number, startDate: string, endDate:
     '/api/admin/reports/best-selling-products',
     { params: { topN, startDate, endDate } }
   );
+};
+
+// Loyalty Points API
+export const getUserLoyaltyInfo = () => {
+  return instance.get<IUserLoyalty>('/api/loyalty/me');
+};
+
+export const redeemLoyaltyPoints = (pointsToRedeem: number) => {
+  return instance.post('/api/loyalty/redeem', { pointsToRedeem });
+};
+
+export const getAllUsersLoyaltyInfo = () => {
+  return instance.get<IBackendRes<{ users: IUserSummaryLoyalty[] }>>('/api/loyalty/all');
+};
+
+export const updateUserLoyaltyPoints = (userId: number, newPointsValue: number) => {
+  return instance.put(`/api/loyalty/update/${userId}`, { newPointsValue });
 };

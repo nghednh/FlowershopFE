@@ -203,6 +203,18 @@ const Admin = () => {
     }
   };
 
+  const handleOrderSave = async (data: IOrder) => {
+    try {
+      setError(null);
+      closeModal();
+      setRefreshTrigger(prev => prev + 1);
+    }
+    catch (err: any) {
+      setError(err.message || 'Failed to save order');
+      console.error('Error saving order:', err);
+    }
+  };
+
   const handleLoyaltySave = async (data: IUserSummaryLoyalty) => {
     try {
       setError(null);
@@ -268,16 +280,14 @@ const Admin = () => {
         return (
           <>
             <OrderList
-              orders={orders}
-              onAdd={() => openModal("order")}
               onEdit={(o) => openModal("order", o)}
               onDelete={(id) => handleDelete("orders", id)}
             />
             <Modal isOpen={modal.isOpen && modal.type === "order"} onClose={closeModal}>
               <OrderForm
                 order={modal.data ?? undefined}
-                onSave={(data) => setOrders(modal.data ? orders.map(o => o.id === data.id ? data : o) : [...orders, data])}
                 onClose={closeModal}
+                onSave={handleOrderSave}
               />
             </Modal>
           </>

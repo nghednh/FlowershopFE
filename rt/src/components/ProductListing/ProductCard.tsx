@@ -25,7 +25,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
       )}
       <h2 className="font-bold text-lg">{product.name}</h2>
       <p className="text-gray-700 text-sm">{product.description}</p>
-      <p><span className="font-medium">Flower Type:</span> {flowerType || "N/A"}</p>
+      <p><span className="font-medium">Categories:</span> {flowerType || "N/A"}</p>
       <p><span className="font-medium">Condition:</span> {conditionLabel || "Unknown"}</p>
       <p className="text-green-600 font-semibold">Price: ${product.basePrice.toFixed(2)}</p>
       <Button className="w-full" onClick={() => navigate(`/products/${product.id}`)}>View Details</Button>

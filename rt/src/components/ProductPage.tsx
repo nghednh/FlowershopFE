@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import './ProductPage/ProductPage.css';
 import ProductImageGallery from './ProductPage/ProductImageGallery';
 import ProductDetails from './ProductPage/ProductDetails';
-import { getProductDetails, getSimilarProducts } from '../config/api';
+import { getProductDetails, getSimilarProducts, getDynamicPrice } from '../config/api';
 import { IProduct } from '../types/backend';
 
 const ProductPage: React.FC = () => {
@@ -14,6 +14,8 @@ const ProductPage: React.FC = () => {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [currentDisplayImage, setCurrentDisplayImage] = useState<string>('');
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
+  const [dynamicPrice, setDynamicPrice] = useState<number | null>(null);
+  const [priceLoading, setPriceLoading] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -24,12 +26,16 @@ const ProductPage: React.FC = () => {
         const response = await getProductDetails(Number(id));
         console.log('Product response:', response);
         setProduct(response);
+
         // Initialize gallery images with primary image
         const primaryImage = response.images && response.images.length > 0
           ? response.images.map(img => img.imageUrl)
           : ['https://via.placeholder.com/800x600/FFDDC1/800000?text=No+Image'];
         setGalleryImages(primaryImage);
-        setCurrentDisplayImage(primaryImage[0]); // Set initial display image
+        setCurrentDisplayImage(primaryImage[0]);
+
+        // Fetch dynamic pricing
+        await fetchDynamicPrice(Number(id));
 
         // Fetch related products based on category
         if (response.categories && response.categories.length > 0) {
@@ -39,7 +45,6 @@ const ProductPage: React.FC = () => {
             setRelatedProducts(filtered);
           } catch (relatedError) {
             console.error('Error fetching related products:', relatedError);
-            // Don't set error state for related products failure
           }
         }
 
@@ -53,6 +58,26 @@ const ProductPage: React.FC = () => {
 
     fetchProduct();
   }, [id]);
+
+  const fetchDynamicPrice = async (productId: number) => {
+    try {
+      setPriceLoading(true);
+      const currentTime = new Date().toISOString();
+      const priceResponse = await getDynamicPrice(productId, currentTime);
+      console.log('Dynamic price response:', priceResponse);
+
+      if (priceResponse.success && priceResponse.data) {
+        setDynamicPrice(priceResponse.data.dynamicPrice);
+        console.log('Dynamic price fetched:', priceResponse.data);
+      }
+    } catch (err) {
+      console.error('Error fetching dynamic price:', err);
+      // Fallback to base price if dynamic pricing fails
+      setDynamicPrice(null);
+    } finally {
+      setPriceLoading(false);
+    }
+  };
 
   const handleVaseSelection = (vaseImageUrl: string) => {
     setCurrentDisplayImage(vaseImageUrl);
@@ -78,10 +103,13 @@ const ProductPage: React.FC = () => {
     ? product.categories[0].name
     : 'Uncategorized';
 
-  // Calculate discount percentage if there's a difference between basePrice and finalPrice
-  const finalPrice = product.basePrice - 2; // Assuming finalPrice is basePrice for now
-  const hasDiscount = finalPrice < product.basePrice;
-  const discountPercentage = hasDiscount ? Math.round(((product.basePrice - finalPrice) / product.basePrice) * 100) : 0;
+  // Use dynamic price if available, otherwise fall back to base price
+  const finalPrice = dynamicPrice !== null ? dynamicPrice : product.basePrice;
+  const hasDiscount = dynamicPrice !== null && dynamicPrice < product.basePrice;
+  const hasSurcharge = dynamicPrice !== null && dynamicPrice > product.basePrice;
+  const priceChangePercentage = dynamicPrice !== null
+    ? Math.round(Math.abs((dynamicPrice - product.basePrice) / product.basePrice) * 100)
+    : 0;
 
   return (
     <div>
@@ -98,9 +126,10 @@ const ProductPage: React.FC = () => {
           price={finalPrice}
           basePrice={product.basePrice}
           stockQuantity={product.stockQuantity}
-          discountPercentage={discountPercentage}
+          discountPercentage={priceChangePercentage}
           hasDiscount={hasDiscount}
-          imageUrls={galleryImages} // Pass original images for vase selection
+          hasSurcharge={hasSurcharge}
+          imageUrls={galleryImages}
           onVaseSelect={handleVaseSelection}
         />
       </div>

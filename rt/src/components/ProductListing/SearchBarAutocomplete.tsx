@@ -46,7 +46,7 @@ export const SearchBarWithAutocomplete = () => {
   return (
     <div className="relative w-full max-w-md">
       <Input
-        label="Search by bar"
+        label="Search by name"
         value={input}
         onChange={(e) => {
           const val = e.target.value;

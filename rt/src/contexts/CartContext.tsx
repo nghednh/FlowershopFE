@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { addToCart, getCartItemCount, getCartDetails, removeFromCart as removeCartItem, updateCartItem as updateCartItemAPI } from '../config/api';
+import { addToCart, getCartItemCount, getCartDetails, removeFromCart as removeCartItem, updateCartItem as updateCartItemAPI, getDynamicPrice } from '../config/api';
 
 interface CartItem {
     id: number;
@@ -7,6 +7,8 @@ interface CartItem {
     productId: number;
     productName: string;
     price: number;
+    basePrice: number; // Add base price
+    dynamicPrice?: number; // Add dynamic price
     quantity: number;
     subTotal: number;
     productImage: string;
@@ -45,10 +47,35 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
     const refreshCart = async () => {
         try {
+            setIsLoading(true);
             const response = await getCartDetails();
             console.log('Cart details response:', response);
+
+            // Fetch dynamic prices for each cart item
+            const cartItemsWithDynamicPrices = await Promise.all(
+                response.cartItems.map(async (item: any) => {
+                    try {
+                        const currentTime = new Date().toISOString();
+                        const priceResponse = await getDynamicPrice(item.productId, currentTime);
+
+                        return {
+                            ...item,
+                            basePrice: item.price, // Assuming current price is base price
+                            dynamicPrice: priceResponse.success ? priceResponse.data.dynamicPrice : undefined
+                        };
+                    } catch (error) {
+                        console.error(`Error fetching dynamic price for product ${item.productId}:`, error);
+                        return {
+                            ...item,
+                            basePrice: item.price,
+                            dynamicPrice: undefined
+                        };
+                    }
+                })
+            );
+
             setCartItemCount(response.totalItems);
-            setCartItems(response.cartItems);
+            setCartItems(cartItemsWithDynamicPrices);
             setTotalAmount(response.totalAmount);
 
         } catch (error) {
@@ -63,6 +90,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
             } catch (countError) {
                 console.error('Error fetching cart count:', countError);
             }
+        } finally {
+            setIsLoading(false);
         }
     };
 

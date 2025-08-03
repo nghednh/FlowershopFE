@@ -20,6 +20,7 @@ export const UserList: React.FC<UserListProps> = ({ onEdit, refreshTrigger }) =>
       setLoading(true);
       setError(null);
       const usersData = await getUsers();
+      console.log("Fetched users:", usersData);
       setUsers(usersData);
     } catch (err: any) {
       setError(err.message || 'Failed to load users');

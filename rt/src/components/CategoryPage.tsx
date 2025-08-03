@@ -9,9 +9,9 @@ export default function CategoryPage() {
     const handleShopNow = (category?: string) => {
         // Navigate to products page with optional category filter
         if (category) {
-            navigate(`/products?category=${category}`);
+            navigate(`/list?categories=${category}`);
         } else {
-            navigate('/products');
+            navigate('/list');
         }
     };
 
@@ -31,7 +31,6 @@ export default function CategoryPage() {
     return (
         <div className="min-h-screen">
             <div className="sticky top-0 z-50 bg-gray-100">
-                <Header />
             </div>
             
             {/* Main Content */}
@@ -88,7 +87,7 @@ export default function CategoryPage() {
             {/* Bottom Section */}
             <div className="w-full md:grid md:grid-cols-2 lg:flex lg:flex-row">
                 {/* Email Reminder */}
-                <div className="lg:flex-1 aspect-square bg-yellow-200 border border-gray-400 relative">
+                <div className="lg:flex-1 aspect-2/3 bg-yellow-200 border border-gray-400 relative">
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
                         <div className="text-6xl mb-4">💌</div>
                         <h3 className="text-2xl font-bold text-gray-800 mb-4 text-center">Flower Reminders</h3>
@@ -109,7 +108,7 @@ export default function CategoryPage() {
                 </div>
 
                 {/* Contact Us */}
-                <div className="lg:flex-1 aspect-square bg-purple-200 border border-gray-400 relative">
+                <div className="lg:flex-1 bg-purple-200 border border-gray-400 relative">
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
                         <div className="text-6xl mb-4">📞</div>
                         <h3 className="text-2xl font-bold text-gray-800 mb-4 text-center">Contact Us</h3>
@@ -134,7 +133,7 @@ export default function CategoryPage() {
                 </div>
 
                 {/* Shop Categories */}
-                <div className="lg:flex-1 aspect-square bg-pink-200 border border-gray-400 relative">
+                <div className="lg:flex-1 bg-pink-200 border border-gray-400 relative">
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
                         <div className="text-6xl mb-4">🛍️</div>
                         <h3 className="text-2xl font-bold text-gray-800 mb-4 text-center">Shop by Category</h3>
@@ -168,7 +167,7 @@ export default function CategoryPage() {
                 </div>
 
                 {/* About Us */}
-                <div className="lg:flex-1 aspect-square bg-blue-200 border border-gray-400 relative">
+                <div className="lg:flex-1 bg-blue-200 border border-gray-400 relative">
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
                         <div className="text-6xl mb-4">🌿</div>
                         <h3 className="text-2xl font-bold text-gray-800 mb-4 text-center">About FlowerShop</h3>
@@ -190,7 +189,6 @@ export default function CategoryPage() {
                     Discover the perfect flowers for every moment at FlowerShop
                 </p>
             </section>
-            <Footer />
         </div>
     )
 }

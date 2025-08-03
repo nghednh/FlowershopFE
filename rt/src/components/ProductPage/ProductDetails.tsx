@@ -13,6 +13,7 @@ interface ProductDetailsProps {
     stockQuantity: number;
     discountPercentage: number;
     hasDiscount: boolean;
+    hasSurcharge?: boolean;
     imageUrls: string[];
     onVaseSelect?: (vaseImageUrl: string) => void;
 }
@@ -27,6 +28,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     stockQuantity,
     discountPercentage,
     hasDiscount,
+    hasSurcharge,
     imageUrls,
     onVaseSelect
 }) => {
@@ -91,6 +93,12 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                         <>
                             <span className="original-price">${basePrice.toFixed(2)}</span>
                             <span className="discount-badge">-{discountPercentage}%</span>
+                        </>
+                    )}
+                    {hasSurcharge && (
+                        <>
+                            <span className="original-price">${basePrice.toFixed(2)}</span>
+                            <span className="surcharge-badge">+{discountPercentage}%</span>
                         </>
                     )}
                 </div>
@@ -164,7 +172,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                     />
                     <label htmlFor="oneTime" className={`price-option ${isOutOfStock ? 'disabled' : ''}`}>
                         <img src={selectedOption === 'oneTime' ? "/radio-button-active.svg" : "/radio-button.svg"} />
-                        One time purchase. Price ${price.toFixed(2)}</label>
+                        One time purchase. Price ${price}</label>
                 </div>
                 <div className="price-option">
                     <input

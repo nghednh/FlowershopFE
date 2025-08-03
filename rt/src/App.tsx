@@ -31,10 +31,12 @@ function App() {
             }
           >
             <Route path="/home" element={<HomePage />} />
-            <Route path="/products" element={<ProductPage />} />
             <Route path="/products/:id" element={<ProductPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/category" element={<CategoryPage />} />
+            <Route path="/list" element={<ProductListingsPage />} />
+            <Route path="/orderhistory" element={<OrderHistoryPage />} />
+            <Route path="/orders/:orderId" element={<OrderTracking />} />
           </Route>
           <Route
             path="/admin"
@@ -44,10 +46,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/category" element={<CategoryPage />} />
-          <Route path="/list" element={<ProductListingsPage />} />
-          <Route path="/orderhistory" element={<OrderHistoryPage />} />
-          <Route path="/orders/:orderId" element={<OrderTracking />} />
         </Routes>
             
         <Chatbot />

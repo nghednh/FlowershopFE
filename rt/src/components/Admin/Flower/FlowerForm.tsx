@@ -69,6 +69,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, onClose 
       alert("Base Price must be a non-negative number.");
       return;
     }
+
     if (!isValidStock(formData.stockQuantity)) {
       alert("Stock Quantity must be a non-negative number.");
       return;
@@ -158,8 +159,9 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, onClose 
       />
       <Input
         label="Condition"
-        value={formData.condition || ""}
+        value={formData.condition}
         onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
+        required
       />
       <Input
         label="Stock Quantity"

@@ -56,14 +56,38 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ isOpen, onClose }) => {
                                     <div className="cart-item-wrapper">
                                         <div className="cart-item-details">
                                             <p className="cart-item-name">{item.productName}</p>
-                                            {/* Replace quantity text with QuantitySelector */}
                                             <QuantitySelector
                                                 quantity={item.quantity}
                                                 onQuantityChange={(newQuantity) => handleQuantityChange(item.id, newQuantity)}
-                                                max={99} // You might want to get this from product stock
+                                                max={99}
                                                 label=""
                                             />
-                                            <p className="cart-item-price">${item.subTotal.toFixed(2)}</p>
+                                            <div className="cart-item-price-section">
+                                                {item.dynamicPrice && item.dynamicPrice !== item.basePrice ? (
+                                                    <>
+                                                        <span className="cart-dynamic-price">
+                                                            ${(item.dynamicPrice * item.quantity).toFixed(2)}
+                                                        </span>
+                                                        <span className="cart-base-price">
+                                                            ${(item.basePrice * item.quantity).toFixed(2)}
+                                                        </span>
+                                                        {item.dynamicPrice > item.basePrice && (
+                                                            <span className="cart-surcharge-badge">
+                                                                +{Math.round(((item.dynamicPrice - item.basePrice) / item.basePrice) * 100)}%
+                                                            </span>
+                                                        )}
+                                                        {item.dynamicPrice < item.basePrice && (
+                                                            <span className="cart-discount-badge">
+                                                                -{Math.round(((item.basePrice - item.dynamicPrice) / item.basePrice) * 100)}%
+                                                            </span>
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    <span className="cart-item-price">
+                                                        ${item.subTotal.toFixed(2)}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <button
                                             className="remove-button"

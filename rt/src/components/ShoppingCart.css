@@ -81,22 +81,41 @@
     color: black;
 }
 
-.cart-item-quantity {
+.cart-item-price-section {
     display: flex;
-    font-size: 16px;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
-.remove-button {
-    font-size: 16px;
-    font-weight: 600;
-    color: gray;
-    cursor: pointer;
-}
-
-.remove-button:hover {
+.cart-dynamic-price {
+    font-size: 18px;
     color: black;
+    font-weight: 600;
+}
+
+.cart-base-price {
+    font-size: 16px;
+    color: gray;
+    text-decoration: line-through;
+}
+
+.cart-discount-badge {
+    background-color: #e74c3c;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.cart-surcharge-badge {
+    background-color: #f39c12;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 .cart-total {

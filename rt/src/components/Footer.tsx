@@ -1,66 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { getUserLoyaltyInfo } from "../config/api";
-import { IUserLoyalty } from "../types/backend";
+import React from "react";
 import "./Footer.css";
 
 const Footer: React.FC = () => {
-  const [loyaltyInfo, setLoyaltyInfo] = useState<IUserLoyalty | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  // Check if user is logged in
-  const user = localStorage.getItem("user");
-  const isLoggedIn = user && user !== "null";
-
-  const loadLoyaltyInfo = async () => {
-    if (!isLoggedIn) return;
-    
-    try {
-      setLoading(true);
-      const response = await getUserLoyaltyInfo();
-      console.log("Loyalty Info Response:", response);
-      setLoyaltyInfo(response);
-    } catch (error) {
-      console.error('Error loading loyalty info:', error);
-      // Don't show error in footer, just fail silently
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadLoyaltyInfo();
-  }, [isLoggedIn]);
-
   return (
     <footer className="bg-gray-800 text-white">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Loyalty Points Section - Only show if logged in */}
-        {isLoggedIn && (
-          <div className="mb-6 pb-6 border-b border-gray-600">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">
-                Your Loyalty Points
-              </h3>
-              {loading ? (
-                <div className="text-gray-300">Loading...</div>
-              ) : loyaltyInfo ? (
-                <div className="flex justify-center items-center space-x-6">
-                  <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-4 py-2 rounded-lg font-bold">
-                    🏆 Current Points: {loyaltyInfo.currentPoints}
-                  </div>
-                  <div className="text-sm text-gray-300">
-                    <span>Total Earned: {loyaltyInfo.totalEarned}</span>
-                    <span className="mx-2">|</span>
-                    <span>Total Redeemed: {loyaltyInfo.totalRedeemed}</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-gray-400">Unable to load loyalty points</div>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Existing footer content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}

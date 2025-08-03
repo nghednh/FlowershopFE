@@ -40,6 +40,10 @@ export const createOrder = (orderData: { cartId: number; addressId: number; paym
   return instance.post<IBackendRes<{ order: any }>>('/api/orders', orderData);
 };
 
+export const getOrders = () => {
+  return instance.get<IBackendRes<{ orders: any[] }>>('/api/Orders');
+}
+
 export const getOrderHistory = () => {
   return instance.get<IBackendRes<{ orders: any[] }>>('/api/orders/history');
 };
@@ -52,8 +56,8 @@ export const cancelOrder = (orderId: number) => {
   return instance.delete<IBackendRes<{ success: boolean }>>(`/api/orders/${orderId}`);
 };
 
-export const updateOrderStatus = (orderId: number, status: string) => {
-  return instance.put<IBackendRes<{ order: any }>>(`/api/orders/${orderId}/status`, { status });
+export const updateOrder = (orderId: number, orderStatus: string, trackingNumber: string) => {
+  return instance.put<IBackendRes<{ order: any }>>(`/api/Orders/${orderId}`, { status: orderStatus, trackingNumber });
 };
 
 // Product
@@ -178,7 +182,7 @@ export const removeFromCart = (cartItemId: number) => {
 };
 
 export const clearCart = () => {
-  return instance.delete<IBackendRes<{ success: boolean }>>('/api/Cart');
+  return instance.delete<IBackendRes<{ success: boolean }>>('/api/Cart/clear');
 };
 
 export const checkoutCart = () => {
@@ -237,6 +241,42 @@ export const getPricingRuleHistory = () => {
 
 export const getPricingRuleById = (ruleId: number) => {
   return instance.get<IBackendRes<{ rule: any }>>(`/api/pricing/rules/${ruleId}`);
+};
+
+// Address APIs
+export const createAddress = (addressData: {
+  fullName: string;
+  streetAddress: string;
+  city: string;
+  phoneNumber: string;
+}) => {
+  return instance.post<IBackendRes<{ address: any }>>('/api/Address', addressData);
+};
+
+export const getUserAddresses = () => {
+  return instance.get<IBackendRes<{ addresses: any[] }>>('/api/Address/user');
+};
+
+export const getAddressById = (addressId: number) => {
+  return instance.get<IBackendRes<{ address: any }>>(`/api/Address/${addressId}`);
+};
+
+// Payment APIs
+export const createPayment = (paymentData: any) => {
+  return instance.post<IBackendRes<{ payment: any }>>('/api/Payment', paymentData);
+};
+
+export const getPaymentById = (paymentId: number) => {
+  return instance.get<IBackendRes<{ payment: any }>>(`/api/Payment/${paymentId}`);
+};
+
+// VNPay APIs
+export const vnpayCallback = (params: any) => {
+  return instance.get<IBackendRes<any>>('/api/Vnpay/Callback', { params });
+};
+
+export const vnpayIpnAction = (params: any) => {
+  return instance.get<IBackendRes<any>>('/api/Vnpay/IpnAction', { params });
 };
 
 // Report: summary of total revenue and total orders

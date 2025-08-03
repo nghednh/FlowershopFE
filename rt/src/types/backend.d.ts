@@ -16,9 +16,9 @@ export interface IProduct {
     id: number;
     name: string;
     flowerStatus: number;
-    description?: string;
+    description: string;
     basePrice: number;
-    condition?: string;
+    condition: string;
     stockQuantity: number;
     isActive?: boolean;
     imageUrls: string[];
@@ -87,10 +87,19 @@ export interface IOrder {
     cartId: number;
     addressId: number;
     paymentMethod: PaymentMethod;
-    totalAmount: number;
-    status: string;
+    trackingNumber: string;
+    sum: number;
+    orderStatus: OrderStatus;
     createdAt: string; // ISO date-time string
     updatedAt?: string; // ISO date-time string
+}
+
+export enum OrderStatus {
+    "Pending",
+    "Processing",
+    "Shipped",
+    "Delivered",
+    "Cancelled"
 }
 
 export interface IUser {
@@ -123,13 +132,10 @@ export interface IPricingRule {
 
 export interface IAddress {
     id: number;
-    firstName?: string | null;
-    lastName?: string | null;
-    streetAddress?: string | null;
-    country?: string | null;
-    city?: string | null;
-    zipCode?: string | null;
-    applicationUserId?: number | null;
+    fullName: string;
+    streetAddress: string;
+    city: string;
+    applicationUserId: number;
 }
 
 export interface IReview {

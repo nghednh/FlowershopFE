@@ -170,6 +170,17 @@
 .payment-options {
     display: flex;
     gap: 12px;
+
+    select {
+        flex: 1;
+        padding: 16px;
+        border: 1px solid black;
+        font-size: 14px;
+    }
+}
+
+.bank-code-select {
+    margin-top: 8px;
 }
 
 .payment-option-button {

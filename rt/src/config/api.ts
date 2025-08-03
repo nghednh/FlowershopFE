@@ -1,4 +1,4 @@
-import { IBackendRes, ICart, ICategory, IPricingRule, IProduct, IUser, PaymentMethod, IUserLoyalty, IUserSummaryLoyalty } from "../types/backend";
+import { IBackendRes, ICart, ICategory, IPricingRule, IProduct, IUser, PaymentMethod, IUserLoyalty, IUserSummaryLoyalty, IPaymentRequest, IPaymentResponse } from "../types/backend";
 import instance from "./axios-customize";
 
 // Category service to interact with the backend API
@@ -262,12 +262,12 @@ export const getAddressById = (addressId: number) => {
 };
 
 // Payment APIs
-export const createPayment = (paymentData: any) => {
-  return instance.post<IBackendRes<{ payment: any }>>('/api/Payment', paymentData);
+export const createPayment = (paymentData: IPaymentRequest) => {
+  return instance.post<IBackendRes<IPaymentResponse>>('/api/Payment', paymentData);
 };
 
-export const getPaymentById = (paymentId: number) => {
-  return instance.get<IBackendRes<{ payment: any }>>(`/api/Payment/${paymentId}`);
+export const getPaymentStatus = (paymentId: number) => {
+  return instance.get<IBackendRes<IPaymentResponse>>(`/api/Payment/${paymentId}`);
 };
 
 // VNPay APIs

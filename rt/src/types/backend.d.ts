@@ -68,6 +68,14 @@ export enum DisplayLanguage {
     English
 }
 
+// public enum PaymentStatus
+// {
+//     Pending,
+//     Completed,
+//     Failed,
+//     Refunded
+// }
+
 export interface IPaymentRequest {
     orderId: number;
     paymentId: number;
@@ -79,6 +87,18 @@ export interface IPaymentRequest {
     createdDate: string; // ISO date-time string
     currency: Currency;
     language: DisplayLanguage;
+}
+
+export interface IPaymentResponse {
+    paymentId: number;
+    orderId: number;
+    method: PaymentMethod;
+    status: PaymentStatus;
+    amount: number;
+    paymentUrl?: string | null;
+    transactionId: number;
+    createdAt: string; // ISO date-time string
+    updatedAt?: string | null; // ISO date-time string
 }
 
 export interface IOrder {

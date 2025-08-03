@@ -78,15 +78,9 @@ export enum DisplayLanguage {
 
 export interface IPaymentRequest {
     orderId: number;
-    paymentId: number;
     amount: number;
     description?: string | null;
-    ipAddress?: string | null;
     method: PaymentMethod;
-    bankCode: BankCode;
-    createdDate: string; // ISO date-time string
-    currency: Currency;
-    language: DisplayLanguage;
 }
 
 export interface IPaymentResponse {

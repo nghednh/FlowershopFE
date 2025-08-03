@@ -46,7 +46,7 @@ const CheckoutPage: React.FC = () => {
     useEffect(() => {
         if (contextCartItems.length === 0 && !orderSuccess) {
             // Redirect to products page or home if cart is empty
-            navigate('/products');
+            navigate('/home');
         }
     }, [contextCartItems, orderSuccess, navigate]);
 
@@ -254,7 +254,7 @@ const CheckoutPage: React.FC = () => {
             <div className="success-actions">
                 <button
                     className="track-order-btn"
-                    onClick={() => window.location.href = `/order-tracking/${orderDetails?.id}`}
+                    onClick={() => window.location.href = `/orders/${orderDetails?.id}`}
                 >
                     Track Your Order
                 </button>

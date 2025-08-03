@@ -7,7 +7,8 @@ const trackingSteps: OrderStatus[] = [
   OrderStatus.Pending,
   OrderStatus.Processing,
   OrderStatus.Shipped,
-  OrderStatus.Delivered
+  OrderStatus.Delivered,
+  OrderStatus.Cancelled,
 ];
 
 const orderStatusToStep = (status: OrderStatus) => {
@@ -17,6 +18,7 @@ const orderStatusToStep = (status: OrderStatus) => {
 export default function OrderTracking() {
   const { orderId } = useParams<{ orderId: string }>();
   const [order, setOrder] = useState<IOrder | null>(null);
+  const [response, setResponse] = useState<null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,6 +29,7 @@ export default function OrderTracking() {
       .then((res) => {
         if (res) {
           setOrder(res);
+          setResponse(res);
         } else {
           setError("Order not found.");
         }
@@ -50,11 +53,13 @@ export default function OrderTracking() {
   const currentStep = orderStatusToStep(order.orderStatus);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Order Tracking</h1>
+    <div className="p-6 max-w-4xl mx-auto space-y-6">
+      <h1 className="text-2xl font-semibold">Order Tracking</h1>
 
-      <div className="mb-4">
+      <div className="space-y-1">
         <p className="text-lg font-medium">Order ID: {order.id}</p>
+        <p className="text-sm text-gray-500">Tracking Number: {order.trackingNumber}</p>
+        <p className="text-sm text-gray-500">User: {response.userName}</p>
         <p className="text-sm text-gray-500">
           Created: {new Date(order.createdAt).toLocaleString()}
         </p>
@@ -64,17 +69,53 @@ export default function OrderTracking() {
           </p>
         )}
         <p className="text-sm text-gray-500">
-          Total: ${order.sum.toFixed(2)}
-        </p>
-        <p className="text-sm text-gray-500">
           Payment: {PaymentMethod[order.paymentMethod]}
         </p>
+        <p className="text-sm text-gray-500">
+          Total: ${order.sum.toFixed(2)}
+        </p>
+      </div>
+
+      <div>
+        <h2 className="font-semibold mb-1">Shipping Address</h2>
+        <div className="text-sm text-gray-700">
+          <p>{response.address.fullName}</p>
+          <p>{response.address.streetAddress}</p>
+          <p>{response.address.city}</p>
+          <p>{response.address.phoneNumber}</p>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="font-semibold mb-1">Items</h2>
+        <div className="space-y-4">
+          {response.orderItems.map((item) => (
+            <div
+              key={item.id}
+              className="flex gap-4 items-center border p-3 rounded-md"
+            >
+              <img
+                src={item.product.images?.[0]?.imageUrl}
+                alt={item.name}
+                className="w-16 h-16 object-cover rounded"
+              />
+              <div className="flex-1 text-sm">
+                <p className="font-medium">{item.name}</p>
+                <p>Quantity: {item.quantity}</p>
+                <p>Price per item: ${item.price.toFixed(2)}</p>
+                <p className="font-semibold">
+                  Subtotal: ${(item.price * item.quantity).toFixed(2)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {order.orderStatus === OrderStatus.Cancelled ? (
         <div className="text-red-600 font-semibold mt-4">Order has been cancelled.</div>
       ) : (
-        <div className="mt-6">
+        <div>
           <h2 className="font-semibold mb-2">Tracking Progress</h2>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             {trackingSteps.map((step, index) => (

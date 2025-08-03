@@ -10,22 +10,40 @@ import { Card, CardContent } from "./Card";
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { Select } from "./Select";
+import { MultiSelect } from './MultiSelect';
 
 import ProductCard from './ProductListing/ProductCard';
 import ProductFilter from './ProductListing/ProductFilter';
 import Pagination from './ProductListing/Pagination';
 
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 4;
 
 const flowerTypesOptions = [0, 1, 2]; // Example IDs
-const occasionOptions = ['Birthday', "Valentine's Day"];
-const conditionOptions = ['All', 'New', 'Old'];
+const occasionOptions = ['', 'Birthday', "Valentine's Day"];
+const conditionOptions = ['', 'New', 'Old'];
 const sortOptions = [
   { value: 0, label: 'Name A–Z' },
   { value: 1, label: 'Price' },
   { value: 2, label: 'Stock' },
   { value: 3, label: 'Status' },
+];
+const trueCategories: ICategory[] = [
+  {
+    id: 1,
+    name: "Fresh",
+    description: "#FreshWeedEveryday"
+  },
+  {
+    id: 2,
+    name: "Dried",
+    description: "Lay it at home, never die"
+  },
+  {
+    id: 3,
+    name: "Live",
+    description: "Live plants help you live better"
+  }
 ];
 
 const ProductListingPage: React.FC = () => {
@@ -59,6 +77,7 @@ const ProductListingPage: React.FC = () => {
     const flowerTypes = searchParams.getAll('flowerTypes').map(Number);
     const occasions = searchParams.getAll('occasions');
     const conditions = searchParams.getAll('conditions');
+    const categories = searchParams.getAll('categories').map(Number).filter(id => trueCategories.some(p => p.id === id));
 
     if (searchTerm && !product.name.toLowerCase().includes(searchTerm)) return false;
     if (minPrice !== undefined && product.basePrice < minPrice) return false;
@@ -66,6 +85,7 @@ const ProductListingPage: React.FC = () => {
     if (flowerTypes.length && !flowerTypes.includes(product.flowerStatus)) return false;
     if (occasions.length && !occasions.includes(product.description || '')) return false;
     if (conditions.length && !conditions.includes(product.condition || '')) return false;
+    if (categories.length && !product.categories.some((id) => categories.includes(id.id))) return false;
 
     return true;
   };
@@ -114,18 +134,47 @@ const ProductListingPage: React.FC = () => {
     const page = Number(searchParams.get('page')) || 1;
     const sortBy = Number(searchParams.get('sortBy')) || 0;
     const sortDirection = Number(searchParams.get('sortDirection')) || 0;
-    const searchTerm = searchParams.get('searchTerm') || undefined;
-    const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined;
-    const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined;
-    const flowerTypes = searchParams.getAll('flowerTypes').map(Number);
-    const occasions = searchParams.getAll('occasions');
-    const conditions = searchParams.getAll('conditions');
+
+    const searchTermRaw = searchParams.get('searchTerm');
+    const searchTerm = searchTermRaw && searchTermRaw.trim() !== "" ? searchTermRaw : undefined;
+
+    const minPriceRaw = searchParams.get('minPrice');
+    const minPrice = minPriceRaw && minPriceRaw !== "" ? Number(minPriceRaw) : undefined;
+
+    const maxPriceRaw = searchParams.get('maxPrice');
+    const maxPrice = maxPriceRaw && maxPriceRaw !== "" ? Number(maxPriceRaw) : undefined;
+
+    const flowerTypes = (() => {
+      const raw = searchParams.getAll('flowerTypes').filter(s => s.trim() !== "");
+      return raw.length ? raw.map(Number) : undefined;
+    })();
+
+    const occasions = (() => {
+      const raw = searchParams.getAll('occasions').filter(s => s.trim() !== "");
+      return raw.length ? raw : undefined;
+    })();
+
+    const conditions = (() => {
+      const raw = searchParams.getAll('conditions').filter(s => s.trim() !== "");
+      return raw.length ? raw : undefined;
+    })();
+
+    const categoryIds = (() => {
+      const raw = searchParams.getAll('categories').filter(s => s.trim() !== "");
+      if (!raw.length) return undefined;
+
+      const validIds = new Set(trueCategories.map(c => c.id));
+      const filtered = raw.map(Number).filter(id => validIds.has(id));
+      return filtered.length ? filtered : undefined;
+    })();
+
 
     const res = await getProducts({
       page,
       pageSize: PAGE_SIZE,
       sortBy,
       sortDirection,
+      categoryIds, 
       searchTerm,
       minPrice,
       maxPrice,
@@ -146,6 +195,8 @@ const ProductListingPage: React.FC = () => {
   useEffect(() => {
     fetchProducts();
   }, [searchParams]);
+
+  console.log(trueCategories);
 
   return (
     <div className="p-4">
@@ -168,6 +219,22 @@ const ProductListingPage: React.FC = () => {
               label: opt.label,
             }))}
           />
+
+          <MultiSelect
+            label="Categories"
+            value={searchParams.getAll("categories").map(Number)}
+            onChange={(selected) => {
+              const updated = new URLSearchParams(searchParams);
+              updated.delete("categories");
+              selected.forEach((id) => updated.append("categories", String(id)));
+              setSearchParams(updated);
+            }}
+            options={trueCategories.map((cat) => ({
+              value: cat.id,
+              label: cat.name,
+            }))}
+          />
+
 
           <Select
             label="Condition"

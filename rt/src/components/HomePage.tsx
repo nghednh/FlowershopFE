@@ -24,7 +24,11 @@ export default function HomePage() {
               {/* Bottom half: horizontally split */}
               <div className="grid grid-cols-2 divide-x divide-gray-400 mt-5 mb-15 mx-10">
                 <div className="flex items-center justify-center bg-green-100">
-                  <p>Bottom Left</p>
+                  <img
+                    src="/images/floral_studio.jpg"
+                    alt="Example"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="flex items-end justify-center bg-gray-100 pl-5 border-l-2 border-gray-400">
                   <p className="text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)]">Experience the joy of giving with our modern floral studio. Order online and send fresh flowers, plants and gifts today.</p>
@@ -44,27 +48,36 @@ export default function HomePage() {
               {/* Small bottom text with hyperlink */}
               <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)] cursor-pointer">
                 {' '}
-                <a href="#" className="text-gray-700 hover:font-bold">
+                <a href="../list?categories=1" className="text-gray-700 hover:font-bold">
                   Shop now
                   <span className="ml-1">→</span>
                 </a>
               </p>
             </div>
             <div className="w-[50%] aspect-square bg-gray-500 border border-gray-400">
+              <img
+                src="/images/fresh_flower.jpg"
+                alt="Example"
+                className="w-full h-full object-cover"
+              />
             </div>  
           </div>
           <div className="flex flex-row w-full">
             <div className="w-[50%] aspect-square bg-gray-500 border border-gray-400">
+              <img
+                src="/images/dried_flower.jpg"
+                alt="Example"
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="w-[50%] relative flex items-center justify-center aspect-square bg-gray-100 border border-gray-400">
               <div className="flex-1 flex items-center justify-center text-[clamp(1.25rem,6.25vw,3.75rem)] lg:text-[clamp(0.625rem,3.125vw,1.875rem)] text-center">
                 Dried Flowers
               </div>
-
               {/* Small bottom text with hyperlink */}
               <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)] cursor-pointer">
                 {' '}
-                <a href="#" className="text-gray-700 hover:font-bold">
+                <a href="../list&categories=2" className="text-gray-700 hover:font-bold">
                   <span className="mr-1">←</span>
                   Shop now
                 </a>
@@ -80,18 +93,28 @@ export default function HomePage() {
               {/* Small bottom text with hyperlink */}
               <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)] cursor-pointer">
                 {' '}
-                <a href="#" className="text-gray-700 hover:font-bold">
+                <a href="../list?categories=3" className="text-gray-700 hover:font-bold">
                   Shop now
                   <span className="ml-1">→</span>
                 </a>
               </p>
             </div>
             <div className="w-[50%] aspect-square bg-gray-500 border border-gray-400">
+              <img
+                    src="/images/live_plant.jpg"
+                    alt="Example"
+                    className="w-full h-full object-cover"
+                  />
             </div>  
           </div>
           
           <div className="flex flex-row w-full">
             <div className="w-[50%] aspect-square bg-gray-500 border border-gray-400">
+              <img
+                    src="/images/aroma_candle.png"
+                    alt="Example"
+                    className="w-full h-full object-cover"
+                  />
             </div>
             <div className="w-[50%] relative flex items-center justify-center aspect-square bg-gray-100 border border-gray-400">
               <div className="flex-1 flex items-center justify-center text-[clamp(1.25rem,6.25vw,3.75rem)] lg:text-[clamp(0.625rem,3.125vw,1.875rem)] text-center">
@@ -101,7 +124,7 @@ export default function HomePage() {
               {/* Small bottom text with hyperlink */}
               <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)] cursor-pointer">
                 {' '}
-                <a href="#" className="text-gray-700 hover:font-bold">
+                <a href="../list?categories=4" className="text-gray-700 hover:font-bold">
                   <span className="mr-1">←</span>
                   Shop now
                 </a>
@@ -165,6 +188,11 @@ export default function HomePage() {
       <div className="flex flex-col lg:flex-row-reverse w-full">
         <div className="w-full lg:w-1/2">
           <div className="w-full h-[75vh] md:h-screen lg:aspect-square lg:h-auto bg-pink-500 border border-gray-400">
+            <img
+              src="/images/front_door.png"
+              alt="Example"
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="flex flex-col md:flex-row w-full">
             <div className="w-full md:w-1/2 text-center p-2 text-gray-800 text-[clamp(1rem,3vw,2rem)]  border border-gray-400">
@@ -244,7 +272,11 @@ export default function HomePage() {
       </div>
       <div className="w-full flex flex-col lg:flex-row">
         <div className="w-full h-[75vh] md:h-screen lg:w-1/2 lg:h-auto lg:aspect-square bg-pink-500 border border-gray-400">
-          Pic placeholder
+          <img
+            src="/images/subscription_flower.jpg"
+            alt="Example"
+            className="w-full h-full object-cover"
+          />
         </div>
         <div className="w-full h-screen lg:w-1/2 lg:h-auto lg:aspect-square flex flex-col items-center justify-center bg-gray-100 border border-gray-400 p-[clamp(1rem,9vw,4.5rem)]">
           <div className="text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)]">SERVICE</div>
@@ -257,13 +289,18 @@ export default function HomePage() {
           </button>
         </div>
       </div>
-      <div className="w-full h-[75vh] md:h-screen lg:h-auto lg:aspect-[2/1] flex flex-col items-center justify-center p-[clamp(1rem,9vw,4.5rem)] bg-green-200 border border-gray-400">
-        <div className="text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)]">SERVICE</div>
-        <div className="text-[clamp(1.25rem,6.25vw,3.75rem)] lg:text-[clamp(0.625rem,3.125vw,1.875rem)] my-3">Wedding & Event Decor</div>
-        <div className="text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)] text-center my-3">
+      <div className="relative w-full h-[75vh] md:h-screen lg:h-auto lg:aspect-[2/1] flex flex-col items-center justify-center p-[clamp(1rem,9vw,4.5rem)] border border-gray-400">
+        <img
+          src="/images/wedding_decor.jpg"
+          alt="Background"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        />
+        <div className="z-10 text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)] text-white [text-shadow:1px_1px_0_black,_-1px_1px_0_black,_1px_-1px_0_black,_-1px_-1px_0_black]">SERVICE</div>
+        <div className="z-10 text-[clamp(1.25rem,6.25vw,3.75rem)] lg:text-[clamp(0.625rem,3.125vw,1.875rem)] my-3 text-white [text-shadow:1px_1px_0_black,_-1px_1px_0_black,_1px_-1px_0_black,_-1px_-1px_0_black]">Wedding & Event Decor</div>
+        <div className="z-10 text-[clamp(0.5rem,3vw,2rem)] lg:text-[clamp(0.25rem,1.5vw,1rem)] text-center my-3 text-white [text-shadow:1px_1px_0_black,_-1px_1px_0_black,_1px_-1px_0_black,_-1px_-1px_0_black]">
           Let our team of expert florists and designers create stunning, on-trend floral décor for your special day. Trust us to bring your vision to life.
         </div>
-        <button className="w-max text-[clamp(0.75rem,2vw,1.25rem)] py-4 px-8 border border-gray-400 mt-10 hover:bg-white/50 cursor-pointer">
+        <button className="z-10 w-max text-[clamp(0.75rem,2vw,1.25rem)] py-4 px-8 border border-gray-400 bg-white mt-10 hover:bg-white/50 cursor-pointer">
           INQUIRE NOW
         </button>
       </div>
@@ -275,124 +312,6 @@ export default function HomePage() {
         <GoogleSlides/>
         <button className="max-w-screen md:w-max text-[clamp(0.75rem,2vw,1.25rem)] py-4 px-8 border border-gray-400 m-10 bg-gray-100 hover:bg-gray-200 cursor-pointer">READ REVIEWS</button>
       </div>
-      <div className="w-full flex flex-col md:grid md:grid-cols-2 lg:flex lg:flex-row">
-        <div className="flex-1 md:grid lg:flex-1 aspect-square bg-yellow-200 border border-gray-400">
-          <div className="pt-3 pl-10 text-[clamp(1rem,3vw,4rem)] lg:text-[clamp(0.5rem,1.5vw,2rem)] ">
-              Remember to offer beautiful flowers from FlowerShop Valentines Day, Mothers Day, Christmas... Reminds you 7 days before. No spam or sharing your address
-          </div>
-          <div className="my-[clamp(0.5rem,3vw,1.5rem)] mx-auto w-7/9 flex flex-col">
-            <input
-              type="text"
-              placeholder="Your email"
-              className="w-full border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-            </input>
-            <button className="w-full bg-black text-white p-2 mt-3 hover:bg-gray-800 cursor-pointer">
-              REMIND
-            </button>
-          </div>
-        </div> 
-        <div className="flex-1 md:grid lg:flex-1 aspect-square bg-orange-200 border border-gray-400">
-          <div className="text-gray-600 m-[clamp(1rem,3vw,2rem)] text-[clamp(1rem,3vw,4rem)] lg:text-[clamp(0.5rem,1.5vw,2rem)] ">
-            Contact Us
-            <div className="my-[clamp(0.35rem,2vw,1rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)]">
-              <div className="text-gray-400">
-                Address
-              </div>
-              <div className="text-black">
-                Somewhere on Earth
-              </div>
-            </div>
-            <div className="my-[clamp(0.35rem,2vw,1rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)]">
-              <div className="text-gray-400">
-                Phone
-              </div>
-              <div className="text-black">
-                +840123456789
-              </div>
-            </div>
-            <div className="my-[clamp(0.35rem,2vw,1rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)]">
-              <div className="text-gray-400">
-                General Inquiry:
-              </div>
-              <div className="text-black">
-                FlowerShop.Shop@gmail.com
-              </div>
-            </div>
-            <div className="text-gray-600 text-[clamp(1rem,3vw,4rem)] lg:text-[clamp(0.5rem,1.5vw,2rem)] ">
-              Follow Us
-              <div className="flex flex-row items-center justify-center w-max md:w-full h-full">
-                <img src="/Instagram.svg" alt="instagram" className="flex-1 w-7 h-7 m-3 cursor-pointer" onClick={() => alert("You clicked the Instagram button!")}/>
-                <img src="/Pinterest.svg" alt="pinterest" className="flex-1 w-7 h-7 m-3 cursor-pointer" onClick={() => alert("You clicked the Pinterest button!")}/>
-                <img src="/Facebook.svg" alt="facebook" className="flex-1 w-7 h-7 m-3 cursor-pointer" onClick={() => alert("You clicked the Facebook button!")}/>
-                <img src="/Twitter.svg" alt="twitter" className="flex-1 w-7 h-7 m-3 cursor-pointer" onClick={() => alert("You clicked the Twitter button!")}/>
-                <img src="/Telegram.svg" alt="telegram" className="flex-1 w-7 h-7 m-3 cursor-pointer" onClick={() => alert("You clicked the Telegram button!")}/>
-              </div>
-            </div>
-            
-          </div>
-        </div>
-        <div className="flex-1 md:grid lg:flex-1 aspect-square bg-green-200 border border-gray-400">
-          <div className="text-gray-600 m-[clamp(1rem,3vw,2rem)] text-[clamp(1rem,3vw,4rem)] lg:text-[clamp(0.5rem,1.5vw,2rem)] ">
-            Shop
-            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-              All Products             
-            </div>
-            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-              Fresh Flowers             
-            </div>
-            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-              Dried Flowers
-            </div>
-            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-              Live Plants
-            </div>
-            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-              Designer Vases
-            </div>
-            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-              Aroma Candles
-            </div>
-            <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-              Freshener Diffuser
-            </div>
-            <div className="text-gray-600 text-[clamp(1rem,3vw,4rem)] lg:text-[clamp(0.5rem,1.5vw,2rem)] ">
-              Service
-              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-                Flower Subscription
-              </div>
-              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-                Wedding & Event Decor
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="flex-1 md:grid lg:flex-1 aspect-square bg-blue-200 border border-gray-400">
-          <div className="text-gray-600 m-[clamp(1rem,3vw,2rem)] text-[clamp(1rem,3vw,4rem)] lg:text-[clamp(0.5rem,1.5vw,2rem)] ">
-            About Us
-            <div>
-              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-                Our Story             
-              </div>
-              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-                Blog             
-              </div>
-            </div>
-            <div className="my-[clamp(1rem,2vw,3rem)]">
-              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-                Shipping & Returns
-              </div>
-              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-                Terms & Conditions
-              </div>
-              <div className="my-[clamp(0.1rem,0.75vw,0.3rem)] text-[clamp(0.8rem,2.5vw,3.5rem)] lg:text-[clamp(0.4rem,1.25vw,1.75rem)] text-black hover:underline cursor-pointer">
-                Privacy Policy
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <section className="h-[20vh] bg-gray-100">
         {/* More scrollable content */}
       </section>

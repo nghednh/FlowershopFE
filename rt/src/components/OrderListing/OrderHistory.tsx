@@ -9,6 +9,7 @@ const PAGE_SIZE = 5;
 export default function OrderHistory() {
   const [allOrders, setAllOrders] = useState<IOrder[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchMode, setSearchMode] = useState<"id" | "tracking">("id");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,9 +27,20 @@ export default function OrderHistory() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredOrders = allOrders.filter((order) =>
-    order.id.toString().includes(searchTerm)
-  );
+  const filteredOrders = allOrders.filter((order) => {
+    if (!searchTerm.trim()) return true;
+
+    if (searchMode === "id") {
+      return order.id.toString().includes(searchTerm);
+    }
+
+    if (searchMode === "tracking") {
+      return order.trackingNumber.toLowerCase().includes(searchTerm.toLowerCase());
+    }
+
+    return true;
+  });
+
 
   const totalPages = Math.ceil(filteredOrders.length / PAGE_SIZE);
   const paginatedOrders = filteredOrders.slice(
@@ -40,14 +52,33 @@ export default function OrderHistory() {
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Order History</h1>
 
-      <Input
-        label="Search by Order ID..."
-        value={searchTerm}
+      <div className="flex gap-4 items-end">
+  <div className="flex-1">
+    <Input
+      label={`Search by ${searchMode === "id" ? "Order ID" : "Tracking Number"}...`}
+      value={searchTerm}
+      onChange={(e) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1); // reset to first page on search
+      }}
+    />
+    </div>
+    <div>
+      <label className="text-sm font-medium block mb-1">Search by</label>
+      <select
+        value={searchMode}
         onChange={(e) => {
-          setSearchTerm(e.target.value);
-          setCurrentPage(1); // reset to first page on search
+          setSearchMode(e.target.value as "id" | "tracking");
+          setSearchTerm(""); // optional: reset search input when switching
+          setCurrentPage(1);
         }}
-      />
+        className="border rounded px-2 py-1 text-sm"
+      >
+        <option value="id">Order ID</option>
+        <option value="tracking">Tracking Number</option>
+      </select>
+    </div>
+  </div>
 
       {loading ? (
         <p>Loading orders...</p>

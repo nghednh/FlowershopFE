@@ -13,6 +13,7 @@ interface ProductDetailsProps {
     stockQuantity: number;
     discountPercentage: number;
     hasDiscount: boolean;
+    hasSurcharge?: boolean;
     imageUrls: string[];
     onVaseSelect?: (vaseImageUrl: string) => void;
 }
@@ -27,6 +28,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     stockQuantity,
     discountPercentage,
     hasDiscount,
+    hasSurcharge,
     imageUrls,
     onVaseSelect
 }) => {
@@ -86,11 +88,17 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
             <div className="product-header">
                 <h1 className="product-title">{name}</h1>
                 <div className="price-section">
-                    <span className="current-price">${price}</span>
+                    <span className="current-price">${price.toFixed(2)}</span>
                     {hasDiscount && (
                         <>
                             <span className="original-price">${basePrice.toFixed(2)}</span>
                             <span className="discount-badge">-{discountPercentage}%</span>
+                        </>
+                    )}
+                    {hasSurcharge && (
+                        <>
+                            <span className="original-price">${basePrice.toFixed(2)}</span>
+                            <span className="surcharge-badge">+{discountPercentage}%</span>
                         </>
                     )}
                 </div>

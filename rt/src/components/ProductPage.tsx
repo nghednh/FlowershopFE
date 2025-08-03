@@ -106,7 +106,10 @@ const ProductPage: React.FC = () => {
   // Use dynamic price if available, otherwise fall back to base price
   const finalPrice = dynamicPrice !== null ? dynamicPrice : product.basePrice;
   const hasDiscount = dynamicPrice !== null && dynamicPrice < product.basePrice;
-  const discountPercentage = hasDiscount ? Math.round(((product.basePrice - finalPrice) / product.basePrice) * 100) : 0;
+  const hasSurcharge = dynamicPrice !== null && dynamicPrice > product.basePrice;
+  const priceChangePercentage = dynamicPrice !== null
+    ? Math.round(Math.abs((dynamicPrice - product.basePrice) / product.basePrice) * 100)
+    : 0;
 
   return (
     <div>
@@ -123,8 +126,9 @@ const ProductPage: React.FC = () => {
           price={finalPrice}
           basePrice={product.basePrice}
           stockQuantity={product.stockQuantity}
-          discountPercentage={discountPercentage}
+          discountPercentage={priceChangePercentage}
           hasDiscount={hasDiscount}
+          hasSurcharge={hasSurcharge}
           imageUrls={galleryImages}
           onVaseSelect={handleVaseSelection}
         />

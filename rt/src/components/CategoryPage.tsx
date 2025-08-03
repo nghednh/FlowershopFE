@@ -11,7 +11,7 @@ export default function CategoryPage() {
         if (category) {
             navigate(`/products?category=${category}`);
         } else {
-            navigate('/products');
+            navigate('/list');
         }
     };
 
@@ -31,7 +31,6 @@ export default function CategoryPage() {
     return (
         <div className="min-h-screen">
             <div className="sticky top-0 z-50 bg-gray-100">
-                <Header />
             </div>
             
             {/* Main Content */}
@@ -190,7 +189,6 @@ export default function CategoryPage() {
                     Discover the perfect flowers for every moment at FlowerShop
                 </p>
             </section>
-            <Footer />
         </div>
     )
 }

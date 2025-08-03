@@ -106,7 +106,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="/products"
+                  href="/list"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   Shop

@@ -56,8 +56,8 @@ export const cancelOrder = (orderId: number) => {
   return instance.delete<IBackendRes<{ success: boolean }>>(`/api/orders/${orderId}`);
 };
 
-export const updateOrder = (orderId: number, orderStatus: string, trackingNumber: string) => {
-  return instance.put<IBackendRes<{ order: any }>>(`/api/Orders/${orderId}`, { status: orderStatus, trackingNumber });
+export const updateOrder = (orderId: number, orderStatus: number, trackingNumber: string) => {
+  return instance.put<IBackendRes<{ order: any }>>(`/api/Orders/${orderId}`, { orderStatus: orderStatus, trackingNumber });
 };
 
 export const getMyOrders = () => {

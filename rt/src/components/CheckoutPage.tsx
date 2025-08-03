@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "./CheckoutPage.css";
 import { useCart } from "../contexts/CartContext";
-import { createOrder, createAddress, createPayment } from "../config/api";
+import { createOrder, createAddress, createPayment, updateOrder } from "../config/api";
 import { useNavigate } from "react-router-dom";
 import { IPaymentRequest } from "../types/backend";
 import { PaymentMethod, DisplayLanguage, Currency, BankCode } from "../types/backend.d";
+import { track } from "framer-motion/client";
 
 interface CartItem {
     id: number;
@@ -123,7 +124,7 @@ const CheckoutPage: React.FC = () => {
 
             // For COD, update order status to 1 and finish
             if (paymentMethod === PaymentMethod.COD) {
-                await updateOrderStatusAfterPayment(orderResponse.id, 1);
+                console.log("Processing COD payment...");
                 await refreshCart();
                 setOrderSuccess(true);
                 return;
@@ -158,7 +159,6 @@ const CheckoutPage: React.FC = () => {
             }
 
             // For PayPal, update order status immediately after payment creation
-            await updateOrderStatusAfterPayment(orderResponse.id, 1, paymentResponse.data.paymentId);
             await refreshCart();
             setOrderSuccess(true);
 
@@ -170,24 +170,6 @@ const CheckoutPage: React.FC = () => {
             console.log("Request data:", error.config?.data);
         } finally {
             setIsProcessing(false);
-        }
-    };
-
-    // New function to update order status after payment
-    const updateOrderStatusAfterPayment = async (orderId: number, status: number, paymentId?: number) => {
-        try {
-            // You'll need to create this API endpoint if it doesn't exist
-            const updateData = {
-                status: status,
-                paymentId: paymentId
-            };
-
-            // Assuming you have an updateOrderStatus API function
-            await updateOrder(orderId, status, "trackingNumber");
-            console.log("Order status updated successfully");
-        } catch (error) {
-            console.error('Error updating order status:', error);
-            throw error;
         }
     };
 
@@ -216,7 +198,7 @@ const CheckoutPage: React.FC = () => {
         if (responseCode === '00') {
             // Payment successful - update order status from 0 to 1
             try {
-                await updateOrderStatusAfterPayment(orderData.orderId, 1, orderData.paymentId);
+                console.log("Order updated after successful payment");
                 await refreshCart();
                 setOrderSuccess(true);
                 setOrderDetails({ id: orderData.orderId });
@@ -228,7 +210,6 @@ const CheckoutPage: React.FC = () => {
         } else {
             // Payment failed - you might want to update order status to cancelled or delete it
             try {
-                await updateOrderStatusAfterPayment(orderData.orderId, 4); // 4 = Cancelled
                 alert('Payment failed. Order has been cancelled.');
             } catch (error) {
                 console.error('Error cancelling order after failed payment:', error);

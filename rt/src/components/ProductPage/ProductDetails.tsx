@@ -86,7 +86,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
             <div className="product-header">
                 <h1 className="product-title">{name}</h1>
                 <div className="price-section">
-                    <span className="current-price">${price.toFixed(2)}</span>
+                    <span className="current-price">${price}</span>
                     {hasDiscount && (
                         <>
                             <span className="original-price">${basePrice.toFixed(2)}</span>
@@ -164,7 +164,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
                     />
                     <label htmlFor="oneTime" className={`price-option ${isOutOfStock ? 'disabled' : ''}`}>
                         <img src={selectedOption === 'oneTime' ? "/radio-button-active.svg" : "/radio-button.svg"} />
-                        One time purchase. Price ${price.toFixed(2)}</label>
+                        One time purchase. Price ${price}</label>
                 </div>
                 <div className="price-option">
                     <input

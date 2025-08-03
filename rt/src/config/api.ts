@@ -61,7 +61,7 @@ export const updateOrder = (orderId: number, orderStatus: string, trackingNumber
 };
 
 export const getMyOrders = () => {
-  return instance.get<IBackendRes<{ order: any}>>(`api/Orders/my-orders`);
+  return instance.get<IBackendRes<{ order: any }>>(`api/Orders/my-orders`);
 }
 
 // Product
@@ -314,4 +314,23 @@ export const getAllUsersLoyaltyInfo = () => {
 
 export const updateUserLoyaltyPoints = (userId: number, newPointsValue: number) => {
   return instance.put(`/api/loyalty/update/${userId}`, { newPointsValue });
+};
+
+export const getDynamicPrice = (productId: number, requestTime?: string) => {
+  const params = new URLSearchParams();
+  if (requestTime) {
+    params.append('requestTime', requestTime);
+  }
+  return instance.get<IBackendRes<{
+    productId: number;
+    productName: string;
+    basePrice: number;
+    dynamicPrice: number;
+    discount: number;
+    discountPercentage: number;
+    appliedRule: any | null;
+    calculatedAt: string;
+    hasDiscount: boolean;
+    hasSurcharge: boolean;
+  }>>(`/api/pricing/products/${productId}/price?${params.toString()}`);
 };

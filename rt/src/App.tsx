@@ -31,7 +31,6 @@ function App() {
             }
           >
             <Route path="/home" element={<HomePage />} />
-            <Route path="/products" element={<ProductPage />} />
             <Route path="/products/:id" element={<ProductPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/category" element={<CategoryPage />} />

@@ -483,7 +483,7 @@ const CheckoutPage: React.FC = () => {
                         </div>
                         <div className="order-summary-row">
                             <span className="order-summary-text">Shipping</span>
-                            <span className="order-summary-price">$
+                            <span className="order-summary-price">$5.00
 
                             </span>
                         </div>

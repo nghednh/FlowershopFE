@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../config/api";
+import { loginAccount } from "../config/api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -21,8 +21,8 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const response = await loginUser(email, password);
-      const data = response;
+      const data = await loginAccount(email, password);
+      console.log("Login response:", data);
 
       if (data.success) {
         localStorage.setItem("token", data.token);
@@ -37,7 +37,7 @@ export default function LoginPage() {
           navigate("/home");
         }
       } else {
-        setMessage(`❌ Login failed. ${data.message || "Invalid credentials"}`);
+        setMessage(`❌ ${data.errors?.join(", ") || "Login failed"}`);
         setPassword("");
       }
     } catch (error: any) {

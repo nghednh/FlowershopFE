@@ -1,4 +1,4 @@
-import { IBackendRes, ICart, ICategory, IPricingRule, IProduct, IUser, PaymentMethod, IUserLoyalty, IUserSummaryLoyalty, IPaymentRequest, IPaymentResponse } from "../types/backend";
+import { IBackendRes, ICart, ICategory, IPricingRule, IProduct, IUser, PaymentMethod, IUserLoyalty, IUserSummaryLoyalty, IPaymentRequest, IPaymentResponse, ILoginResponse, IUserRegister } from "../types/backend";
 import instance from "./axios-customize";
 
 // Category service to interact with the backend API
@@ -18,9 +18,28 @@ export const deleteCategory = (id: number) => {
   return instance.delete<IBackendRes<{ success: boolean }>>(`/api/category/${id}`);
 };
 
-// User
-export const loginUser = (email: string, password: string) => {
-  return instance.post<IBackendRes<{ token: string; user: any }>>('/api/login', { email, password });
+export const loginAccount = (email: string, password: string): Promise<ILoginResponse> => {
+  return instance.post('/api/login', { email, password });
+};
+
+export const registerAccount = (
+  firstname: string,
+  lastname: string,
+  email: string,
+  username: string,
+  phoneNumber: string,
+  password: string,
+  confirmPassword: string
+): Promise<IUserRegister> => {
+  return instance.post('/api/register', {
+    firstName: firstname,
+    lastName: lastname,
+    email,
+    userName: username,
+    phoneNumber,
+    password,
+    confirmPassword
+  });
 };
 
 export const registerUser = (user: Omit<IUser, 'id'>) => {
@@ -41,7 +60,7 @@ export const createOrder = (orderData: { cartId: number; addressId: number; paym
 };
 
 export const getOrders = () => {
-  return instance.get<IBackendRes<{ orders: any[] }>>('/api/Orders');
+  return instance.get<IBackendRes<{ orders: any[] }>>('/api/orders');
 }
 
 export const getOrderHistory = () => {
@@ -301,7 +320,7 @@ export const getBestSellingProducts = (topN: number, startDate: string, endDate:
 
 // Loyalty Points API
 export const getUserLoyaltyInfo = () => {
-  return instance.get<IUserLoyalty>('/api/loyalty/me');
+  return instance.get<IBackendRes<IUserLoyalty>>('/api/loyalty/me');
 };
 
 export const redeemLoyaltyPoints = (pointsToRedeem: number) => {

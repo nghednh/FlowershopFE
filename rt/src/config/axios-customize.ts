@@ -37,7 +37,7 @@ instance.interceptors.response.use(
         const originalRequest = error.config;
 
         // Handle 401 Unauthorized errors
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/api/login') {
             originalRequest._retry = true;
 
             try {

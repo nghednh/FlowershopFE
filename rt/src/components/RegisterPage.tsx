@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../config.ts";
+import { registerAccount } from "../config/api";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -80,19 +80,21 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const data = await registerAccount(
+        firstName,
+        lastName,
+        email,
+        userName,
+        phoneNumber,
+        password,
+        confirmPassword
+      );
 
-      const data = await res.json();
-
-      if (res.ok && data.success !== false) {
+      if (data.success !== false) {
         setMessage("✅ Registration successful! Redirecting in 3...");
         setCountdown(3); // ⏱️ Start countdown
       } else {
-        setMessage(`❌ Registration failed. ${data.errors?.join(", ")}.`);
+        setMessage(`❌ ${data.message}. ${data.errors.join(", ")}`);
       }
     } catch (error) {
       setMessage("⚠️ Network error.");

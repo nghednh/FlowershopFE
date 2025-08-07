@@ -179,3 +179,26 @@ export interface IUserSummaryLoyalty {
     email: string;
     loyaltyPoints: number;
 }
+
+export interface ILoginResponse {
+  success: boolean;
+  message?: string;
+  token: string;
+  refreshToken: string;
+  user: IUserLogin;
+  errors?: string[];
+}
+
+export interface IUserLogin {
+    id: number;
+    userName: string;
+    role: string;
+}
+
+export interface IUserRegister {
+    success: boolean;
+    message: string;
+    data: any,
+    errors: string[];
+    timestamp: string;
+}

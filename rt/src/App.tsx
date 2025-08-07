@@ -3,7 +3,7 @@ import Layout from "./components/Layout";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import ProductPage from "./components/ProductPage";
-import HomePage from "./components/HomePage";
+import HomePage from "./components/HomePage/HomePage";
 import CategoryPage from "./components/CategoryPage";
 import CheckoutPage from "./components/CheckoutPage";
 import ContactPage from "./components/ContactPage";
@@ -11,6 +11,7 @@ import Admin from "./components/Admin";
 import ProductListingsPage from "./components/ProductListing";
 import OrderHistoryPage from "./components/OrderHistoryPage";
 import OrderTracking from "./components/OrderListing/OrderTracking";
+import UserProfile from "./components/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { CartProvider } from "./contexts/CartContext";
 import Chatbot from "./components/Chatbot";
@@ -35,6 +36,8 @@ function App() {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/category" element={<CategoryPage />} />
             <Route path="/list" element={<ProductListingsPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/profile" element={<UserProfile />} />
             <Route path="/orderhistory" element={<OrderHistoryPage />} />
             <Route path="/orders/:orderId" element={<OrderTracking />} />
           </Route>

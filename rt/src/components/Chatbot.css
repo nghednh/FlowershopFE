@@ -7,11 +7,23 @@
   color: white;
   border-radius: 9999px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
   z-index: 999;
+  border: none;
+  cursor: pointer;
 }
+
 .chatbot-toggle:hover {
   background-color: #1e40af;
+  transform: scale(1.05);
+}
+
+.chatbot-toggle-open {
+  background-color: #dc2626;
+}
+
+.chatbot-toggle-open:hover {
+  background-color: #b91c1c;
 }
 
 .chatbot-window {
@@ -28,6 +40,20 @@
   overflow: hidden;
   z-index: 999;
   border: 1px solid #ddd;
+  transition: all 0.3s ease;
+  transform-origin: bottom right;
+}
+
+.chatbot-window-open {
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+}
+
+.chatbot-window-closed {
+  opacity: 0;
+  transform: scale(0.8);
+  visibility: hidden;
 }
 
 .chatbot-header {
@@ -38,6 +64,24 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  cursor: default;
+}
+
+.chatbot-close-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.chatbot-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .chatbot-messages {
@@ -71,6 +115,7 @@
   font-size: 0.875rem;
   max-width: 80%;
   word-wrap: break-word;
+  cursor: default;
 }
 
 .chatbot-msg.bot {
@@ -108,6 +153,7 @@
 
 .chatbot-option-button:hover {
   background-color: #bfdbfe;
+  cursor: pointer;
 }
 
 .chatbot-option-button:disabled {
@@ -117,6 +163,7 @@
 
 .chatbot-option-button:disabled:hover {
   background-color: #dbeafe;
+  cursor: not-allowed;
 }
 
 /* Loading animation and styles */
@@ -162,6 +209,7 @@
   border-color: #007bff;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
 
 .product-recommendation-image {

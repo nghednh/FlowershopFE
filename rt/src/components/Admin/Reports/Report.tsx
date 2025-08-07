@@ -11,19 +11,140 @@ import {
     Cell,
     Legend,
 } from "recharts";
-import { getReportSummary, getBestSellingProducts } from "../../../config/api.ts";
+import { getReportSummary, getBestSellingProducts } from "../../../config/api";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ReportPDF } from "./GeneratePDF.tsx";
+import { getMonthRange, getYearRange, getCurrentRange } from "../../../utils/timeRange";
 
-type SalesData = { date: string; total: number; orders: number; averageOrder: number };
-type ProductData = {
+/**
+ * Utility functions for time range generation and management
+ */
+
+export type SalesData = { 
+    date: string; 
+    total: number; 
+    orders: number; 
+    averageOrder: number; 
+};
+
+export type ProductData = {
     productId: string;
     productName: string;
     totalQuantitySold: number;
     totalRevenue: number;
 };
 
-type ChartMetric = "revenue" | "orders" | "average";
+export type ChartMetric = "revenue" | "orders" | "average";
+
+/**
+ * Get current line chart data key based on selected metric
+ */
+const getLineChartDataKey = (chartMetric: ChartMetric): string => {
+    switch (chartMetric) {
+        case "revenue": return "total";
+        case "orders": return "orders";
+        case "average": return "averageOrder";
+        default: return "total";
+    }
+};
+
+/**
+ * Generate pie chart data from sales data by time periods
+ */
+const getRevenueDistributionData = (
+    salesData: SalesData[],
+    viewMode: "month" | "year"
+) => {
+    if (salesData.length === 0) return [];
+    
+    // Get data with revenue > 0 for better visualization
+    const revenueData = salesData.filter(item => item.total > 0);
+    
+    if (revenueData.length === 0) return [];
+    
+    // Take top periods by revenue for cleaner visualization
+    const sortedData = revenueData
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 8); // Show top 8 periods
+    
+    const colors = [
+        "#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", 
+        "#ef4444", "#06b6d4", "#84cc16", "#f97316"
+    ];
+    
+    return sortedData.map((item, index) => ({
+        name: viewMode === "month" 
+            ? `Day ${item.date.slice(8, 10)}` 
+            : `Month ${item.date.slice(5, 7)}`,
+        value: item.total,
+        color: colors[index % colors.length],
+        fullDate: item.date
+    }));
+};
+
+/**
+ * Get chart label and formatter for selected metric
+ */
+const getChartConfig = (chartMetric: ChartMetric) => {
+    switch (chartMetric) {
+        case "revenue":
+            return {
+                label: "Revenue",
+                color: "#10b981",
+                formatter: (value: any) => [`$${value?.toLocaleString?.()}`, "Revenue"]
+            };
+        case "orders":
+            return {
+                label: "Orders",
+                color: "#3b82f6",
+                formatter: (value: any) => [value?.toLocaleString?.(), "Orders"]
+            };
+        case "average":
+            return {
+                label: "Avg Order Value",
+                color: "#8b5cf6",
+                formatter: (value: any) => [`$${value?.toFixed?.(2)}`, "Avg Order Value"]
+            };
+        default:
+            return {
+                label: "Revenue",
+                color: "#10b981",
+                formatter: (value: any) => [`$${value?.toLocaleString?.()}`, "Revenue"]
+            };
+    }
+};
+
+/**
+ * Generate years array for dropdown selection
+ */
+const getAvailableYears = (yearCount: number = 5): number[] => {
+    const currentYear = new Date().getFullYear();
+    const startYear = currentYear - yearCount + 1;
+    return Array.from({ length: yearCount }, (_, i) => startYear + i);
+}
+
+/**
+ * Format date for tooltip display
+ */
+const formatTooltipLabel = (label: string): string => {
+    const date = new Date(Date.UTC(
+        parseInt(label.slice(0, 4)),
+        parseInt(label.slice(5, 7)) - 1,
+        parseInt(label.slice(8, 10) || "1")
+    ));
+    return date.toISOString().slice(0, 10);
+};
+
+/**
+ * Format chart tick values for display
+ */
+const formatChartTick = (value: string, viewMode: "month" | "year"): string => {
+    if (viewMode === "month") {
+        return value.slice(8, 10); // Show day
+    } else {
+        return value.slice(5, 7); // Show month
+    }
+};
 
 export const ReportList: React.FC = () => {
     const [viewMode, setViewMode] = useState<"month" | "year">("month");
@@ -40,51 +161,9 @@ export const ReportList: React.FC = () => {
         averageOrderValue: 0,
     });
 
-    // Generate all dates in a month with start + end times
-    const getMonthRange = (year: number, month: number) => {
-        const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
-        return Array.from({ length: daysInMonth }, (_, i) => {
-            const day = i + 1;
-            const labelDate = new Date(Date.UTC(year, month - 1, day));
-            return {
-                name: day,
-                label: labelDate.toISOString().slice(0, 10),
-                start: new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0)).toISOString(),
-                end: new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999)).toISOString(),
-            };
-        });
-    };
-
-    // Generate all months in a year with start + end times
-    const getYearRange = (year: number) => {
-        return Array.from({ length: 12 }, (_, i) => {
-            const start = new Date(Date.UTC(year, i, 1, 0, 0, 0, 0));
-            const end = new Date(Date.UTC(year, i + 1, 0, 23, 59, 59, 999));
-            return {
-                name: i + 1,
-                label: start.toISOString().slice(0, 7),
-                start: start.toISOString(),
-                end: end.toISOString(),
-            };
-        });
-    };
-
-    // Get current start and end time based on current filter
-    const getCurrentRange = () => {
-        if (viewMode === "month") {
-            const start = new Date(Date.UTC(filters.year, filters.month - 1, 1, 0, 0, 0, 0)).toISOString();
-            const end = new Date(Date.UTC(filters.year, filters.month, 0, 23, 59, 59, 999)).toISOString();
-            return { start, end };
-        } else {
-            const start = new Date(Date.UTC(filters.year, 0, 1, 0, 0, 0, 0)).toISOString();
-            const end = new Date(Date.UTC(filters.year, 11, 31, 23, 59, 59, 999)).toISOString();
-            return { start, end };
-        }
-    };
-    
     // Get total revenue and total orders
     const fetchSummary = async () => {
-        const { start, end } = getCurrentRange();
+        const { start, end } = getCurrentRange(viewMode, filters);
         try {
             const summaryResponse = await getReportSummary(start, end);
             console.log('Response: summary data:', summaryResponse);
@@ -134,7 +213,7 @@ export const ReportList: React.FC = () => {
 
     // Get best-selling products based on current filter
     const fetchTopProducts = async () => {
-        const { start, end } = getCurrentRange();
+        const { start, end } = getCurrentRange(viewMode, filters);
         try {
             const response = await getBestSellingProducts(10, start, end);
             console.log(`Response: top products in range: ${start} - ${end}:`, response);
@@ -165,75 +244,6 @@ export const ReportList: React.FC = () => {
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFilters((prev) => ({ ...prev, [name]: parseInt(value) }));
-    };
-
-    // Get current line chart data key based on selected metric
-    const getLineChartDataKey = () => {
-        switch (chartMetric) {
-            case "revenue": return "total";
-            case "orders": return "orders";
-            case "average": return "averageOrder";
-            default: return "total";
-        }
-    };
-
-    // Generate pie chart data from sales data by time periods
-    const getRevenueDistributionData = () => {
-        if (salesData.length === 0) return [];
-        
-        // Get data with revenue > 0 for better visualization
-        const revenueData = salesData.filter(item => item.total > 0);
-        
-        if (revenueData.length === 0) return [];
-        
-        // Take top periods by revenue for cleaner visualization
-        const sortedData = revenueData
-            .sort((a, b) => b.total - a.total)
-            .slice(0, 8); // Show top 8 periods
-        
-        const colors = [
-            "#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", 
-            "#ef4444", "#06b6d4", "#84cc16", "#f97316"
-        ];
-        
-        return sortedData.map((item, index) => ({
-            name: viewMode === "month" 
-                ? `Day ${item.date.slice(8, 10)}` 
-                : `Month ${item.date.slice(5, 7)}`,
-            value: item.total,
-            color: colors[index % colors.length],
-            fullDate: item.date
-        }));
-    };
-
-    // Get chart label and formatter for selected metric
-    const getChartConfig = () => {
-        switch (chartMetric) {
-            case "revenue":
-                return {
-                    label: "Revenue",
-                    color: "#10b981",
-                    formatter: (value: any) => [`$${value?.toLocaleString?.()}`, "Revenue"]
-                };
-            case "orders":
-                return {
-                    label: "Orders",
-                    color: "#3b82f6",
-                    formatter: (value: any) => [value?.toLocaleString?.(), "Orders"]
-                };
-            case "average":
-                return {
-                    label: "Avg Order Value",
-                    color: "#8b5cf6",
-                    formatter: (value: any) => [`$${value?.toFixed?.(2)}`, "Avg Order Value"]
-                };
-            default:
-                return {
-                    label: "Revenue",
-                    color: "#10b981",
-                    formatter: (value: any) => [`$${value?.toLocaleString?.()}`, "Revenue"]
-                };
-        }
     };
 
     return (
@@ -304,10 +314,7 @@ export const ReportList: React.FC = () => {
                         onChange={handleChange}
                         className="p-2 border rounded"
                     >
-                        {Array.from(
-                            { length: Math.min(5, new Date().getFullYear() - 2022 + 1) },
-                            (_, i) => 2022 + i
-                        ).map((y) => (
+                        {getAvailableYears().map((y) => (
                             <option key={y} value={y}>
                                 {y}
                             </option>
@@ -366,11 +373,11 @@ export const ReportList: React.FC = () => {
                         📊 Revenue Distribution by {viewMode === "month" ? "Days" : "Months"}
                     </h4>
                     <div className="bg-white p-6 rounded-lg shadow border">
-                        {getRevenueDistributionData().length > 0 ? (
+                        {getRevenueDistributionData(salesData, viewMode).length > 0 ? (
                             <ResponsiveContainer width="100%" height={400}>
                                 <PieChart>
                                     <Pie
-                                        data={getRevenueDistributionData()}
+                                        data={getRevenueDistributionData(salesData, viewMode)}
                                         cx="50%"
                                         cy="50%"
                                         innerRadius={60}
@@ -378,7 +385,7 @@ export const ReportList: React.FC = () => {
                                         dataKey="value"
                                         nameKey="name"
                                     >
-                                        {getRevenueDistributionData().map((entry, index) => (
+                                        {getRevenueDistributionData(salesData, viewMode).map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color} />
                                         ))}
                                     </Pie>
@@ -414,33 +421,20 @@ export const ReportList: React.FC = () => {
                         <XAxis
                             dataKey="date"
                             interval="preserveStartEnd"
-                            tickFormatter={(value) => {
-                                if (viewMode === "month") {
-                                    return value.slice(8, 10);
-                                } else {
-                                    return value.slice(5, 7);
-                                }
-                            }}
+                            tickFormatter={(value) => formatChartTick(value, viewMode)}
                         />
                         <YAxis />
                         <Tooltip
-                            formatter={getChartConfig().formatter}
-                            labelFormatter={(label) => {
-                                const date = new Date(Date.UTC(
-                                    parseInt(label.slice(0, 4)),
-                                    parseInt(label.slice(5, 7)) - 1,
-                                    parseInt(label.slice(8, 10) || "1")
-                                ));
-                                return date.toISOString().slice(0, 10);
-                            }}
+                            formatter={getChartConfig(chartMetric).formatter}
+                            labelFormatter={(label) => formatTooltipLabel(label)}
                         />
                         <Line
                             type="monotone"
-                            dataKey={getLineChartDataKey()}
-                            stroke={getChartConfig().color}
+                            dataKey={getLineChartDataKey(chartMetric)}
+                            stroke={getChartConfig(chartMetric).color}
                             strokeWidth={3}
-                            dot={{ r: 4, fill: getChartConfig().color }}
-                            activeDot={{ r: 6, fill: getChartConfig().color }}
+                            dot={{ r: 4, fill: getChartConfig(chartMetric).color }}
+                            activeDot={{ r: 6, fill: getChartConfig(chartMetric).color }}
                         />
                     </LineChart>
                 </ResponsiveContainer>

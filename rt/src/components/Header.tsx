@@ -44,7 +44,7 @@ const Header: React.FC<HeaderProps> = ({ toggleCart, toggleMenu }) => {
             if (userData.role === 'Admin') {
                 navigate('/admin');
             } else {
-                navigate('/orderhistory'); // or user profile page
+                navigate('/profile'); // Navigate to user profile page
             }
         } else {
             // User not logged in, redirect to login
@@ -71,6 +71,10 @@ const Header: React.FC<HeaderProps> = ({ toggleCart, toggleMenu }) => {
         navigate('/contact');
     };
 
+    const handleHome = () => {
+        navigate('/home');
+    };
+
     return (
         <div>
             {/* Loyalty Points Bar - Only show if logged in */}
@@ -95,6 +99,9 @@ const Header: React.FC<HeaderProps> = ({ toggleCart, toggleMenu }) => {
             <header className="header">
                 {/* Desktop */}
                 <div className="header-left desktop-only">
+                    <button className="header-button" onClick={handleHome}>
+                        Home
+                    </button>
                     <button className="header-button" onClick={handleShop}>
                         Shop
                     </button>
@@ -105,10 +112,15 @@ const Header: React.FC<HeaderProps> = ({ toggleCart, toggleMenu }) => {
                 <div className="header-right desktop-only">
                     <button className="header-button" onClick={handleSignIn}>
                         {isLoggedIn 
-                            ? (userData?.role === 'Admin' ? 'Admin CMS' : 'Order History')
+                            ? (userData?.role === 'Admin' ? 'Admin CMS' : 'My Profile')
                             : 'Sign in'
                         }
                     </button>
+                    {isLoggedIn && (
+                        <button className="header-button" onClick={() => navigate('/orderhistory')}>
+                            Order History
+                        </button>
+                    )}
                     {isLoggedIn && (
                         <button className="header-button" onClick={handleLogout}>
                             Logout

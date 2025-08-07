@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { getPopularProducts, getRecommendationsForUser } from "../config/api";
 import { IProduct } from "../types/backend";
@@ -34,7 +34,7 @@ const Chatbot = () => {
   const fetchPopularProducts = async () => {
     try {
       const response = await getPopularProducts(3);
-      const products = response.data?.products || response.products || [];
+      const products = response.products || [];
       setPopularProducts(products);
     } catch (error) {
       console.error('Error fetching popular products:', error);
@@ -57,7 +57,7 @@ const Chatbot = () => {
         response = await getPopularProducts(6);
       }
 
-      const products = response.data?.products || response.products || [];
+      const products = response.products || [];
       
       if (products.length > 0) {
         const recommendationType = isLoggedIn() ? "personalized recommendations" : "popular products";
@@ -195,7 +195,7 @@ const Chatbot = () => {
           onClick={() => window.open(`/products/${product.id}`, '_blank')}
         >
           <img 
-            src={product.imageUrls?.[0] || product.images?.[0]?.imageUrl || 'https://via.placeholder.com/60x60'} 
+            src={product.imageUrls?.[0] || 'https://via.placeholder.com/60x60'} 
             alt={product.name}
             className="product-recommendation-image"
           />
@@ -252,71 +252,81 @@ const Chatbot = () => {
   }
 
   return (
-    <>
-      <button className="chatbot-toggle" onClick={() => setOpen(!open)}>
+    <div className="chatbot-container">
+      {/* Toggle Button */}
+      <button 
+        className={`chatbot-toggle ${open ? 'chatbot-toggle-open' : ''}`}
+        onClick={() => setOpen(!open)}
+        aria-label={open ? 'Close chat' : 'Open chat'}
+      >
         <MessageCircle size={24} />
       </button>
 
-      {open && (
-        <div className="chatbot-window">
-          <div className="chatbot-header">
-            <span>FlowerShop Support</span>
-            <button onClick={() => setOpen(false)}><X size={20} /></button>
-          </div>
-
-          <div className="chatbot-messages">
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`message-container ${msg.from}`}>
-                <div className={`chatbot-msg ${msg.from === "user" ? "user" : "bot"}`}>
-                  {typeof msg.text === "string" ? msg.text : msg.text}
-                </div>
-                {msg.type === "products" && msg.products && (
-                  <ProductRecommendations products={msg.products} />
-                )}
-              </div>
-            ))}
-            {loading && (
-              <div className="message-container bot">
-                <div className="chatbot-msg bot">
-                  <div className="loading-container">
-                    <div className="loading-text">Getting recommendations...</div>
-                    <div className="loading-spinner"></div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="chatbot-options">
-            <button 
-              onClick={() => handleOptionClick("Product Recommendations")}
-              disabled={loading}
-              className="chatbot-option-button"
-            >
-              🌟 Product Recommendations
-            </button>
-            <button 
-              onClick={() => handleOptionClick("Popular Products")}
-              className="chatbot-option-button"
-            >
-              🔥 Popular Products
-            </button>
-            <button 
-              onClick={() => handleOptionClick("Common Questions")}
-              className="chatbot-option-button"
-            >
-              ❓ Common Questions
-            </button>
-            <button 
-              onClick={() => handleOptionClick("Buying Support Guide")}
-              className="chatbot-option-button"
-            >
-              📘 Buying Support Guide
-            </button>
-          </div>
+      {/* Chatbot Window */}
+      <div className={`chatbot-window ${open ? 'chatbot-window-open' : 'chatbot-window-closed'}`}>
+        <div className="chatbot-header">
+          <span>FlowerShop Support</span>
+          <button 
+            onClick={() => setOpen(false)}
+            aria-label="Close chat"
+            className="chatbot-close-btn"
+          >
+            <X size={20} />
+          </button>
         </div>
-      )}
-    </>
+
+        <div className="chatbot-messages">
+          {messages.map((msg, idx) => (
+            <div key={idx} className={`message-container ${msg.from}`}>
+              <div className={`chatbot-msg ${msg.from === "user" ? "user" : "bot"}`}>
+                {typeof msg.text === "string" ? msg.text : msg.text}
+              </div>
+              {msg.type === "products" && msg.products && (
+                <ProductRecommendations products={msg.products} />
+              )}
+            </div>
+          ))}
+          {loading && (
+            <div className="message-container bot">
+              <div className="chatbot-msg bot">
+                <div className="loading-container">
+                  <div className="loading-text">Getting recommendations...</div>
+                  <div className="loading-spinner"></div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="chatbot-options">
+          <button 
+            onClick={() => handleOptionClick("Product Recommendations")}
+            disabled={loading}
+            className="chatbot-option-button"
+          >
+            🌟 Product Recommendations
+          </button>
+          <button 
+            onClick={() => handleOptionClick("Popular Products")}
+            className="chatbot-option-button"
+          >
+            🔥 Popular Products
+          </button>
+          <button 
+            onClick={() => handleOptionClick("Common Questions")}
+            className="chatbot-option-button"
+          >
+            ❓ Common Questions
+          </button>
+          <button 
+            onClick={() => handleOptionClick("Buying Support Guide")}
+            className="chatbot-option-button"
+          >
+            📘 Buying Support Guide
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

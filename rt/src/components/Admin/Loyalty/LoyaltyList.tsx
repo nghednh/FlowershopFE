@@ -21,7 +21,12 @@ export const LoyaltyList: React.FC<LoyaltyListProps> = ({ onEdit, refreshTrigger
       setError(null);
       const response = await getAllUsersLoyaltyInfo();
       console.log("Loyalty Users Response:", response);
-      setUsers(response.users);
+      // Since API now returns { users: IUserSummaryLoyalty[] } directly
+      if (Array.isArray(response)) {
+        setUsers(response);
+      } else {
+        setUsers(response.users || []);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load loyalty data');
       console.error('Error loading loyalty data:', err);
@@ -54,17 +59,14 @@ export const LoyaltyList: React.FC<LoyaltyListProps> = ({ onEdit, refreshTrigger
   const filteredUsers = users
     .filter((u) => 
       u.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      `${u.firstName} ${u.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+      u.email.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
       if (!sortInput.field) return 0;
       const multiplier = sortInput.order === "asc" ? 1 : -1;
       if (sortInput.field === "userName") return multiplier * a.userName.localeCompare(b.userName);
       if (sortInput.field === "email") return multiplier * a.email.localeCompare(b.email);
-      if (sortInput.field === "currentPoints") return multiplier * (a.currentPoints - b.currentPoints);
-      if (sortInput.field === "totalEarned") return multiplier * (a.totalEarned - b.totalEarned);
-      if (sortInput.field === "totalRedeemed") return multiplier * (a.totalRedeemed - b.totalRedeemed);
+      if (sortInput.field === "loyaltyPoints") return multiplier * (a.loyaltyPoints - b.loyaltyPoints);
       return 0;
     });
 
@@ -81,7 +83,7 @@ export const LoyaltyList: React.FC<LoyaltyListProps> = ({ onEdit, refreshTrigger
         <div className="flex items-center gap-4">
           <input
             type="text"
-            placeholder="Search by name, username, or email..."
+            placeholder="Search by username or email..."
             value={searchTerm}
             onChange={handleSearch}
             className="border border-gray-300 p-2 rounded text-sm"
@@ -101,12 +103,8 @@ export const LoyaltyList: React.FC<LoyaltyListProps> = ({ onEdit, refreshTrigger
               <option value="userName|desc">Username (Z-A)</option>
               <option value="email|asc">Email (A-Z)</option>
               <option value="email|desc">Email (Z-A)</option>
-              <option value="currentPoints|desc">Current Points (High to Low)</option>
-              <option value="currentPoints|asc">Current Points (Low to High)</option>
-              <option value="totalEarned|desc">Total Earned (High to Low)</option>
-              <option value="totalEarned|asc">Total Earned (Low to High)</option>
-              <option value="totalRedeemed|desc">Total Redeemed (High to Low)</option>
-              <option value="totalRedeemed|asc">Total Redeemed (Low to High)</option>
+              <option value="loyaltyPoints|desc">Loyalty Points (High to Low)</option>
+              <option value="loyaltyPoints|asc">Loyalty Points (Low to High)</option>
             </select>
           </div>
         </div>
@@ -136,36 +134,22 @@ export const LoyaltyList: React.FC<LoyaltyListProps> = ({ onEdit, refreshTrigger
               >
                 Email {sortInput.field === 'email' && (sortInput.order === 'asc' ? '↑' : '↓')}
               </th>
-              <th className="text-black font-bold uppercase p-2 border border-gray-300">Name</th>
               <th className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
-                onClick={() => handleSortInputChange('currentPoints', sortInput.order === 'asc' ? 'desc' : 'asc')}
+                onClick={() => handleSortInputChange('loyaltyPoints', sortInput.order === 'asc' ? 'desc' : 'asc')}
               >
-                Current Points {sortInput.field === 'currentPoints' && (sortInput.order === 'asc' ? '↑' : '↓')}
-              </th>
-              <th className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
-                onClick={() => handleSortInputChange('totalEarned', sortInput.order === 'asc' ? 'desc' : 'asc')}
-              >
-                Total Earned {sortInput.field === 'totalEarned' && (sortInput.order === 'asc' ? '↑' : '↓')}
-              </th>
-              <th className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
-                onClick={() => handleSortInputChange('totalRedeemed', sortInput.order === 'asc' ? 'desc' : 'asc')}
-              >
-                Total Redeemed {sortInput.field === 'totalRedeemed' && (sortInput.order === 'asc' ? '↑' : '↓')}
+                Loyalty Points {sortInput.field === 'loyaltyPoints' && (sortInput.order === 'asc' ? '↑' : '↓')}
               </th>
               <th className="text-black font-bold uppercase p-2 border border-gray-300">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredUsers.map((user) => (
-              <tr key={user.userId} className="border-b border-gray-300">
+              <tr key={user.id} className="border-b border-gray-300">
                 <td className="p-2 border-x border-gray-300">{user.userName}</td>
                 <td className="p-2 border-x border-gray-300">{user.email}</td>
-                <td className="p-2 border-x border-gray-300">{user.firstName} {user.lastName}</td>
                 <td className="p-2 border-x border-gray-300 text-center font-semibold text-green-600">
-                  {user.currentPoints}
+                  {user.loyaltyPoints}
                 </td>
-                <td className="p-2 border-x border-gray-300 text-center">{user.totalEarned}</td>
-                <td className="p-2 border-x border-gray-300 text-center">{user.totalRedeemed}</td>
                 <td className="p-2 border-x border-gray-300">
                   <div className="flex items-center justify-center gap-2">
                     <Button onClick={() => onEdit(user)} className="mr-2">Edit Points</Button>

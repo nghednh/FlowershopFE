@@ -89,6 +89,7 @@ export default function RegisterPage() {
         password,
         confirmPassword
       );
+      console.log("Register response:", data);
 
       if (data.success !== false) {
         setMessage("✅ Registration successful! Redirecting in 3...");

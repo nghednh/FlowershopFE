@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 
 // Create axios instance with base configuration
 const instance = axios.create({
-    baseURL: 'https://localhost:5001', // Your backend URL
+    baseURL: API_BASE_URL,
     timeout: 100000,
     headers: {
         'Content-Type': 'application/json',
@@ -36,15 +37,26 @@ instance.interceptors.response.use(
         console.error('Response error:', error);
         const originalRequest = error.config;
 
-        // Handle 401 Unauthorized errors
-        if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/api/login') {
+        // Handle login/register endpoints - don't reject if server responded
+        const auth_endpoints = [
+            '/api/login',
+            '/api/register'
+        ];
+
+        // For login/register endpoints, if there's a response from server, return the response data instead of rejecting
+        if (error.response && auth_endpoints.includes(originalRequest.url)) {
+            return error.response.data;
+        }
+
+        // Handle 401 Unauthorized errors for other endpoints
+        if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             try {
                 // Try to refresh the token
                 const refreshToken = localStorage.getItem('refresh_token');
                 if (refreshToken) {
-                    const refreshResponse = await axios.post('https://localhost:5001/api/auth/refresh', {
+                    const refreshResponse = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
                         refreshToken: refreshToken
                     });
 

@@ -12,13 +12,17 @@ import { UserForm } from "./Admin/User/UserForm";
 import { CategoryList } from "./Admin/Category/CategoryList";
 import { CategoryForm } from "./Admin/Category/CategoryForm";
 import { Modal } from "./Modal";
-import { ReportList } from "./Admin/Reports/ReportList";
+import { ReportList } from "./Admin/Reports/Report";
 import { createCategory, deleteCategory, getCategories, getUsers, updateCategory, deleteProduct, deletePricingRule, cancelOrder, getPricingRules } from "../config/api";
 import { LoyaltyList } from "./Admin/Loyalty/LoyaltyList";
 import { LoyaltyForm } from "./Admin/Loyalty/LoyaltyForm";
 
 const Admin = () => {
-  const [activeSection, setActiveSection] = React.useState("flowers");
+  // Initialize activeSection from localStorage or default to "flowers"
+  const [activeSection, setActiveSection] = React.useState(() => {
+    const savedSection = localStorage.getItem('adminActiveSection');
+    return savedSection || "flowers";
+  });
   const [pricingRules, setPricingRules] = React.useState<IPricingRule[]>([]);
   const [orders, setOrders] = React.useState<IOrder[]>([]);
   const [users, setUsers] = React.useState<IUser[]>([]);
@@ -28,6 +32,12 @@ const Admin = () => {
   const [error, setError] = React.useState<string | null>(null);
   const [modal, setModal] = React.useState({ isOpen: false, type: "", data: null });
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
+
+  // Create a wrapper function to save to localStorage when activeSection changes
+  const handleSetActiveSection = (section: string) => {
+    setActiveSection(section);
+    localStorage.setItem('adminActiveSection', section);
+  };
 
   const openModal = (type: string, data: any = null) => setModal({ isOpen: true, type, data });
   const closeModal = () => setModal({ isOpen: false, type: "", data: null });
@@ -378,9 +388,9 @@ const Admin = () => {
   };
 
   return (
-    <div className="flex">
-      <Sidebar setActiveSection={setActiveSection} />
-      <div className="flex-1 p-6 bg-white">{renderSection()}</div>
+    <div className="flex min-h-screen">
+      <Sidebar setActiveSection={handleSetActiveSection} activeSection={activeSection} />
+      <div className="flex-1 p-6 bg-white ml-64 min-h-screen">{renderSection()}</div>
     </div>
   );
 };

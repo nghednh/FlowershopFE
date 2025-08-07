@@ -11,7 +11,7 @@ interface LoyaltyFormProps {
 }
 
 export const LoyaltyForm: React.FC<LoyaltyFormProps> = ({ user, onSave, onClose }) => {
-  const [newPointsValue, setNewPointsValue] = useState(user.currentPoints);
+  const [newPointsValue, setNewPointsValue] = useState(user.loyaltyPoints);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +25,7 @@ export const LoyaltyForm: React.FC<LoyaltyFormProps> = ({ user, onSave, onClose 
         return;
       }
 
-      const response = await updateUserLoyaltyPoints(user.userId, newPointsValue);
+      const response = await updateUserLoyaltyPoints(user.id, newPointsValue);
       onSave(response.data);
       onClose();
     } catch (error: any) {
@@ -36,7 +36,7 @@ export const LoyaltyForm: React.FC<LoyaltyFormProps> = ({ user, onSave, onClose 
     }
   };
 
-  const pointsDifference = newPointsValue - user.currentPoints;
+  const pointsDifference = newPointsValue - user.loyaltyPoints;
 
   return (
     <div>
@@ -50,12 +50,9 @@ export const LoyaltyForm: React.FC<LoyaltyFormProps> = ({ user, onSave, onClose 
 
       <div className="mb-4 p-4 bg-gray-50 rounded">
         <h4 className="font-semibold mb-2">User Information</h4>
-        <p><strong>Name:</strong> {user.firstName} {user.lastName}</p>
         <p><strong>Username:</strong> {user.userName}</p>
         <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>Current Points:</strong> <span className="text-green-600 font-semibold">{user.currentPoints}</span></p>
-        <p><strong>Total Earned:</strong> {user.totalEarned}</p>
-        <p><strong>Total Redeemed:</strong> {user.totalRedeemed}</p>
+        <p><strong>Current Points:</strong> <span className="text-green-600 font-semibold">{user.loyaltyPoints}</span></p>
       </div>
 
       <Input

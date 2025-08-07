@@ -11,6 +11,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     document.getElementById("email")?.focus();
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   }, []);
 
   const handleLogin = async () => {
@@ -43,7 +45,7 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error("Login error:", error);
       setMessage(
-        `❌ Login failed. ${error.response?.data?.message || "Network error"
+        `❌ ${error.response?.data?.message || "Network error"
         }`
       );
       setPassword("");

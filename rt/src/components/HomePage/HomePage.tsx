@@ -1,60 +1,187 @@
 import GoogleSlides from "./GoogleSlides";
+import { useState, useEffect } from "react";
+import './HomePage.css';
 
 export default function HomePage() {
+    const [isVisible, setIsVisible] = useState(false);
+    const [currentSlogan, setCurrentSlogan] = useState(0);
+    
+    const slogans = [
+        "Where beauty blooms and memories are made.",
+        "Crafting moments that last forever.",
+        "Your story, beautifully told through flowers."
+    ];
+
+    useEffect(() => {
+        setIsVisible(true);
+        const interval = setInterval(() => {
+            setCurrentSlogan((prev) => (prev + 1) % slogans.length);
+        }, 4000);
+        
+        return () => {
+            clearInterval(interval);
+        };
+    }, []);
+
     return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative">
-        <div className="flex flex-col lg:flex-row w-full min-h-screen">
-          {/* Left Hero Content */}
-          <div className="w-full lg:w-1/2 bg-gradient-to-br from-pink-50 to-purple-50 border border-gray-200">
-            <div className="h-full flex flex-col justify-between p-8 lg:p-16">
+      {/* Enhanced Hero Section */}
+      <section className="hero-section relative overflow-hidden min-h-screen">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-32 w-96 h-96 bg-gradient-to-br from-pink-200/30 to-purple-200/30 rounded-full animate-pulse"></div>
+          <div className="absolute -bottom-32 -left-40 w-80 h-80 bg-gradient-to-tr from-purple-200/20 to-pink-200/20 rounded-full animate-pulse delay-1000"></div>
+          <div className="absolute top-1/3 left-1/4 w-4 h-4 bg-pink-400/40 rounded-full animate-bounce delay-500"></div>
+          <div className="absolute top-2/3 right-1/3 w-3 h-3 bg-purple-400/40 rounded-full animate-bounce delay-1000"></div>
+          <div className="absolute top-1/4 right-1/4 w-2 h-2 bg-pink-300/60 rounded-full animate-ping delay-2000"></div>
+        </div>
+        
+        <div className="flex flex-col lg:flex-row w-full min-h-screen relative z-10">
+          {/* Left Hero Content - Enhanced */}
+          <div className="w-full lg:w-1/2 bg-gradient-to-br from-pink-50/80 via-purple-50/60 to-pink-50/80 backdrop-blur-sm border border-gray-200/50 relative">
+            <div className="h-full flex flex-col justify-start p-8 lg:p-16 pt-16 lg:pt-24 relative space-y-8">
               
-              {/* Main Hero Text */}
-              <div className="flex-1 flex flex-col justify-top">
-                <div className="space-y-6">
-                  <h1 className="text-5xl lg:text-7xl font-bold text-gray-800 leading-tight">
-                    Flower<br/>
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">Shop</span>
+              {/* FlowerShop Text - Centered within Left Section */}
+              <div className={`transform transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-0 opacity-0'}`}>
+                <div className="animate-breathe">
+                  <h1 className="text-center text-5xl lg:text-8xl xl:text-9xl font-bold leading-tight tracking-tight">
+                    <span className="inline-block transform hover:scale-105 transition-transform duration-300 cursor-default text-gray-800 animate-text-glow">
+                      <span className="inline-block animate-float" style={{animationDelay: '100ms'}}>F</span>
+                      <span className="inline-block animate-float" style={{animationDelay: '200ms'}}>l</span>
+                      <span className="inline-block animate-float" style={{animationDelay: '300ms'}}>o</span>
+                      <span className="inline-block animate-float" style={{animationDelay: '400ms'}}>w</span>
+                      <span className="inline-block animate-float" style={{animationDelay: '500ms'}}>e</span>
+                      <span className="inline-block animate-float" style={{animationDelay: '600ms'}}>r</span>
+                    </span>
+                    <br/>
+                    <span className="inline-block transform hover:scale-105 transition-transform duration-300 cursor-default font-bold">
+                      <span className="inline-block animate-float animate-color-shift bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent" style={{animationDelay: '700ms', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>S</span>
+                      <span className="inline-block animate-float animate-color-shift bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent" style={{animationDelay: '800ms', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>h</span>
+                      <span className="inline-block animate-float animate-color-shift bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent" style={{animationDelay: '900ms', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>o</span>
+                      <span className="inline-block animate-float animate-color-shift bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent" style={{animationDelay: '1000ms', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>p</span>
+                    </span>
                   </h1>
-                  <p className="text-xl lg:text-2xl text-gray-600 max-w-lg leading-relaxed">
-                    Where beauty blooms and memories are made.<br/>
-                    <span className="text-lg font-medium text-pink-500">"Every flower speaks a language of love"</span>
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                    <button 
-                      onClick={() => window.location.href = '/list'}
-                      className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-full hover:from-pink-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
-                    >
-                      Shop Now
-                    </button>
-                    <button 
-                      onClick={() => window.location.href = '/contact'}
-                      className="px-8 py-4 border-2 border-pink-500 text-pink-500 font-semibold rounded-full hover:bg-pink-500 hover:text-white transition-all duration-200"
-                    >
-                      Contact Us
-                    </button>
-                  </div>
                 </div>
               </div>
-
-              {/* Bottom Image Section */}
-              <div className="mt-8 lg:mt-0">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="relative overflow-hidden rounded-2xl shadow-lg">
+              
+              {/* Slogan */}
+              <div className={`transform transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                <div className="relative h-32 lg:h-40 overflow-hidden text-center">
+                  {slogans.map((slogan, index) => (
+                    <p key={index} className={`absolute inset-0 text-xl lg:text-2xl text-gray-600 leading-relaxed transform transition-all duration-700 flex flex-col items-center justify-center ${
+                      currentSlogan === index 
+                        ? 'translate-y-0 opacity-100' 
+                        : index < currentSlogan 
+                          ? '-translate-y-full opacity-0' 
+                          : 'translate-y-full opacity-0'
+                    }`}>
+                      <span>{slogan}</span>
+                      <span className="text-lg font-medium text-pink-500 italic mt-2">"Every flower speaks a language of love"</span>
+                    </p>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Call-to-Action Buttons */}
+              <div className={`transform transition-all duration-1000 delay-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button 
+                    onClick={() => window.location.href = '/list'}
+                    className="group px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-full hover:from-pink-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl relative overflow-hidden w-[180px] h-[56px] flex items-center justify-center"
+                  >
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                      Shop Now
+                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                  </button>
+                  <button 
+                    onClick={() => window.location.href = '/contact'}
+                    className="group px-8 py-4 border-2 border-pink-500 text-pink-500 font-semibold rounded-full hover:bg-pink-500 hover:text-white hover:border-pink-600 transition-all duration-300 hover:shadow-lg relative overflow-hidden w-[180px] h-[56px] flex items-center justify-center"
+                  >
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                      </svg>
+                      Contact Us
+                    </span>
+                  </button>
+                </div>
+              </div>  
+                          
+              {/* Enhanced Bottom Image Section */}
+              <div className={`mt-8 lg:mt-0 transform transition-all duration-1000 delay-900 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer">
                     <img
                       src="/images/floral_studio.jpg"
                       alt="Floral Studio"
-                      className="w-full h-32 lg:h-40 object-cover hover:scale-110 transition-transform duration-300"
+                      className="w-full h-32 lg:h-40 object-cover group-hover:scale-110 transition-transform duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    <div className="absolute bottom-3 left-3 text-white font-medium">Studio</div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent group-hover:from-black/40 transition-all duration-300"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <div className="text-white font-semibold text-lg mb-1 transform group-hover:translate-y-0 translate-y-2 transition-transform duration-300">
+                        Our Studio
+                      </div>
+                      <div className="text-white/80 text-sm opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-4 transition-all duration-300 delay-100">
+                        Visit our beautiful space
+                      </div>
+                    </div>
+                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
-                  <div className="bg-white rounded-2xl p-6 shadow-lg border">
-                    <div className="text-sm text-gray-600 mb-2">Experience</div>
-                    <p className="text-gray-800 text-sm leading-relaxed">
-                      Professional floral arrangements crafted with love and delivered fresh to your door.
-                    </p>
+                  
+                  <div className="group bg-white rounded-2xl p-6 shadow-lg border hover:shadow-xl transition-all duration-500 hover:border-pink-200 relative overflow-hidden cursor-pointer">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 to-purple-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-pink-100 to-purple-100 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                          <svg className="w-4 h-4 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="text-sm text-gray-600 font-medium">Our Promise</div>
+                      </div>
+                      <p className="text-gray-800 text-sm leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                        Professional floral arrangements crafted with love and delivered fresh to your door with a smile.
+                      </p>
+                      <div className="mt-4 opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-2 transition-all duration-300">
+                        <div className="text-xs text-pink-500 font-medium flex items-center gap-1">
+                          Learn more 
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Statistics Bar */}
+                <div className={`mt-6 transform transition-all duration-1000 delay-1100 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}>
+                  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/50 shadow-sm">
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="group cursor-pointer">
+                        <div className="text-lg font-bold text-gray-800 group-hover:text-pink-500 transition-colors duration-300">500+</div>
+                        <div className="text-xs text-gray-600">Happy Customers</div>
+                      </div>
+                      <div className="group cursor-pointer border-x border-gray-200">
+                        <div className="text-lg font-bold text-gray-800 group-hover:text-pink-500 transition-colors duration-300">5⭐</div>
+                        <div className="text-xs text-gray-600">Rating</div>
+                      </div>
+                      <div className="group cursor-pointer">
+                        <div className="text-lg font-bold text-gray-800 group-hover:text-pink-500 transition-colors duration-300">24/7</div>
+                        <div className="text-xs text-gray-600">Support</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -62,20 +189,37 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right Hero Grid */}
-          <div className="w-full lg:w-1/2">
-            <div className="grid grid-cols-2 h-full">
+          {/* Enhanced Right Hero Grid */}
+          <div className="w-full lg:w-1/2 relative">
+            {/* Floating decoration elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+              <div className="absolute top-20 right-16 w-6 h-6 bg-pink-400/20 rounded-full animate-float delay-500"></div>
+              <div className="absolute bottom-32 left-12 w-4 h-4 bg-purple-400/30 rounded-full animate-bounce-slow delay-1000"></div>
+              <div className="absolute top-1/3 right-8 w-2 h-2 bg-green-400/40 rounded-full animate-ping-slow delay-1500"></div>
+            </div>
+            
+            <div className="grid grid-cols-2 h-full relative z-10">
               
-              {/* Fresh Flowers */}
-              <div className="relative group cursor-pointer overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center border border-gray-200 z-10">
-                  <div className="text-center">
-                    <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4">
+              {/* Fresh Flowers - Enhanced */}
+              <div className={`relative group cursor-pointer overflow-hidden aspect-square transform transition-all duration-800 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'} delay-300`}>
+                <div className="absolute inset-0 bg-gradient-to-br from-green-50/90 to-emerald-100/90 backdrop-blur-sm flex items-center justify-center border border-gray-200/50 z-10 group-hover:from-green-100/95 group-hover:to-emerald-200/95 transition-all duration-500">
+                  <div className="text-center transform group-hover:scale-105 transition-transform duration-300">
+                    <div className="mb-4 opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-4 transition-all duration-300">
+                      <div className="w-12 h-12 mx-auto bg-white/80 rounded-full flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4 tracking-tight">
                       Fresh<br/>Flowers
                     </h3>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <a href="/list?categories=1" className="inline-flex items-center text-green-600 font-semibold hover:text-green-700">
-                        Shop now <span className="ml-2">→</span>
+                    <div className="opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-4 transition-all duration-300 delay-100">
+                      <a href="/list?categories=1" className="inline-flex items-center text-green-600 font-semibold hover:text-green-700 bg-white/80 px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all duration-200">
+                        Shop now 
+                        <svg className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
                       </a>
                     </div>
                   </div>
@@ -83,40 +227,67 @@ export default function HomePage() {
                 <img
                   src="/images/fresh_flower.jpg"
                   alt="Fresh Flowers"
-                  className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-300"
+                  className="absolute inset-0 w-full h-full object-cover opacity-15 group-hover:opacity-25 group-hover:scale-110 transition-all duration-700"
                 />
+                <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="px-3 py-1 bg-green-600 text-white text-xs font-medium rounded-full">
+                    Popular
+                  </div>
+                </div>
               </div>
 
-              {/* Fresh Flowers Image */}
-              <div className="relative overflow-hidden">
+              {/* Fresh Flowers Image - Enhanced */}
+              <div className={`relative overflow-hidden group cursor-pointer aspect-square transform transition-all duration-800 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'} delay-400`}>
                 <img
                   src="/images/fresh_flower.jpg"
                   alt="Fresh Flowers"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent group-hover:from-black/30 transition-all duration-300"></div>
+                <div className="absolute bottom-4 left-4 right-4 transform group-hover:translate-y-0 translate-y-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+                    <div className="text-sm font-semibold text-gray-800">Premium Collection</div>
+                    <div className="text-xs text-gray-600">Hand-picked daily</div>
+                  </div>
+                </div>
               </div>
 
-              {/* Dried Flowers Image */}
-              <div className="relative overflow-hidden">
+              {/* Dried Flowers Image - Enhanced */}
+              <div className={`relative overflow-hidden group cursor-pointer aspect-square transform transition-all duration-800 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'} delay-500`}>
                 <img
                   src="/images/dried_flower.jpg"
                   alt="Dried Flowers"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent group-hover:from-black/30 transition-all duration-300"></div>
+                <div className="absolute bottom-4 left-4 right-4 transform group-hover:translate-y-0 translate-y-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+                    <div className="text-sm font-semibold text-gray-800">Lasting Beauty</div>
+                    <div className="text-xs text-gray-600">Eternal elegance</div>
+                  </div>
+                </div>
               </div>
 
-              {/* Dried Flowers */}
-              <div className="relative group cursor-pointer overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center border border-gray-200 z-10">
-                  <div className="text-center">
-                    <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4">
+              {/* Dried Flowers - Enhanced */}
+              <div className={`relative group cursor-pointer overflow-hidden aspect-square transform transition-all duration-800 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'} delay-600`}>
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-50/90 to-orange-100/90 backdrop-blur-sm flex items-center justify-center border border-gray-200/50 z-10 group-hover:from-amber-100/95 group-hover:to-orange-200/95 transition-all duration-500">
+                  <div className="text-center transform group-hover:scale-105 transition-transform duration-300">
+                    <div className="mb-4 opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-4 transition-all duration-300">
+                      <div className="w-12 h-12 mx-auto bg-white/80 rounded-full flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4 tracking-tight">
                       Dried<br/>Flowers
                     </h3>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <a href="/list?categories=2" className="inline-flex items-center text-orange-600 font-semibold hover:text-orange-700">
-                        <span className="mr-2">←</span> Shop now
+                    <div className="opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-4 transition-all duration-300 delay-100">
+                      <a href="/list?categories=2" className="inline-flex items-center text-orange-600 font-semibold hover:text-orange-700 bg-white/80 px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all duration-200">
+                        <svg className="mr-2 w-4 h-4 transform group-hover:-translate-x-1 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                        </svg>
+                        Shop now
                       </a>
                     </div>
                   </div>
@@ -124,20 +295,35 @@ export default function HomePage() {
                 <img
                   src="/images/dried_flower.jpg"
                   alt="Dried Flowers"
-                  className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-300"
+                  className="absolute inset-0 w-full h-full object-cover opacity-15 group-hover:opacity-25 group-hover:scale-110 transition-all duration-700"
                 />
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="px-3 py-1 bg-orange-600 text-white text-xs font-medium rounded-full">
+                    Trending
+                  </div>
+                </div>
               </div>
 
-              {/* Live Plants */}
-              <div className="relative group cursor-pointer overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-teal-100 flex items-center justify-center border border-gray-200 z-10">
-                  <div className="text-center">
-                    <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4">
+              {/* Live Plants - Enhanced */}
+              <div className={`relative group cursor-pointer overflow-hidden aspect-square transform transition-all duration-800 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'} delay-700`}>
+                <div className="absolute inset-0 bg-gradient-to-br from-green-50/90 to-teal-100/90 backdrop-blur-sm flex items-center justify-center border border-gray-200/50 z-10 group-hover:from-green-100/95 group-hover:to-teal-200/95 transition-all duration-500">
+                  <div className="text-center transform group-hover:scale-105 transition-transform duration-300">
+                    <div className="mb-4 opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-4 transition-all duration-300">
+                      <div className="w-12 h-12 mx-auto bg-white/80 rounded-full flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4 tracking-tight">
                       Live<br/>Plants
                     </h3>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <a href="/list?categories=3" className="inline-flex items-center text-teal-600 font-semibold hover:text-teal-700">
-                        Shop now <span className="ml-2">→</span>
+                    <div className="opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-4 transition-all duration-300 delay-100">
+                      <a href="/list?categories=3" className="inline-flex items-center text-teal-600 font-semibold hover:text-teal-700 bg-white/80 px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all duration-200">
+                        Shop now 
+                        <svg className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
                       </a>
                     </div>
                   </div>
@@ -145,40 +331,67 @@ export default function HomePage() {
                 <img
                   src="/images/live_plant.jpg"
                   alt="Live Plants"
-                  className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-300"
+                  className="absolute inset-0 w-full h-full object-cover opacity-15 group-hover:opacity-25 group-hover:scale-110 transition-all duration-700"
                 />
+                <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="px-3 py-1 bg-teal-600 text-white text-xs font-medium rounded-full">
+                    Eco-Friendly
+                  </div>
+                </div>
               </div>
 
-              {/* Live Plants Image */}
-              <div className="relative overflow-hidden">
+              {/* Live Plants Image - Enhanced */}
+              <div className={`relative overflow-hidden group cursor-pointer aspect-square transform transition-all duration-800 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'} delay-800`}>
                 <img
                   src="/images/live_plant.jpg"
                   alt="Live Plants"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent group-hover:from-black/30 transition-all duration-300"></div>
+                <div className="absolute bottom-4 left-4 right-4 transform group-hover:translate-y-0 translate-y-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+                    <div className="text-sm font-semibold text-gray-800">Green Living</div>
+                    <div className="text-xs text-gray-600">Purify your space</div>
+                  </div>
+                </div>
               </div>
 
-              {/* Aroma Candles Image */}
-              <div className="relative overflow-hidden">
+              {/* Aroma Candles Image - Enhanced */}
+              <div className={`relative overflow-hidden group cursor-pointer aspect-square transform transition-all duration-800 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'} delay-900`}>
                 <img
                   src="/images/aroma_candle.png"
                   alt="Aroma Candles"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent group-hover:from-black/30 transition-all duration-300"></div>
+                <div className="absolute bottom-4 left-4 right-4 transform group-hover:translate-y-0 translate-y-4 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+                    <div className="text-sm font-semibold text-gray-800">Ambient Scents</div>
+                    <div className="text-xs text-gray-600">Create the mood</div>
+                  </div>
+                </div>
               </div>
 
-              {/* Aroma Candles */}
-              <div className="relative group cursor-pointer overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-100 flex items-center justify-center border border-gray-200 z-10">
-                  <div className="text-center">
-                    <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4">
+              {/* Aroma Candles - Enhanced */}
+              <div className={`relative group cursor-pointer overflow-hidden aspect-square transform transition-all duration-800 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'} delay-1000`}>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-50/90 to-pink-100/90 backdrop-blur-sm flex items-center justify-center border border-gray-200/50 z-10 group-hover:from-purple-100/95 group-hover:to-pink-200/95 transition-all duration-500">
+                  <div className="text-center transform group-hover:scale-105 transition-transform duration-300">
+                    <div className="mb-4 opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-4 transition-all duration-300">
+                      <div className="w-12 h-12 mx-auto bg-white/80 rounded-full flex items-center justify-center shadow-lg">
+                        <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M11 3a1 1 0 10-2 0v1a1 1 0 10-2 0V3a3 3 0 106 0zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 11a1 1 0 100-2H4a1 1 0 100 2h1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.477.859h4z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-4 tracking-tight">
                       Aroma<br/>Candles
                     </h3>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <a href="/list?categories=4" className="inline-flex items-center text-purple-600 font-semibold hover:text-purple-700">
-                        <span className="mr-2">←</span> Shop now
+                    <div className="opacity-0 group-hover:opacity-100 transform group-hover:translate-y-0 translate-y-4 transition-all duration-300 delay-100">
+                      <a href="/list?categories=4" className="inline-flex items-center text-purple-600 font-semibold hover:text-purple-700 bg-white/80 px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all duration-200">
+                        <svg className="mr-2 w-4 h-4 transform group-hover:-translate-x-1 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                        </svg>
+                        Shop now
                       </a>
                     </div>
                   </div>
@@ -186,8 +399,13 @@ export default function HomePage() {
                 <img
                   src="/images/aroma_candle.png"
                   alt="Aroma Candles"
-                  className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-300"
+                  className="absolute inset-0 w-full h-full object-cover opacity-15 group-hover:opacity-25 group-hover:scale-110 transition-all duration-700"
                 />
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="px-3 py-1 bg-purple-600 text-white text-xs font-medium rounded-full">
+                    Luxury
+                  </div>
+                </div>
               </div>
 
             </div>

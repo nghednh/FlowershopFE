@@ -128,7 +128,7 @@ const UserProfile: React.FC = () => {
                                 <div className="text-2xl font-bold text-gray-900">
                                     {userData?.role === 'Admin' ? 'Admin' : 'Customer'}
                                 </div>
-                                <div className="text-gray-600">Account Type</div>
+                                <div className="text-gray-600">Role</div>
                             </div>
                         </div>
                     </div>
@@ -139,7 +139,7 @@ const UserProfile: React.FC = () => {
                             <h2 className="text-2xl font-bold text-gray-900">Profile Information</h2>
                             {!isEditing ? (
                                 <button
-                                    onClick={() => setIsEditing(true)}
+                                    onClick={() => setIsEditing(false)} // Should be updated later
                                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                                 >
                                     Edit Profile

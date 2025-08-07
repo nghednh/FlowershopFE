@@ -1,0 +1,192 @@
+/* Custom animations for HomePage */
+@keyframes gradient-x {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes bounce-slow {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-8px);
+  }
+  60% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes color-shift {
+  0% {
+    filter: hue-rotate(0deg) brightness(1) saturate(1);
+  }
+  25% {
+    filter: hue-rotate(90deg) brightness(1.1) saturate(1.2);
+  }
+  50% {
+    filter: hue-rotate(180deg) brightness(1) saturate(1.1);
+  }
+  75% {
+    filter: hue-rotate(270deg) brightness(1.1) saturate(1.2);
+  }
+  100% {
+    filter: hue-rotate(360deg) brightness(1) saturate(1);
+  }
+}
+
+@keyframes text-glow {
+  0%, 100% {
+    text-shadow: 0 0 8px rgba(236, 72, 153, 0.4), 0 0 16px rgba(236, 72, 153, 0.3), 0 0 24px rgba(236, 72, 153, 0.2);
+  }
+  50% {
+    text-shadow: 0 0 12px rgba(236, 72, 153, 0.5), 0 0 24px rgba(236, 72, 153, 0.4), 0 0 36px rgba(236, 72, 153, 0.3);
+  }
+}
+
+/* Utility classes */
+.bg-size-200 {
+  background-size: 200% 200%;
+}
+
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
+
+.animate-breathe {
+  animation: breathe 5s ease-in-out infinite;
+}
+
+.animate-color-shift {
+  animation: color-shift 8s ease-in-out infinite;
+}
+
+.animate-text-glow {
+  animation: text-glow 4s ease-in-out infinite;
+}
+
+/* Centered hero text within left section */
+.hero-section {
+  min-height: 100vh;
+  position: relative;
+}
+
+.hero-left-centered-text {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 20;
+  text-align: center;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  padding: 0 2rem;
+}
+
+.hero-left-centered-text.scrolled {
+  position: relative;
+  top: auto;
+  transform: none;
+  z-index: 10;
+  margin: 2rem 0;
+}
+
+.hero-left-centered-text h1 {
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  line-height: 0.85;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.hero-left-centered-text h1 span {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.hero-left-centered-text:hover h1 span {
+  transform: scale(1.02);
+}
+
+/* Add a subtle background overlay when text is centered */
+.hero-left-centered-text::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 20px;
+  backdrop-filter: blur(2px);
+}
+
+.hero-left-centered-text:not(.scrolled)::before {
+  opacity: 1;
+}
+
+/* Mobile responsiveness for centered text */
+@media (max-width: 1024px) {
+  .hero-left-centered-text h1 {
+    font-size: 5rem !important;
+  }
+  
+  .hero-left-centered-text {
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-left-centered-text h1 {
+    font-size: 4rem !important;
+    white-space: normal;
+    line-height: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-left-centered-text h1 {
+    font-size: 3rem !important;
+    line-height: 1.1;
+  }
+  
+  .hero-left-centered-text {
+    padding: 0 0.5rem;
+  }
+}

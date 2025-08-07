@@ -77,90 +77,133 @@ const Header: React.FC<HeaderProps> = ({ toggleCart, toggleMenu }) => {
 
     return (
         <div>
-            {/* Loyalty Points Bar - Only show if logged in */}
-            {isLoggedIn && (
-                <div className="loyalty-bar">
-                    <div className="loyalty-content">
-                        {loading ? (
-                            <div className="loading-rewards">
-                                <div className="loading-spinner"></div>
-                                <span>Loading rewards...</span>
-                            </div>
-                        ) : loyaltyInfo ? (
-                            <div className="loyalty-info">
-                                <div className="points-display">
-                                    <span className="trophy-icon">🏆</span>
-                                    <span className="points-text">{loyaltyInfo.currentPoints} Points</span>
+            {/* Desktop Layout */}
+            <div className="desktop-only">
+                {/* Loyalty Points Bar - Only show if logged in */}
+                {isLoggedIn && (
+                    <div className="loyalty-bar">
+                        <div className="loyalty-content">
+                            {loading ? (
+                                <div className="loading-rewards">
+                                    <div className="loading-spinner"></div>
+                                    <span>Loading rewards...</span>
                                 </div>
-                            </div>
-                        ) : (
-                            <span className="loyalty-unavailable">Loyalty rewards unavailable</span>
-                        )}
+                            ) : loyaltyInfo ? (
+                                <div className="loyalty-info">
+                                    <div className="points-display">
+                                        <span className="trophy-icon">🏆</span>
+                                        <span className="points-text">{loyaltyInfo.currentPoints} Points</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <span className="loyalty-unavailable">Loyalty rewards unavailable</span>
+                            )}
+                        </div>
                     </div>
-                </div>
-            )}
-            
-            <header className="header">
-                {/* Brand Logo/Name */}
-                <div className="header-brand">
-                    <button className="brand-button" onClick={handleHome}>
-                        <img src="/flower.svg" alt="FlowerShop" className="brand-icon" />
-                        <span className="brand-name">FlowerShop</span>
-                    </button>
-                </div>
-
-                {/* Desktop Navigation */}
-                <div className="header-nav desktop-only">
-                    <button className="nav-button" onClick={handleHome}>
-                        <span>Home</span>
-                    </button>
-                    <button className="nav-button" onClick={handleShop}>
-                        <span>Shop</span>
-                    </button>
-                    <button className="nav-button" onClick={handleContact}>
-                        <span>Contact</span>
-                    </button>
-                </div>
-                {/* Desktop User Actions */}
-                <div className="header-actions desktop-only">
-                    <button className="action-button primary" onClick={handleSignIn}>
-                        {isLoggedIn 
-                            ? (userData?.role === 'Admin' ? 'Admin CMS' : 'My Profile')
-                            : 'Sign in'
-                        }
-                    </button>
-                    {isLoggedIn && (
-                        <button className="action-button" onClick={() => navigate('/orderhistory')}>
-                            Order History
+                )}
+                
+                <header className="header">
+                    {/* Brand Logo/Name */}
+                    <div className="header-brand">
+                        <button className="brand-button" onClick={handleHome}>
+                            <img src="/flower.svg" alt="FlowerShop" className="brand-icon" />
+                            <span className="brand-name">FlowerShop</span>
                         </button>
-                    )}
-                    {isLoggedIn && (
-                        <button className="action-button logout" onClick={handleLogout}>
-                            Logout
-                        </button>
-                    )}
-                    <button className="action-button cart" onClick={toggleCart}>
-                        <img src="/shopping-bag.svg" alt="Cart" className="cart-icon" />
-                        <span>Cart</span>
-                    </button>
-                </div>
+                    </div>
 
-                {/* Mobile */}
-                <div className="header-mobile mobile-only">
-                    <div className="mobile-brand">
+                    {/* Desktop Navigation */}
+                    <div className="header-nav">
+                        <button className="nav-button" onClick={handleHome}>
+                            <span>Home</span>
+                        </button>
+                        <button className="nav-button" onClick={handleShop}>
+                            <span>Shop</span>
+                        </button>
+                        <button className="nav-button" onClick={handleContact}>
+                            <span>Contact</span>
+                        </button>
+                    </div>
+
+                    {/* Desktop User Actions */}
+                    <div className="header-actions">
+                        {isLoggedIn && (
+                            <>
+                                <span>Welcome, </span>
+                                <span className="welcome-text">
+                                    {userData?.userName || userData?.name || userData?.firstName || 'User'}
+                                </span>
+                            </>
+                        )}
+                        <button className="action-button primary" onClick={handleSignIn}>
+                            {isLoggedIn 
+                                ? (userData?.role === 'Admin' ? 'Admin CMS' : 'My Profile')
+                                : 'Sign in'
+                            }
+                        </button>
+                        {isLoggedIn && (
+                            <button className="action-button" onClick={() => navigate('/orderhistory')}>
+                                Order History
+                            </button>
+                        )}
+                        {isLoggedIn && (
+                            <button className="action-button logout" onClick={handleLogout}>
+                                Logout
+                            </button>
+                        )}
+                        <button className="action-button cart" onClick={toggleCart}>
+                            <img src="/shopping-bag.svg" alt="Cart" className="cart-icon" />
+                            <span>Cart</span>
+                        </button>
+                    </div>
+                </header>
+            </div>
+
+            {/* Mobile Layout */}
+            <div className="mobile-only">
+                {/* Mobile Loyalty Points Bar - Only show if logged in */}
+                {isLoggedIn && (
+                    <div className="mobile-loyalty-bar">
+                        <div className="mobile-loyalty-content">
+                            {loading ? (
+                                <div className="loading-rewards">
+                                    <div className="loading-spinner"></div>
+                                    <span>Loading...</span>
+                                </div>
+                            ) : loyaltyInfo ? (
+                                <div className="mobile-loyalty-info">
+                                    <span className="trophy-icon">🏆</span>
+                                    <span className="mobile-points-text">{loyaltyInfo.currentPoints} Points</span>
+                                    <span>Hi, </span>
+                                    <span className="mobile-user-name">{userData?.userName || userData?.name || userData?.firstName || 'User'}!</span>
+                                </div>
+                            ) : (
+                                <span className="loyalty-unavailable">Rewards unavailable</span>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                <header className="mobile-header">
+                    <div className="mobile-brand" onClick={handleHome}>
                         <img src="/flower.svg" alt="FlowerShop" className="mobile-brand-icon" />
                         <span className="mobile-brand-name">FlowerShop</span>
                     </div>
+                    
                     <div className="mobile-actions">
-                        <button className="header-icon-btn" aria-label="Menu" onClick={toggleMenu}>
-                            <img src="/menu.svg" alt="Menu" className="header-icon" />
-                        </button>
-                        <button className="header-icon-btn" aria-label="Cart" onClick={toggleCart}>
+                        {!isLoggedIn && (
+                            <button className="mobile-sign-in-btn" onClick={handleSignIn}>
+                                Sign in
+                            </button>
+                        )}
+                        <button className="header-icon-btn cart-btn" aria-label="Cart" onClick={toggleCart}>
                             <img src="/shopping-bag.svg" alt="Cart" className="header-icon" />
                         </button>
+                        <button className="header-icon-btn menu-btn" aria-label="Menu" onClick={toggleMenu}>
+                            <img src="/menu.svg" alt="Menu" className="header-icon" />
+                        </button>
                     </div>
-                </div>
-            </header>
+                </header>
+            </div>
         </div>
     );
 };

@@ -38,7 +38,7 @@ export default function HomePage() {
         
         <div className="flex flex-col lg:flex-row w-full min-h-screen relative z-10">
           {/* Left Hero Content - Enhanced */}
-          <div className="w-full lg:w-1/2 bg-gradient-to-br from-pink-50/80 via-purple-50/60 to-pink-50/80 backdrop-blur-sm border border-gray-200/50 relative">
+          <div className="w-full lg:w-1/2 bg-gradient-to-br from-yellow-100 via-purple-50/60 to-green-200 backdrop-blur-sm border border-gray-200/50 relative">
             <div className="h-full flex flex-col justify-start p-8 lg:p-16 pt-16 lg:pt-24 relative space-y-8">
               
               {/* FlowerShop Text - Centered within Left Section */}
@@ -414,7 +414,7 @@ export default function HomePage() {
       </section>
 
       {/* About Us Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-white">
+      <section className="py-20 bg-gradient-to-br from-green-200 to-gray-500">
         <div className="max-w-7xl mx-auto px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
@@ -446,7 +446,7 @@ export default function HomePage() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-gradient-to-br from-white to-yellow-500">
         <div className="max-w-7xl mx-auto px-8">
           <div className="grid lg:grid-cols-2 gap-16">
             <div className="flex items-center">
@@ -489,7 +489,7 @@ export default function HomePage() {
 
       <div className="flex flex-col lg:flex-row-reverse w-full">
         <div className="w-full lg:w-1/2">
-          <div className="w-full h-[75vh] md:h-screen lg:aspect-square lg:h-auto bg-pink-500 border border-gray-400">
+          <div className="w-full h-[75vh] md:h-screen lg:aspect-square lg:h-auto bg-gradient-to-br from-emerald-400 to-teal-500 border border-gray-400">
             <img
               src="/images/front_door.png"
               alt="Example"
@@ -497,7 +497,7 @@ export default function HomePage() {
             />
           </div>
           <div className="flex flex-col md:flex-row w-full">
-            <div className="w-full md:w-1/2 text-center p-2 text-gray-800 text-[clamp(1rem,3vw,2rem)]  border border-gray-400">
+            <div className="w-full md:w-1/2 text-center p-2 text-gray-800 text-[clamp(1rem,3vw,2rem)]  border border-gray-400 bg-cyan-400">
               Follow us
             </div>
             <div className="ml-auto w-full md:w-1/2 bg-gray-100 border border-gray-400">
@@ -513,7 +513,7 @@ export default function HomePage() {
         </div>
         
         <div className="w-full lg:w-1/2">
-          <div className="w-full h-max lg:h-1/2 bg-white border border-gray-400" id="contact">
+          <div className="w-full h-max lg:h-1/2 bg-cyan-200 border border-gray-400" id="contact">
             <div className="pt-10 pl-10 font-bold text-[clamp(1.5rem,4vw,2.5rem)]">
               To Contact Us
             </div>
@@ -534,10 +534,10 @@ export default function HomePage() {
           </div>
           <div className="w-full lg:h-1/2 flex flex-col md:flex-row">
             <div className="flex flex-col w-full md:w-1/2">
-              <div className="text-center p-2 text-gray-800 text-[clamp(1rem,3vw,2rem)]  border border-gray-400">
+              <div className="text-center p-2 text-gray-800 text-[clamp(1rem,3vw,2rem)]  border border-gray-400 bg-red-200">
                 Phone
               </div>
-              <div className="flex flex-col flex-1 item:left md:items-center justify-center bg-gray-100 border border-gray-400">
+              <div className="flex flex-col flex-1 item:left md:items-center justify-center bg-gray-100 border border-gray-400 bg-red-100">
                 <p className="m-3">
                   <img src="/phone.svg" alt="phonecall" className="mr-1 w-7 h-7 inline-block cursor-pointer" onClick={() => alert("You clicked the Phone1 button!")}>
                   </img>
@@ -551,10 +551,10 @@ export default function HomePage() {
               </div>
             </div>
             <div className="flex flex-col w-full md:w-1/2">
-              <div className="text-center p-2 text-gray-800 text-[clamp(1rem,3vw,2rem)]  border border-gray-400">
+              <div className="text-center p-2 text-gray-800 text-[clamp(1rem,3vw,2rem)]  border border-gray-400 bg-red-200">
                 Address
               </div>
-              <div className="flex flex-col flex-1 item:left md:items-center justify-center bg-gray-100 border border-gray-400">
+              <div className="flex flex-col flex-1 item:left md:items-center justify-center bg-gray-100 border border-gray-400 bg-red-100">
                 <p className="m-3">
                   OPENING HOURS: 8 A.M. TO 11 P.M.
                 </p>
@@ -570,7 +570,7 @@ export default function HomePage() {
       </div>
 
       {/* Services Section Header */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-gradient-to-br from-green-100 to-blue-200">
         <div className="text-center">
           <h2 className="text-5xl lg:text-6xl font-bold text-gray-800 mb-4">
             Our Services
@@ -689,7 +689,7 @@ export default function HomePage() {
       </section>
 
       {/* Customer Reviews Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-white">
+      <section className="py-20 bg-gradient-to-br from-amber-50 to-orange-100">
         <div className="max-w-7xl mx-auto px-8">
           <div className="text-center mb-16">
             <div className="flex items-center justify-center gap-3 mb-4">
@@ -726,9 +726,6 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
-      <section className="h-[20vh] bg-gray-100">
-        {/* More scrollable content */}
       </section>
     </div>
     );

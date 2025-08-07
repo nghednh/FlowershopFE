@@ -21,7 +21,7 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/" element={<Navigate to="/home" />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route
@@ -50,7 +50,8 @@ function App() {
             }
           />
         </Routes>
-            
+        
+        {/* Chatbot should be outside Routes to appear on all pages */}
         <Chatbot />
       </div>
     </Router>

@@ -13,6 +13,7 @@ const Menu: React.FC<MenuProps> = ({ isOpen, onClose }) => {
     // Check if user is logged in
     const user = localStorage.getItem('user');
     const isLoggedIn = user && user !== 'null';
+    const userData = isLoggedIn ? JSON.parse(user) : null;
 
     const handleLogout = () => {
         // Clear user data from localStorage
@@ -38,37 +39,63 @@ const Menu: React.FC<MenuProps> = ({ isOpen, onClose }) => {
             <div className="menu-overlay" onClick={onClose} />
             <div className="menu">
                 <div className="menu-header">
+                    <div className="menu-user-info">
+                        {isLoggedIn && (
+                            <div className="menu-welcome">
+                                <span className="welcome-text">{userData?.userName || userData?.name || userData?.firstName || 'User'}</span>
+                                {userData?.role === 'Admin' && (
+                                    <span className="admin-badge">Admin</span>
+                                )}
+                            </div>
+                        )}
+                    </div>
                     <button onClick={onClose} className="close-button">
-                        <img src="/close-button-menu.svg" />
+                        <img src="/close-button-menu.svg" alt="Close" />
                     </button>
                 </div>
 
                 <div className="menu-content">
+                    {/* Main Navigation */}
                     <ul className="menu-list">
+                        <li>
+                            <a onClick={() => handleMenuItemClick('/home')}>Home</a>
+                        </li>
+                        <li>
+                            <a onClick={() => handleMenuItemClick('/list')}>Shop</a>
+                        </li>
+                        <li>
+                            <a onClick={() => handleMenuItemClick('/contact')}>Contact</a>
+                        </li>
+                    </ul>
+
+                    {/* User Actions */}
+                    <ul className="menu-user-actions">
                         {!isLoggedIn ? (
                             <li>
-                                <a onClick={() => handleMenuItemClick('/login')}>Sign in</a>
+                                <a className="primary-action" onClick={() => handleMenuItemClick('/login')}>
+                                    Sign in
+                                </a>
                             </li>
                         ) : (
                             <>
                                 <li>
+                                    <a onClick={() => handleMenuItemClick(userData?.role === 'Admin' ? '/admin' : '/profile')}>
+                                        {userData?.role === 'Admin' ? 'Admin CMS' : 'My Profile'}
+                                    </a>
+                                </li>
+                                <li>
                                     <a onClick={() => handleMenuItemClick('/orderhistory')}>Order History</a>
                                 </li>
                                 <li>
-                                    <a onClick={handleLogout}>Logout</a>
+                                    <a className="logout-action" onClick={handleLogout}>
+                                        Logout
+                                    </a>
                                 </li>
                             </>
                         )}
-                        <li>
-                            <a onClick={() => handleMenuItemClick('/products')}>Shop</a>
-                        </li>
-                        <li>
-                            <a onClick={() => handleMenuItemClick('/home#contact')}>Contact</a>
-                        </li>
-                        <li>
-                            <a onClick={() => handleMenuItemClick('/about')}>About Us</a>
-                        </li>
                     </ul>
+
+                    {/* Service Links */}
                     <ul className="menu-service-list">
                         <li>
                             <a href="/faq">Shipping & returns</a>
@@ -80,6 +107,8 @@ const Menu: React.FC<MenuProps> = ({ isOpen, onClose }) => {
                             <a href="/privacy">Privacy policy</a>
                         </li>
                     </ul>
+
+                    {/* Social Links */}
                     <ul className="menu-social-list">
                         <li>
                             <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">

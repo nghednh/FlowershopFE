@@ -239,6 +239,22 @@
     gap: 8px;
     flex-shrink: 0;
     margin-right: 16px;
+    align-items: center;
+}
+
+.welcome-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ff0000 !important;
+    padding: 0;
+    background: none;
+    border: none;
+    border-bottom: 2px solid #0000ff;
+    border-radius: 0;
+    white-space: nowrap;
+    box-shadow: none;
+    text-shadow: none;
+    margin-right: 20px;
 }
 
 .action-button {
@@ -346,24 +362,89 @@
     transform: scale(1.1);
 }
 
-/* Mobile Styles */
-.header-mobile {
-    display: none;
+/* Mobile Loyalty Bar */
+.mobile-loyalty-bar {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+    padding: 6px 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.mobile-loyalty-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
     width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shimmer 3s infinite;
+}
+
+.mobile-loyalty-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mobile-loyalty-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #1f2937;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.mobile-points-text {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.mobile-user-name {
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+/* Mobile Header */
+.mobile-header {
+    display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 12px 16px;
+    background: linear-gradient(135deg, #fff 0%, #f8fdff 100%);
+    border-bottom: 2px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 64px;
 }
 
+/* Mobile Brand */
 .mobile-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.mobile-brand:hover {
+    background: rgba(5, 150, 105, 0.05);
+    transform: scale(1.02);
 }
 
 .mobile-brand-icon {
     width: 28px;
     height: 28px;
+    transition: transform 0.2s ease;
+}
+
+.mobile-brand:hover .mobile-brand-icon {
+    transform: rotate(5deg);
 }
 
 .mobile-brand-name {
@@ -375,9 +456,30 @@
     background-clip: text;
 }
 
+/* Mobile Actions */
 .mobile-actions {
     display: flex;
+    align-items: center;
     gap: 8px;
+}
+
+.mobile-sign-in-btn {
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+}
+
+.mobile-sign-in-btn:hover {
+    background: linear-gradient(135deg, #047857, #059669);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
 }
 
 .header-icon-btn {
@@ -405,6 +507,38 @@
     outline-offset: 2px;
 }
 
+.header-icon-btn.cart-btn {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    border-color: #f59e0b;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+}
+
+.header-icon-btn.cart-btn:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+}
+
+.header-icon-btn.cart-btn .header-icon {
+    filter: brightness(0) invert(1);
+}
+
+.header-icon-btn.menu-btn {
+    background: linear-gradient(135deg, #059669, #10b981);
+    border-color: #059669;
+    box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+}
+
+.header-icon-btn.menu-btn:hover {
+    background: linear-gradient(135deg, #047857, #059669);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+}
+
+.header-icon-btn.menu-btn .header-icon {
+    filter: brightness(0) invert(1);
+}
+
 .header-icon {
     width: 20px;
     height: 20px;
@@ -415,23 +549,32 @@
     transform: scale(1.1);
 }
 
+/* Visibility Classes */
+.desktop-only {
+    display: block;
+}
+
+.mobile-only {
+    display: none;
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
     .desktop-only {
         display: none !important;
     }
 
-    .header-mobile,
     .mobile-only {
-        display: flex !important;
-    }
-
-    .header {
-        min-height: 64px;
+        display: block !important;
     }
 }
 
 @media (max-width: 480px) {
+    .mobile-header {
+        padding: 10px 14px;
+        min-height: 60px;
+    }
+
     .header-icon-btn {
         width: 40px;
         height: 40px;
@@ -445,4 +588,28 @@
         width: 24px;
         height: 24px;
     }
+
+    .mobile-loyalty-bar {
+        padding: 4px 12px;
+    }
+
+    .mobile-loyalty-info {
+        gap: 4px;
+        font-size: 11px;
+    }
+
+    .mobile-points-text {
+        font-size: 10px;
+    }
+
+    .mobile-user-name {
+        font-size: 10px;
+    }
+
+    .mobile-sign-in-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
 }
+
+/* Remove old mobile styles */

@@ -15,6 +15,10 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ isOpen, onClose }) => {
 
     if (!isOpen) return null;
 
+    // Check if user is logged in
+    const user = localStorage.getItem('user');
+    const isLoggedIn = user && user !== 'null';
+
     // Add handler for quantity changes
     const handleQuantityChange = async (itemId: number, newQuantity: number) => {
         if (newQuantity <= 0) {
@@ -26,6 +30,14 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ isOpen, onClose }) => {
 
     // Add checkout handler
     const handleCheckout = () => {
+        if (!isLoggedIn) {
+            if (window.confirm('Please sign in to proceed to checkout. Would you like to go to the login page?')) {
+                onClose();
+                navigate('/login');
+            }
+            return;
+        }
+        
         if (cartItems.length === 0) {
             alert('Your cart is empty. Please add items before checking out.');
             return;
@@ -47,6 +59,48 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ isOpen, onClose }) => {
 
                 {isLoading ? (
                     <div className="cart-loading">Loading...</div>
+                ) : cartItems.length === 0 ? (
+                    <div className="cart-empty-message" style={{ padding: '40px', textAlign: 'center' }}>
+                        {!isLoggedIn ? (
+                            <>
+                                <h3>Sign in to view your cart</h3>
+                                <p>Please sign in to add items to your cart and make purchases.</p>
+                                <button 
+                                    onClick={() => { onClose(); navigate('/login'); }}
+                                    style={{
+                                        marginTop: '20px',
+                                        padding: '12px 24px',
+                                        backgroundColor: '#3B82F6',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Sign In
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <h3>Your cart is empty</h3>
+                                <p>Add some beautiful flowers to your cart!</p>
+                                <button 
+                                    onClick={() => { onClose(); navigate('/list'); }}
+                                    style={{
+                                        marginTop: '20px',
+                                        padding: '12px 24px',
+                                        backgroundColor: '#10B981',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Shop Now
+                                </button>
+                            </>
+                        )}
+                    </div>
                 ) : (
                     <>
                         <ul className="cart-items">

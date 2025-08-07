@@ -46,6 +46,18 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const refreshCart = async () => {
+        // Check if user is logged in
+        const user = localStorage.getItem('user');
+        const isLoggedIn = user && user !== 'null';
+        
+        if (!isLoggedIn) {
+            // Reset cart state for unlogged users
+            setCartItemCount(0);
+            setCartItems([]);
+            setTotalAmount(0);
+            return;
+        }
+
         try {
             setIsLoading(true);
             const response = await getCartDetails();
@@ -53,7 +65,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
             // Fetch dynamic prices for each cart item
             const cartItemsWithDynamicPrices = await Promise.all(
-                response.cartItems.map(async (item: any) => {
+                (response?.cartItems || []).map(async (item: any) => {
                     try {
                         const currentTime = new Date().toISOString();
                         const priceResponse = await getDynamicPrice(item.productId, currentTime);
@@ -61,7 +73,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
                         return {
                             ...item,
                             basePrice: item.price, // Assuming current price is base price
-                            dynamicPrice: priceResponse.success ? priceResponse.data.dynamicPrice : undefined
+                            dynamicPrice: priceResponse?.dynamicPrice || undefined
                         };
                     } catch (error) {
                         console.error(`Error fetching dynamic price for product ${item.productId}:`, error);
@@ -74,9 +86,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
                 })
             );
 
-            setCartItemCount(response.totalItems);
+            setCartItemCount(response.totalItems || 0);
             setCartItems(cartItemsWithDynamicPrices);
-            setTotalAmount(response.totalAmount);
+            setTotalAmount(response.totalAmount || 0);
 
         } catch (error) {
             console.error('Error fetching cart details:', error);
@@ -84,11 +96,13 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
             try {
                 const countResponse = await getCartItemCount();
                 console.log('Cart item count response:', countResponse);
-                if (countResponse.data.ec === 0) {
-                    setCartItemCount(countResponse.data.dt.count);
-                }
+                setCartItemCount(countResponse?.count || 0);
             } catch (countError) {
                 console.error('Error fetching cart count:', countError);
+                // Set empty cart for unlogged users
+                setCartItemCount(0);
+                setCartItems([]);
+                setTotalAmount(0);
             }
         } finally {
             setIsLoading(false);
@@ -96,6 +110,18 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     };
 
     const addItemToCart = async (productId: number, quantity: number): Promise<boolean> => {
+        // Check if user is logged in
+        const user = localStorage.getItem('user');
+        const isLoggedIn = user && user !== 'null';
+        
+        if (!isLoggedIn) {
+            // Show login prompt for unlogged users
+            if (window.confirm('Please sign in to add items to your cart. Would you like to go to the login page?')) {
+                window.location.href = '/login';
+            }
+            return false;
+        }
+
         setIsLoading(true);
         try {
             const response = await addToCart(productId, quantity);

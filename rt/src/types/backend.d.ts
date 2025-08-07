@@ -4,6 +4,7 @@ export interface IBackendRes<T> {
     message?: string;
     errors?: string[];
     statusCode?: number;
+    timestamp?: string;
 }
 
 export interface ICategory {

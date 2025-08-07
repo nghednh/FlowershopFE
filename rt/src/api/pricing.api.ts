@@ -1,8 +1,8 @@
-import { IPricingRule } from "../types/backend";
+import { IBackendRes, IPricingRule } from "../types/backend";
 import instance from "../config/axios-customize";
 
 export const PricingService = {
-  getPricingRules: (): Promise<IPricingRule[]> => {
+  getPricingRules: (): Promise<Required<IBackendRes<IPricingRule[]>>> => {
     return instance.get('/api/pricing/rules');
   },
 
@@ -10,7 +10,7 @@ export const PricingService = {
     return instance.post('/api/pricing/rules', ruleData);
   },
 
-  updatePricingRule: (ruleId: number, ruleData: IPricingRule): Promise<IPricingRule> => {
+  updatePricingRule: (ruleId: number, ruleData: IPricingRule): Promise<IBackendRes<IPricingRule>> => {
     console.log("Updating Pricing Rule:", ruleData);
     return instance.put(`/api/pricing/rules/${ruleId}`, ruleData);
   },

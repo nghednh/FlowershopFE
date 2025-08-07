@@ -16,6 +16,7 @@ import { ReportList } from "./Admin/Reports/Report";
 import { createCategory, deleteCategory, getCategories, getUsers, updateCategory, deleteProduct, deletePricingRule, cancelOrder, getPricingRules } from "../config/api";
 import { LoyaltyList } from "./Admin/Loyalty/LoyaltyList";
 import { LoyaltyForm } from "./Admin/Loyalty/LoyaltyForm";
+import { API } from "../api/api";
 
 const Admin = () => {
   // Initialize activeSection from localStorage or default to "flowers"
@@ -57,7 +58,8 @@ const Admin = () => {
       if (!userStr) throw new Error('User not found');
       const user = JSON.parse(userStr);
       if (user.role !== 'Admin') throw new Error('Admin access required');
-      const rulesData = await getPricingRules();
+      const rulesData = await API.Pricing.getRules();
+      console.log("Fetched pricing rules:", rulesData);
       setPricingRules(rulesData.data);
     } catch (err: any) {
       setError(err.message || 'Failed to load pricing rules');
@@ -370,11 +372,13 @@ const Admin = () => {
               refreshTrigger={refreshTrigger}
             />
             <Modal isOpen={modal.isOpen && modal.type === "loyalty"} onClose={closeModal}>
-              <LoyaltyForm
-                user={modal.data ?? undefined}
-                onSave={handleLoyaltySave}
-                onClose={closeModal}
-              />
+              {modal.data && (
+                <LoyaltyForm
+                  user={modal.data as IUserSummaryLoyalty}
+                  onSave={handleLoyaltySave}
+                  onClose={closeModal}
+                />
+              )}
             </Modal>
           </>
         );

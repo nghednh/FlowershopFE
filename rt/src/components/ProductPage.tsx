@@ -5,6 +5,7 @@ import ProductImageGallery from './ProductPage/ProductImageGallery';
 import ProductDetails from './ProductPage/ProductDetails';
 import { getProductDetails, getSimilarProducts, getDynamicPrice } from '../config/api';
 import { IProduct } from '../types/backend';
+import { set } from 'zod/v4';
 
 const ProductPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,18 +25,21 @@ const ProductPage: React.FC = () => {
       try {
         setLoading(true);
         const response = await getProductDetails(Number(id));
-        console.log('Product response:', response);
+        console.log('Product responseeeeeeeeeeeeeeeeee:', response);
         setProduct(response);
+
+        console.log('Product response:', response.imageUrls);
 
         // Initialize gallery images with primary image
         const imageUrls: string[] = response.imageUrls && response.imageUrls.length > 0
           ? response.imageUrls
           : ['https://via.placeholder.com/800x600/FFDDC1/800000?text=No+Image'];
+        console.log('Gallery images:', imageUrls);
         setGalleryImages(imageUrls);
         setCurrentDisplayImage(imageUrls[0]);
 
         // Fetch dynamic pricing
-        await fetchDynamicPrice(Number(id));
+        // await fetchDynamicPrice(Number(id));
 
         // Fetch related products based on category
         if (response.categories && response.categories.length > 0) {
@@ -60,6 +64,7 @@ const ProductPage: React.FC = () => {
   }, [id]);
 
   const fetchDynamicPrice = async (productId: number) => {
+    setDynamicPrice(10);
     try {
       setPriceLoading(true);
       const currentTime = new Date().toISOString();

@@ -1,0 +1,9 @@
+/* ===== FILTER COMPONENTS CSS - CONSOLIDATED IMPORTS ===== */
+/* Import all component-specific CSS files */
+
+@import './SearchBar.css';
+@import '../Select.css';
+@import '../MultiSelect.css';
+@import '../Input.css';
+@import '../FilterButton.css';
+@import '../SharedStyles.css';

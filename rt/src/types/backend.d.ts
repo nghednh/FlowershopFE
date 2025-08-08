@@ -24,7 +24,10 @@ export interface IProduct {
     isActive?: boolean;
     imageUrls: string[];
     categories: ICategory[];
+    createdAt?: string;
+    updatedAt?: string;
     reviews?: IReview[];
+    averageRating?: number;
 }
 
 export interface ICartItem {

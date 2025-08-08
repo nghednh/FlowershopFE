@@ -1,8 +1,9 @@
 import { IBackendRes, IProduct } from "../types/backend";
 import instance from "../config/axios-customize";
+import { ins } from "framer-motion/client";
 
 export const ProductService = {
-  getProducts: (params?: {
+  getProducts: async (params?: {
     page?: number;
     pageSize?: number;
     flowerTypes?: number[];
@@ -42,11 +43,51 @@ export const ProductService = {
     }
 
     const url = `/api/products${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return instance.get(url);
+    const response = await instance.get(url);
+    
+    // Transform the response to ensure imageUrls are properly formatted
+    const backendData = response as any;
+    if (backendData.data && backendData.data.products) {
+      backendData.data.products = backendData.data.products.map((product: any) => ({
+        ...product,
+        // Extract imageUrls from the images array structure: {id, imageUrls, publicId}
+        imageUrls: product.images 
+          ? product.images.map((img: any) => img.imageUrls || img.imageUrl || img.url)
+          : (product.imageUrls || [])
+      }));
+    }
+    
+    return backendData;
   },
 
-  getProductDetails: (productId: number): Promise<IProduct> => {
-    return instance.get(`/api/products/${productId}`);
+  getProductDetails: async (productId: number): Promise<IProduct> => {
+    const response = await instance.get(`/api/products/${productId}`);
+    
+    // The axios interceptor returns response.data directly, so response is the actual data
+    const backendData = response as any;
+    
+    // Transform the backend response to match IProduct interface
+    const productData: IProduct = {
+      id: backendData.id,
+      name: backendData.name,
+      flowerStatus: backendData.flowerStatus,
+      description: backendData.description,
+      basePrice: backendData.basePrice,
+      condition: backendData.condition,
+      stockQuantity: backendData.stockQuantity,
+      isActive: backendData.isActive,
+      // Extract imageUrls from the images array structure: {id, imageUrls, publicId}
+      imageUrls: backendData.images 
+        ? backendData.images.map((img: any) => img.imageUrls || img.imageUrl || img.url)
+        : (backendData.imageUrls || []),
+      categories: backendData.categories || [],
+      createdAt: backendData.createdAt,
+      updatedAt: backendData.updatedAt,
+      reviews: backendData.reviews,
+      averageRating: backendData.averageRating
+    };
+    
+    return productData;
   },
 
   createProduct: (formData: FormData): Promise<IBackendRes<IProduct>> => {

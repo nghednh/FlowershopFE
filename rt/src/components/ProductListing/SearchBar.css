@@ -1,0 +1,103 @@
+/* ===== SEARCH BAR STYLES ===== */
+.search-container {
+  position: relative;
+}
+
+.search-input-wrapper {
+  position: relative;
+  background: linear-gradient(to right, rgb(239 246 255), rgb(238 242 255));
+  border-radius: 0.75rem;
+  border: 2px solid rgb(191 219 254);
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.search-input-wrapper:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.search-input-wrapper:focus-within {
+  border-color: rgb(96 165 250);
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  background: transparent;
+  color: rgb(31 41 55);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: rgb(107 114 128);
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgb(59 130 246);
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.5rem;
+  background: white;
+  border: 1px solid rgb(229 231 235);
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  z-index: 50;
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.search-dropdown-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: rgb(55 65 81);
+  border-bottom: 1px solid rgb(243 244 246);
+  transition: all 0.2s ease;
+}
+
+.search-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.search-dropdown-item:hover {
+  background: linear-gradient(to right, rgb(239 246 255), rgb(238 242 255));
+  color: rgb(29 78 216);
+}
+
+/* ===== RESPONSIVE STYLES FOR SEARCH ===== */
+@media (max-width: 640px) {
+  .search-input {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
+/* ===== FOCUS VISIBLE STYLES FOR ACCESSIBILITY ===== */
+.search-input:focus-visible {
+  outline: 2px solid rgb(59 130 246);
+  outline-offset: 2px;
+}
+
+/* ===== HIGH CONTRAST MODE SUPPORT ===== */
+@media (prefers-contrast: high) {
+  .search-input-wrapper {
+    border-color: black;
+  }
+  
+  .search-dropdown {
+    border: 2px solid black;
+  }
+}

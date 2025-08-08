@@ -1,0 +1,58 @@
+/* ===== INPUT COMPONENT STYLES ===== */
+.input-container {
+  margin-bottom: 1rem;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(55 65 81);
+  margin-bottom: 0.5rem;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(to right, rgb(249 250 251), rgb(239 246 255));
+  border: 2px solid rgb(229 231 235);
+  border-radius: 0.5rem;
+  color: rgb(31 41 55);
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  outline: none;
+}
+
+.input-field:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.input-field:focus {
+  border-color: rgb(96 165 250);
+  box-shadow: 0 0 0 2px rgb(191 219 254 / 0.5);
+}
+
+.input-field::placeholder {
+  color: rgb(156 163 175);
+}
+
+/* ===== RESPONSIVE STYLES FOR INPUT ===== */
+@media (max-width: 640px) {
+  .input-field {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
+/* ===== FOCUS VISIBLE STYLES FOR ACCESSIBILITY ===== */
+.input-field:focus-visible {
+  outline: 2px solid rgb(59 130 246);
+  outline-offset: 2px;
+}
+
+/* ===== HIGH CONTRAST MODE SUPPORT ===== */
+@media (prefers-contrast: high) {
+  .input-field {
+    border-color: black;
+  }
+}

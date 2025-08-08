@@ -319,7 +319,7 @@ export const FlowerList: React.FC<FlowerListProps> = ({
               <tr key={p.id} className="border-b border-gray-300">
                 <td className="p-2 border-x border-gray-300 w-1/4">{p.name}</td>
                 <td className="p-2 border-x border-gray-300 w-20">
-                  {p.flowerStatus === 0 ? 'New' : p.flowerStatus === 1 ? 'Old' : p.stockQuantity <= 10 ? 'Low Stock' : 'Unknown'}
+                  {p.flowerStatus === 0 ? 'New' : p.flowerStatus === 1 ? 'Old' : p.stockQuantity <= 10 ? 'Low Stock' : 'Common'}
                 </td>
                 <td className="p-2 border-x border-gray-300 w-1/5">
                   {p.categories?.map((cat) => (

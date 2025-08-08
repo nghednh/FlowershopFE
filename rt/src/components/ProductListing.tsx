@@ -21,31 +21,25 @@ import './ProductListing/index.css';
 
 const PAGE_SIZE = 4;
 
-const flowerTypesOptions = [0, 1, 2]; // Example IDs
-const occasionOptions = ['', 'Birthday', "Valentine's Day"];
-const conditionOptions = ['', 'New', 'Old'];
-const sortOptions = [
-  { value: 0, label: 'Name A–Z' },
-  { value: 1, label: 'Price' },
-  { value: 2, label: 'Stock' },
-  { value: 3, label: 'Status' },
+
+// Status options based on API flowerStatus field
+const statusOptions = [
+  { value: '', label: 'All Status' },
+  { value: '0', label: 'New' },
+  { value: '1', label: 'Old' },
+  { value: '2', label: 'Low Stock' }
 ];
-const trueCategories: ICategory[] = [
-  {
-    id: 1,
-    name: "Fresh",
-    description: "#FreshWeedEveryday"
-  },
-  {
-    id: 2,
-    name: "Dried",
-    description: "Lay it at home, never die"
-  },
-  {
-    id: 3,
-    name: "Live",
-    description: "Live plants help you live better"
-  }
+
+const sortOptions = [
+  { value: '0', label: 'Name' },
+  { value: '1', label: 'Price' },
+  { value: '2', label: 'Stock' },
+  { value: '3', label: 'Status' }
+];
+
+const sortOrderOptions = [
+  { value: '0', label: 'Ascending' },
+  { value: '1', label: 'Descending' }
 ];
 
 const ProductListingPage: React.FC = () => {
@@ -54,85 +48,25 @@ const ProductListingPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [categories, setCategories] = useState<ICategory[]>([]);
-  const [totalProducts, setTotalProducts] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Controlled filter/search/sort states
-  const [searchInput, setSearchInput] = useState("");
-  const [filtersInput, setFiltersInput] = useState({ New: false, Old: false, "Low Stock": false });
-  const [sortInput, setSortInput] = useState<{ field: string; order: 'asc' | 'desc' }>({ field: 'name', order: 'asc' });
-
-  // Applied filter/search/sort states
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<{ field: string; order: 'asc' | 'desc' }>({ field: 'name', order: 'asc' });
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categoriesData = await getCategories();
+        setCategories(categoriesData);
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
 
   const pageSizeOptions = [10, 20, 50, 100];
   const navigate = useNavigate();
-
-  const matchesFilters = (product: IProduct) => {
-    const searchTerm = searchParams.get('searchTerm')?.toLowerCase() || '';
-    const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined;
-    const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined;
-    const flowerTypes = searchParams.getAll('flowerTypes').map(Number);
-    const occasions = searchParams.getAll('occasions');
-    const conditions = searchParams.getAll('conditions');
-    const categories = searchParams.getAll('categories').map(Number).filter(id => trueCategories.some(p => p.id === id));
-
-    if (searchTerm && !product.name.toLowerCase().includes(searchTerm)) return false;
-    if (minPrice !== undefined && product.basePrice < minPrice) return false;
-    if (maxPrice !== undefined && product.basePrice > maxPrice) return false;
-    if (flowerTypes.length && !flowerTypes.includes(product.flowerStatus)) return false;
-    if (occasions.length && !occasions.includes(product.description || '')) return false;
-    if (conditions.length && !conditions.includes(product.condition || '')) return false;
-    if (categories.length && !product.categories.some((id) => categories.includes(id.id))) return false;
-
-    return true;
-  };
-
-  const loadProducts = async (
-    page: number = 1,
-    size: number = PAGE_SIZE,
-    flowerTypes: number[] = [],
-    categoryIds: number[] = [],
-    searchTerm: string = search,
-    sortParam: { field: string; order: 'asc' | 'desc' } = sort
-  ) => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Map sort field and order to sortBy and sortDirection numbers
-      const sortFieldMap: { [key: string]: number } = { name: 0, basePrice: 1, stockQuantity: 2, flowerStatus: 3 };
-      const sortBy = sortFieldMap[sortParam.field] ?? 0;
-      const sortDirection = sortParam.order === 'asc' ? 0 : 1;
-
-      const productsData = await getProducts({
-        page,
-        pageSize: size,
-        flowerTypes: flowerTypes.length > 0 ? flowerTypes : undefined,
-        categoryIds: categoryIds.length > 0 ? categoryIds : undefined,
-        searchTerm: searchTerm,
-        sortBy,
-        sortDirection,
-      });
-      if (!productsData.data)
-        throw new Error("No data returned from API");
-      setProducts(productsData.data.products);
-      setTotalProducts(productsData.data.pagination.totalItems);
-      setCurrentPage(page);
-      setPageSize(size);
-      setSearch(searchTerm);
-      setSort(sortParam);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load products');
-      console.error('Error loading products:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchProducts = async () => {
     try {
@@ -152,31 +86,29 @@ const ProductListingPage: React.FC = () => {
       const maxPriceRaw = searchParams.get('maxPrice');
       const maxPrice = maxPriceRaw && maxPriceRaw !== "" ? Number(maxPriceRaw) : undefined;
 
-      const flowerTypes = (() => {
-        const raw = searchParams.getAll('flowerTypes').filter(s => s.trim() !== "");
-        return raw.length ? raw.map(Number) : undefined;
-      })();
 
-      const occasions = (() => {
-        const raw = searchParams.getAll('occasions').filter(s => s.trim() !== "");
-        return raw.length ? raw : undefined;
-      })();
 
-      const conditions = (() => {
-        const raw = searchParams.getAll('conditions').filter(s => s.trim() !== "");
-        return raw.length ? raw : undefined;
+      // Map status dropdown to flowerTypes (number) for API
+      const status = searchParams.get('status');
+      const flowerTypesFilter = (() => {
+        if (!status || status.trim() === '') return undefined;
+        // Map UI status to API flowerTypes (number[])
+        if (status === '0') return { flowerTypes: [0] }; // New
+        if (status === '1') return { flowerTypes: [1] }; // Old
+        if (status === '2') return { flowerTypes: [2] }; // Low Stock
+        return undefined;
       })();
 
       const categoryIds = (() => {
         const raw = searchParams.getAll('categories').filter(s => s.trim() !== "");
         if (!raw.length) return undefined;
 
-        const validIds = new Set(trueCategories.map(c => c.id));
+        const validIds = new Set(categories.map(c => c.id));
         const filtered = raw.map(Number).filter(id => validIds.has(id));
         return filtered.length ? filtered : undefined;
       })();
 
-      const res = await getProducts({
+      const apiParams = {
         page,
         pageSize: PAGE_SIZE,
         sortBy,
@@ -185,11 +117,11 @@ const ProductListingPage: React.FC = () => {
         searchTerm,
         minPrice,
         maxPrice,
-        flowerTypes,
-        occasions,
-        conditions,
         isActive: true,
-      });
+    ...flowerTypesFilter // Spread the flowerTypes filter parameters
+      };
+
+      const res = await getProducts(apiParams);
       
       if (!res.data) {
         throw new Error("No data returned from API");
@@ -217,7 +149,7 @@ const ProductListingPage: React.FC = () => {
     fetchProducts();
   }, [searchParams]);
 
-  console.log(trueCategories);
+  console.log('Categories loaded:', categories);
 
   return (
   <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 to-purple-50 flex flex-col relative overflow-hidden">
@@ -236,14 +168,42 @@ const ProductListingPage: React.FC = () => {
             <div className="w-80 flex-shrink-0">
               <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-6 sticky top-6">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                      </div>
+                      <h2 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        Filters & Search
+                      </h2>
+                    </div>
+                    <button
+                      onClick={() => {
+                        const updated = new URLSearchParams(searchParams);
+                        const current = searchParams.get('sortDirection') || '0';
+                        updated.set('sortDirection', current === '0' ? '1' : '0');
+                        setSearchParams(updated);
+                      }}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border-2 border-green-300 ml-2 ${
+                        (searchParams.get('sortDirection') || '0') === '0'
+                          ? 'bg-green-600 text-white shadow-lg'
+                          : 'bg-green-700 text-white shadow-lg'
+                      }`}
+                      aria-label={(searchParams.get('sortDirection') || '0') === '0' ? 'Ascendig' : 'Descending'}
+                    >
+                      {(searchParams.get('sortDirection') || '0') === '0' ? (
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Sort Descending">
+                          <path d="M12 18V6m0 0l-6 6m6-6l6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      ) : (
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Sort Ascending">
+                          <path d="M12 6v12m0 0l-6-6m6 6l6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </button>
                   </div>
-                  <h2 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Filters & Search
-                  </h2>
                 </div>
 
                 <div className="space-y-6">
@@ -254,8 +214,9 @@ const ProductListingPage: React.FC = () => {
                       label="Sort By"
                       value={searchParams.get('sortBy') || '0'}
                       onChange={(e) => {
-                        searchParams.set('sortBy', e.target.value);
-                        setSearchParams(searchParams);
+                        const updated = new URLSearchParams(searchParams);
+                        updated.set('sortBy', e.target.value);
+                        setSearchParams(updated);
                       }}
                       options={sortOptions.map(opt => ({
                         value: opt.value,
@@ -263,8 +224,10 @@ const ProductListingPage: React.FC = () => {
                       }))}
                     />
 
+                    {/* Convert Sort Order to icon buttons */}
+
                     <MultiSelect
-                      label="Categories"
+                      label="Categories (Multiple Choice)"
                       value={searchParams.getAll("categories").map(Number)}
                       onChange={(selected) => {
                         const updated = new URLSearchParams(searchParams);
@@ -272,56 +235,30 @@ const ProductListingPage: React.FC = () => {
                         selected.forEach((id) => updated.append("categories", String(id)));
                         setSearchParams(updated);
                       }}
-                      options={trueCategories.map((cat) => ({
+                      options={categories.map((cat) => ({
                         value: cat.id,
                         label: cat.name,
                       }))}
                     />
 
                     <Select
-                      label="Condition"
-                      value={searchParams.get('conditions') || ''}
+                      label="Status (New/Old/Low Stock)"
+                      value={searchParams.get('status') || ''}
                       onChange={(e) => {
-                        const selected = Array.from(e.target.selectedOptions).map(opt => opt.value);
-                        searchParams.delete('conditions');
-                        selected.forEach(cond => searchParams.append('conditions', cond));
-                        setSearchParams(searchParams);
+                        const updated = new URLSearchParams(searchParams);
+                        updated.delete('status');
+                        if (e.target.value && e.target.value.trim() !== '') {
+                          updated.append('status', e.target.value);
+                        }
+                        setSearchParams(updated);
                       }}
-                      options={conditionOptions.map(cond => ({
-                        value: cond,
-                        label: cond,
+                      options={statusOptions.map(status => ({
+                        value: status.value,
+                        label: status.label,
                       }))}
                     />
 
-                    <Select
-                      label="Flower Types"
-                      value={searchParams.get('flowerTypes') || ''}
-                      onChange={(e) => {
-                        const selected = Array.from(e.target.selectedOptions).map(opt => Number(opt.value));
-                        searchParams.delete('flowerTypes');
-                        selected.forEach(type => searchParams.append('flowerTypes', String(type)));
-                        setSearchParams(searchParams);
-                      }}
-                      options={flowerTypesOptions.map(type => ({
-                        value: type,
-                        label: `Type ${type}`,
-                      }))}
-                    />
 
-                    <Select
-                      label="Occasion"
-                      value={searchParams.get('occasions') || ''}
-                      onChange={(e) => {
-                        const selected = Array.from(e.target.selectedOptions).map(opt => opt.value);
-                        searchParams.delete('occasions');
-                        selected.forEach(occ => searchParams.append('occasions', occ));
-                        setSearchParams(searchParams);
-                      }}
-                      options={occasionOptions.map(occ => ({
-                        value: occ,
-                        label: occ,
-                      }))}
-                    />
 
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
                       <label className="block text-sm font-semibold text-blue-800 mb-3">Price Range</label>
@@ -331,8 +268,13 @@ const ProductListingPage: React.FC = () => {
                           label="Min ($)"
                           value={searchParams.get('minPrice') || ''}
                           onChange={(e) => {
-                            searchParams.set('minPrice', e.target.value);
-                            setSearchParams(searchParams);
+                            const updated = new URLSearchParams(searchParams);
+                            if (e.target.value && e.target.value.trim() !== '') {
+                              updated.set('minPrice', e.target.value);
+                            } else {
+                              updated.delete('minPrice');
+                            }
+                            setSearchParams(updated);
                           }}
                           placeholder="0"
                         />
@@ -341,8 +283,13 @@ const ProductListingPage: React.FC = () => {
                           label="Max ($)"
                           value={searchParams.get('maxPrice') || ''}
                           onChange={(e) => {
-                            searchParams.set('maxPrice', e.target.value);
-                            setSearchParams(searchParams);
+                            const updated = new URLSearchParams(searchParams);
+                            if (e.target.value && e.target.value.trim() !== '') {
+                              updated.set('maxPrice', e.target.value);
+                            } else {
+                              updated.delete('maxPrice');
+                            }
+                            setSearchParams(updated);
                           }}
                           placeholder="1000"
                         />
@@ -435,16 +382,8 @@ const ProductListingPage: React.FC = () => {
                         <div className="flex items-center justify-between pb-4 border-b border-gray-200">
                           <div className="flex items-center gap-3">
                             <h2 className="text-lg font-semibold text-gray-800">
-                              Found {products.length} beautiful flowers
+                              Found {totalCount} beautiful flowers
                             </h2>
-                            <div className="flex items-center gap-1">
-                              {[...Array(5)].map((_, i) => (
-                                <svg key={i} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 24 24">
-                                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                              ))}
-                              <span className="text-sm text-gray-500 ml-1">(4.9)</span>
-                            </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-gray-500">Page {Number(searchParams.get('page')) || 1}</span>

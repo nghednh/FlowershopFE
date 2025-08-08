@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Check, ChevronDown } from "lucide-react";
 import "./MultiSelect.css";
 import "./SharedStyles.css";
@@ -13,7 +14,10 @@ interface MultiSelectProps {
 
 export const MultiSelect: React.FC<MultiSelectProps> = ({ label, value, onChange, options, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
-  
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; width: number; direction: 'down' | 'up' } | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const toggleOption = (optionValue: number) => {
     const newValue = value.includes(optionValue)
       ? value.filter(v => v !== optionValue)
@@ -30,6 +34,46 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({ label, value, onChange
     return `${value.length} selected`;
   };
 
+  // Tính vị trí dropdown khi mở, tự động chọn hướng
+  const updateDropdownPos = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const dropdownHeight = 192; // 12rem, giống max-height trong CSS
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      let direction: 'down' | 'up' = 'down';
+      let top = rect.bottom + window.scrollY;
+      if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+        direction = 'up';
+        top = rect.top + window.scrollY - dropdownHeight;
+      }
+      setDropdownPos({
+        top,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+        direction
+      });
+    }
+  };
+
+  const handleOpenDropdown = () => {
+    updateDropdownPos();
+    setIsOpen(true);
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleScrollOrResize = () => {
+      updateDropdownPos();
+    };
+    window.addEventListener("scroll", handleScrollOrResize, true);
+    window.addEventListener("resize", handleScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
+  }, [isOpen]);
+
   return (
     <div className={`multiselect-container ${className}`}>
       {label && (
@@ -38,11 +82,11 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({ label, value, onChange
           {label}
         </label>
       )}
-      
       <div className="multiselect-wrapper">
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
+          ref={buttonRef}
+          onClick={handleOpenDropdown}
           className="multiselect-button"
           aria-expanded={isOpen}
         >
@@ -51,9 +95,23 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({ label, value, onChange
           </span>
           <ChevronDown className="multiselect-icon" />
         </button>
-
-        {isOpen && (
-          <div className="multiselect-dropdown custom-scrollbar">
+      </div>
+      {/* Dropdown dùng Portal, tự động hướng lên hoặc xuống */}
+      {isOpen && dropdownPos && createPortal(
+        <>
+          <div
+            ref={dropdownRef}
+            className="multiselect-dropdown custom-scrollbar"
+            style={{
+              position: 'absolute',
+              top: dropdownPos.top,
+              left: dropdownPos.left,
+              width: dropdownPos.width,
+              zIndex: 9999,
+              maxHeight: '12rem',
+              overflowY: 'auto'
+            }}
+          >
             <div className="p-2">
               {options.map((option) => {
                 const isSelected = value.includes(option.value);
@@ -80,9 +138,14 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({ label, value, onChange
               })}
             </div>
           </div>
-        )}
-      </div>
-
+          {/* Click outside để đóng dropdown */}
+          <div
+            className="fixed inset-0 z-[9998]"
+            onClick={() => { setIsOpen(false); setDropdownPos(null); }}
+          />
+        </>,
+        document.body
+      )}
       {/* Selected items display */}
       {value.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
@@ -104,14 +167,6 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({ label, value, onChange
             );
           })}
         </div>
-      )}
-
-      {/* Click outside to close */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        />
       )}
     </div>
   );

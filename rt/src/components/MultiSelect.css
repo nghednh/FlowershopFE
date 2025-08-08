@@ -13,6 +13,7 @@
 
 .multiselect-wrapper {
   position: relative;
+  overflow: visible;
 }
 
 .multiselect-button {

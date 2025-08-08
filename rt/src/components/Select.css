@@ -13,6 +13,7 @@
 
 .select-wrapper {
   position: relative;
+  overflow: visible;
 }
 
 .select-input {

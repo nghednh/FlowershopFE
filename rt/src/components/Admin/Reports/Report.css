@@ -1,0 +1,27 @@
+/* Remove focus outlines from chart elements */
+.recharts-wrapper *:focus,
+.recharts-wrapper *:focus-visible {
+    outline: none !important;
+    border: none !important;
+}
+
+.recharts-pie-sector:focus,
+.recharts-pie-sector:focus-visible,
+.recharts-line-dot:focus,
+.recharts-line-dot:focus-visible,
+.recharts-active-dot:focus,
+.recharts-active-dot:focus-visible {
+    outline: none !important;
+    border: none !important;
+}
+
+svg:focus,
+svg:focus-visible {
+    outline: none !important;
+}
+
+button:focus,
+select:focus,
+input:focus {
+    outline: none !important;
+}

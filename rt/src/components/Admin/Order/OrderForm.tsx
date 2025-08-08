@@ -34,7 +34,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
 
   const loadData = async () => {
     try {
-      console.log('Order Dataaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:', order);
+      console.log('Order Data:', order);
       setLoading(true);
       setError(null);
 
@@ -43,8 +43,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
         getUserAddresses(),
       ]);
 
-      console.log("Users Dataaaaaaaaaaaaaaaaaaaaaaaaaaa:", usersData);
-
+      console.log("Users Data:", usersData);
       setUsers(usersData);
       setAddresses(addressesData || []);
     } catch (err: any) {
@@ -61,6 +60,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
 
   // Validate required fields and constraints
   const validateForm = (): boolean => {
+    if (!formData) return false;
+    
     const { userId, sum, orderStatus } = formData;
 
     // User ID validation
@@ -99,7 +100,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
   };
 
   const handleSubmit = async () => {
-    if (!validateAll()) {
+    if (!formData || !validateAll()) {
       return;
     }
 
@@ -128,6 +129,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
           .then(response => {
             onSave();
             console.log("Order updated successfully:", response);
+            onClose();
           })
           .catch(error => {
             alert('Error updating order: ' + (error.message || 'Unknown error'));
@@ -178,7 +180,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
 
       <Select
         label="Address"
-        value={formData.addressId}
+        value={formData?.addressId?.toString() || "0"}
         onChange={(e) => setFormData({ ...formData, addressId: Number(e.target.value) })}
         options={[
           { value: "0", label: "Select an address" },
@@ -191,7 +193,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
 
       <Select
         label="Payment Method"
-        value={formData.paymentMethod?.toString() || PaymentMethod.COD.toString()}
+        value={formData?.paymentMethod?.toString() || PaymentMethod.COD.toString()}
         onChange={(e) => setFormData({ ...formData, paymentMethod: Number(e.target.value) as PaymentMethod })}
         options={[
           { value: PaymentMethod.COD.toString(), label: getPaymentMethodName(PaymentMethod.COD) },
@@ -204,7 +206,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
       <Input
         label="Tracking Number"
         type="text"
-        value={formData.trackingNumber}
+        value={formData?.trackingNumber || ""}
         onChange={(e) => setFormData({ ...formData, trackingNumber: e.target.value })}
       />
 
@@ -213,7 +215,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
           label="Total Amount"
           type="number"
           step={0.01}
-          value={formData.sum}
+          value={formData?.sum || 0}
           onChange={(e) => {
             setFormData({ ...formData, sum: Number(e.target.value) });
             setTimeout(() => validateAll(), 0);
@@ -224,7 +226,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
 
       <Select
         label="Status"
-        value={formData.orderStatus.toString()}
+        value={formData?.orderStatus?.toString() || OrderStatus.Pending.toString()}
         onChange={(e) => {
           setFormData({ ...formData, orderStatus: Number(e.target.value) as OrderStatus });
           setTimeout(() => validateAll(), 0);

@@ -237,12 +237,13 @@ const Admin = () => {
             <OrderList
               onEdit={(o) => openModal("order", o)}
               onDelete={(id) => handleDelete("orders", id)}
+              refreshTrigger={refreshTrigger}
             />
             <Modal isOpen={modal.isOpen && modal.type === "order"} onClose={closeModal}>
               <OrderForm
                 order={modal.data ?? undefined}
-                onClose={closeModal}
                 onSave={() => handleSave("order")}
+                onClose={closeModal}
               />
             </Modal>
           </>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getUserLoyaltyInfo } from '../config/api';
 import { IUserLoyalty } from '../types/backend';
 import { APP_ICON } from '../config';
+import { performLogout, isUserLoggedIn, getCurrentUser } from '../services/authServices';
 import './Header.css';
 
 interface HeaderProps {
@@ -16,9 +17,8 @@ const Header: React.FC<HeaderProps> = ({ toggleCart, toggleMenu }) => {
     const [loading, setLoading] = useState(false);
 
     // Check if user is logged in
-    const user = localStorage.getItem('user');
-    const isLoggedIn = user && user !== 'null';
-    const userData = isLoggedIn ? JSON.parse(user) : null;
+    const isLoggedIn = isUserLoggedIn();
+    const userData = getCurrentUser();
 
     const loadLoyaltyInfo = async () => {
         if (!isLoggedIn) return;
@@ -53,15 +53,8 @@ const Header: React.FC<HeaderProps> = ({ toggleCart, toggleMenu }) => {
         }
     };
 
-    const handleLogout = () => {
-        // Clear user data from localStorage
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user.role');
-        
-        // Navigate to login page
-        navigate('/login');
+    const handleLogout = async () => {
+        await performLogout(navigate);
     };
 
     const handleShop = () => {

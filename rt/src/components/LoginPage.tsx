@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginAccount } from "../config/api";
 import { APP_ICON } from "../config";
+import { performLogin, clearAuthData } from "../services/authServices";
 import "./AuthPages.css";
 
 export default function LoginPage() {
@@ -17,8 +17,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     document.getElementById("email")?.focus();
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    clearAuthData(); // Use utility function for consistent cleanup
   }, []);
 
   const validateForm = () => {
@@ -56,35 +55,16 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
     
-    try {
-      const data = await loginAccount(formData.email, formData.password);
-      console.log("Login response:", data);
-
-      if (data.success) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        setMessage("Login successful! Redirecting...");
-
-        // Navigate based on user role with a slight delay for better UX
-        setTimeout(() => {
-          const userRole = data.user.role;
-          if (userRole === "Admin") {
-            navigate("/admin");
-          } else {
-            navigate("/home");
-          }
-        }, 500);
-      } else {
-        setMessage(data.errors?.join(", ") || "Login failed");
-        setFormData(prev => ({ ...prev, password: "" }));
-      }
-    } catch (error: any) {
-      console.error("Login error:", error);
-      setMessage(error.response?.data?.message || "Network error occurred");
+    const result = await performLogin(formData.email, formData.password, navigate);
+    
+    if (result.success) {
+      setMessage(result.message || "Login successful! Redirecting...");
+    } else {
+      setMessage(result.message || "Login failed");
       setFormData(prev => ({ ...prev, password: "" }));
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   return (

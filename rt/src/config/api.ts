@@ -38,6 +38,7 @@ export {
 // Auth
 export const loginAccount = AuthService.loginAccount;
 export const registerAccount = AuthService.registerAccount;
+export const logoutAccount = AuthService.logoutAccount;
 
 // User
 export const registerUser = AdminService.registerUser;

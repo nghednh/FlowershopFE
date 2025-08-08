@@ -25,4 +25,8 @@ export const AuthService = {
       confirmPassword
     });
   },
+
+  logoutAccount: (): Promise<any> => {
+    return instance.post('/api/logout');
+  },
 };

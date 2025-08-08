@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerAccount } from "../config/api";
 import { APP_ICON } from "../config";
+import { performRegister } from "../services/authServices";
 import "./AuthPages.css";
 
 export default function RegisterPage() {
@@ -93,30 +93,19 @@ export default function RegisterPage() {
     setLoading(true);
     setMessage("");
     
-    try {
-      const data = await registerAccount(
-        form.firstName,
-        form.lastName,
-        form.email,
-        form.userName,
-        form.phoneNumber,
-        form.password,
-        form.confirmPassword
-      );
-      
-      console.log("Register response:", data);
-      
-      if (data.success !== false) {
-        setMessage("Registration successful! Redirecting to login...");
-        setCountdown(3);
-      } else {
-        setMessage(`${data.errors?.join(", ") || "Register failed"}`);
-      }
-    } catch (error) {
-      setMessage("Network error occurred. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    const result = await performRegister(
+      form.firstName,
+      form.lastName,
+      form.email,
+      form.userName,
+      form.phoneNumber,
+      form.password,
+      form.confirmPassword,
+      () => setCountdown(3) // Success callback to start countdown
+    );
+    
+    setMessage(result.message || "");
+    setLoading(false);
   };
 
   return (

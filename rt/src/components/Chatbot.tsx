@@ -399,7 +399,6 @@ const Chatbot = () => {
 
   // Close chatbot when navigating to excluded pages
   useEffect(() => {
-    console.log("Path changed:", location.pathname, "Should show:", shouldShowChatbot());
     if (!shouldShowChatbot() && open) {
       setOpen(false);
     }

@@ -16,6 +16,7 @@ import { getReportSummary, getBestSellingProducts } from "../../../config/api";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ReportPDF } from "./GeneratePDF.tsx";
 import { getMonthRange, getYearRange, getCurrentRange } from "../../../utils/timeRange";
+import { Button } from "../../Button";
 import "./Report.css";
 
 /**
@@ -189,6 +190,7 @@ export const ReportList: React.FC = () => {
         year: new Date().getFullYear(),
         month: new Date().getMonth() + 1,
     });
+    const [topN, setTopN] = useState(10);
     const [salesData, setSalesData] = useState<SalesData[]>([]);
     const [topProducts, setTopProducts] = useState<ProductData[]>([]);
     const [summary, setSummary] = useState<{ totalRevenue: number; totalOrders: number; averageOrderValue: number }>({
@@ -196,6 +198,14 @@ export const ReportList: React.FC = () => {
         totalOrders: 0,
         averageOrderValue: 0,
     });
+    
+    // Best selling products table states
+    const [searchTerm, setSearchTerm] = useState("");
+    const [sortInput, setSortInput] = useState<{ field: string; order: 'asc' | 'desc' }>({ 
+        field: 'totalRevenue', order: 'desc' 
+    });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     // Get total revenue and total orders
     const fetchSummary = async () => {
@@ -251,8 +261,8 @@ export const ReportList: React.FC = () => {
     const fetchTopProducts = async () => {
         const { start, end } = getCurrentRange(viewMode, filters);
         try {
-            const response = await getBestSellingProducts(10, start, end);
-            console.log(`Response: top products in range: ${start} - ${end}:`, response);
+            const response = await getBestSellingProducts(topN, start, end);
+            console.log(`Response: top ${topN} products in range: ${start} - ${end}:`, response);
 
             if (Array.isArray(response)) {
                 const topProducts = response.map((p: ProductData) => ({
@@ -275,7 +285,69 @@ export const ReportList: React.FC = () => {
         fetchSales();
         fetchSummary();
         fetchTopProducts();
-    }, [filters, viewMode]);
+    }, [filters, viewMode, topN]);
+
+    // Best selling products filter and pagination logic
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value);
+
+    const handleSortChange = (field: string, order: 'asc' | 'desc') => {
+        setSortInput({ field, order });
+    };
+
+    const resetFilters = () => {
+        setSearchTerm("");
+        setSortInput({ field: 'totalRevenue', order: 'desc' });
+        setCurrentPage(1);
+    };
+
+    const filteredProducts = topProducts
+        .filter((p) => 
+            p.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.productId.toString().includes(searchTerm)
+        )
+        .sort((a, b) => {
+            if (!sortInput.field) return 0;
+            const multiplier = sortInput.order === "asc" ? 1 : -1;
+            if (sortInput.field === "productName") return multiplier * a.productName.localeCompare(b.productName);
+            if (sortInput.field === "totalQuantitySold") return multiplier * (a.totalQuantitySold - b.totalQuantitySold);
+            if (sortInput.field === "totalRevenue") return multiplier * (a.totalRevenue - b.totalRevenue);
+            return 0;
+        });
+
+    // Pagination calculations
+    const totalItems = filteredProducts.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
+    // Pagination handlers
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (items: number) => {
+        setItemsPerPage(items);
+        setCurrentPage(1);
+    };
+
+    const getVisiblePages = () => {
+        const visiblePages = [];
+        const maxVisiblePages = 5;
+        
+        let start = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let end = Math.min(totalPages, start + maxVisiblePages - 1);
+        
+        if (end - start + 1 < maxVisiblePages) {
+            start = Math.max(1, end - maxVisiblePages + 1);
+        }
+        
+        for (let i = start; i <= end; i++) {
+            visiblePages.push(i);
+        }
+        
+        return visiblePages;
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -295,6 +367,7 @@ export const ReportList: React.FC = () => {
                                 topProducts={topProducts}
                                 reportPeriod={`${viewMode === "month" ? `${filters.year}-${filters.month.toString().padStart(2, '0')}` : filters.year}`}
                                 viewMode={viewMode}
+                                topN={topN}
                             />
                         }
                         fileName={(() => {
@@ -374,6 +447,21 @@ export const ReportList: React.FC = () => {
                         </select>
                     </label>
                 )}
+                <label className="flex flex-col text-sm">
+                    Top N Products:
+                    <select
+                        value={topN}
+                        onChange={(e) => setTopN(Number(e.target.value))}
+                        className="p-2 border rounded"
+                    >
+                        <option value={5}>Top 5</option>
+                        <option value={10}>Top 10</option>
+                        <option value={15}>Top 15</option>
+                        <option value={20}>Top 20</option>
+                        <option value={25}>Top 25</option>
+                        <option value={50}>Top 50</option>
+                    </select>
+                </label>
             </div>
 
             <div className="mb-6">
@@ -604,38 +692,178 @@ export const ReportList: React.FC = () => {
             </div>
 
             <div className="mt-10">
-                <h3 className="text-black font-bold text-xl mb-4">🏆 Best-Selling Products</h3>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-black font-bold uppercase text-2xl">🏆 Best-Selling Products</h3>
+                    <div className="flex items-center gap-2">
+                        <Button onClick={resetFilters}>Reset</Button>
+                    </div>
+                </div>
+                
+                <div className="flex flex-col mb-4 p-4 bg-gray-50 gap-2 rounded">
+                    <div className="flex items-center gap-4">
+                        <input
+                            type="text"
+                            placeholder="Search by product name or ID..."
+                            value={searchTerm}
+                            onChange={handleSearch}
+                            className="border border-gray-300 p-2 rounded text-sm"
+                        />
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">Sort by:</span>
+                            <select
+                                value={`${sortInput.field}|${sortInput.order}`}
+                                onChange={(e) => {
+                                    const [field, order] = e.target.value.split('|');
+                                    handleSortChange(field, order as 'asc' | 'desc');
+                                }}
+                                className="border border-gray-300 p-2 rounded text-sm"
+                            >
+                                <option value="totalRevenue|desc">Revenue (High to Low)</option>
+                                <option value="totalRevenue|asc">Revenue (Low to High)</option>
+                                <option value="totalQuantitySold|desc">Quantity Sold (High to Low)</option>
+                                <option value="totalQuantitySold|asc">Quantity Sold (Low to High)</option>
+                                <option value="productName|asc">Product Name (A-Z)</option>
+                                <option value="productName|desc">Product Name (Z-A)</option>
+                            </select>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">Show:</span>
+                            <select
+                                value={itemsPerPage}
+                                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                                className="border border-gray-300 p-2 rounded text-sm"
+                            >
+                                <option value={5}>5 per page</option>
+                                <option value={10}>10 per page</option>
+                                <option value={25}>25 per page</option>
+                                <option value={50}>50 per page</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
                 <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-2xl shadow-lg border border-gray-100">
-                    <table className="w-full border-collapse">
-                        <thead>
-                            <tr className="bg-gray-100">
-                                <th className="p-2 border border-gray-300">Product ID</th>
-                                <th className="p-2 border border-gray-300">Product Name</th>
-                                <th className="p-2 border border-gray-300">Total Quantity Sold</th>
-                                <th className="p-2 border border-gray-300">Revenue</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {topProducts.length === 0 ? (
-                                <tr>
-                                    <td colSpan={4} className="text-center p-4 text-gray-400">
-                                        No data
-                                    </td>
+                    {filteredProducts.length === 0 ? (
+                        <div className="text-center text-gray-500 py-8">No data found.</div>
+                    ) : (
+                        <table className="w-full border-collapse">
+                            <thead>
+                                <tr className="bg-gray-100">
+                                    <th className="text-black font-bold uppercase p-2 border border-gray-300 w-24">Product ID</th>
+                                    <th 
+                                        className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer w-1/3"
+                                        onClick={() => handleSortChange('productName', sortInput.order === 'asc' ? 'desc' : 'asc')}
+                                    >
+                                        Product Name {sortInput.field === 'productName' && (sortInput.order === 'asc' ? '↑' : '↓')}
+                                    </th>
+                                    <th 
+                                        className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer w-32"
+                                        onClick={() => handleSortChange('totalQuantitySold', sortInput.order === 'asc' ? 'desc' : 'asc')}
+                                    >
+                                        Total Quantity Sold {sortInput.field === 'totalQuantitySold' && (sortInput.order === 'asc' ? '↑' : '↓')}
+                                    </th>
+                                    <th 
+                                        className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer w-32"
+                                        onClick={() => handleSortChange('totalRevenue', sortInput.order === 'asc' ? 'desc' : 'asc')}
+                                    >
+                                        Revenue {sortInput.field === 'totalRevenue' && (sortInput.order === 'asc' ? '↑' : '↓')}
+                                    </th>
                                 </tr>
-                            ) : (
-                                topProducts.map((p) => (
-                                    <tr key={p.productId}>
-                                        <td className="p-2 border border-gray-300">{p.productId}</td>
-                                        <td className="p-2 border border-gray-300">{p.productName}</td>
-                                        <td className="p-2 border border-gray-300">{p.totalQuantitySold}</td>
-                                        <td className="p-2 border border-gray-300">
+                            </thead>
+                            <tbody>
+                                {paginatedProducts.map((p) => (
+                                    <tr key={p.productId} className="border-b border-gray-300">
+                                        <td className="p-2 border-x border-gray-300 w-24 text-center">{p.productId}</td>
+                                        <td className="p-2 border-x border-gray-300 w-1/3">{p.productName}</td>
+                                        <td className="p-2 border-x border-gray-300 w-32 text-center font-semibold text-blue-600">{p.totalQuantitySold}</td>
+                                        <td className="p-2 border-x border-gray-300 w-32 text-right font-semibold text-green-600">
                                             ${p.totalRevenue?.toLocaleString?.() ?? 0}
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+
+                    {/* Pagination Controls */}
+                    {filteredProducts.length > 0 && (
+                        <div className="mt-4 flex items-center justify-between">
+                            <div className="text-sm text-gray-600">
+                                Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems} entries
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                                {/* First Page Button */}
+                                <button
+                                    onClick={() => handlePageChange(1)}
+                                    disabled={currentPage === 1}
+                                    className={`px-3 py-1 rounded ${
+                                        currentPage === 1
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    First
+                                </button>
+
+                                {/* Previous Page Button */}
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className={`px-3 py-1 rounded ${
+                                        currentPage === 1
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    Previous
+                                </button>
+
+                                {/* Page Numbers */}
+                                {getVisiblePages().map((page) => (
+                                    <button
+                                        key={page}
+                                        onClick={() => handlePageChange(page)}
+                                        className={`px-3 py-1 rounded ${
+                                            page === currentPage
+                                                ? 'bg-blue-500 text-white'
+                                                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+
+                                {/* Next Page Button */}
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className={`px-3 py-1 rounded ${
+                                        currentPage === totalPages
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    Next
+                                </button>
+
+                                {/* Last Page Button */}
+                                <button
+                                    onClick={() => handlePageChange(totalPages)}
+                                    disabled={currentPage === totalPages}
+                                    className={`px-3 py-1 rounded ${
+                                        currentPage === totalPages
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    Last
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

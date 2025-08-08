@@ -14,6 +14,10 @@ export const LoyaltyList: React.FC<LoyaltyListProps> = ({ onEdit, refreshTrigger
   const [sortInput, setSortInput] = useState<{ field: string; order: 'asc' | 'desc' }>({ field: 'userName', order: 'asc' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const loadLoyaltyUsers = async () => {
     try {
@@ -58,6 +62,7 @@ export const LoyaltyList: React.FC<LoyaltyListProps> = ({ onEdit, refreshTrigger
   const resetFilters = () => {
     setSearchTerm("");
     setSortInput({ field: 'userName', order: 'asc' });
+    setCurrentPage(1);
   };
 
   const filteredUsers = users
@@ -73,6 +78,41 @@ export const LoyaltyList: React.FC<LoyaltyListProps> = ({ onEdit, refreshTrigger
       if (sortInput.field === "loyaltyPoints") return multiplier * (a.loyaltyPoints - b.loyaltyPoints);
       return 0;
     });
+
+  // Pagination calculations
+  const totalItems = filteredUsers.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (items: number) => {
+    setItemsPerPage(items);
+    setCurrentPage(1);
+  };
+
+  const getVisiblePages = () => {
+    const visiblePages = [];
+    const maxVisiblePages = 5;
+    
+    let start = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let end = Math.min(totalPages, start + maxVisiblePages - 1);
+    
+    if (end - start + 1 < maxVisiblePages) {
+      start = Math.max(1, end - maxVisiblePages + 1);
+    }
+    
+    for (let i = start; i <= end; i++) {
+      visiblePages.push(i);
+    }
+    
+    return visiblePages;
+  };
 
   return (
     <div>
@@ -111,6 +151,20 @@ export const LoyaltyList: React.FC<LoyaltyListProps> = ({ onEdit, refreshTrigger
               <option value="loyaltyPoints|asc">Loyalty Points (Low to High)</option>
             </select>
           </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Show:</span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+              className="border border-gray-300 p-2 rounded text-sm"
+            >
+              <option value={5}>5 per page</option>
+              <option value={10}>10 per page</option>
+              <option value={25}>25 per page</option>
+              <option value={50}>50 per page</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -143,11 +197,11 @@ export const LoyaltyList: React.FC<LoyaltyListProps> = ({ onEdit, refreshTrigger
               >
                 Loyalty Points {sortInput.field === 'loyaltyPoints' && (sortInput.order === 'asc' ? '↑' : '↓')}
               </th>
-              <th className="text-black font-bold uppercase p-2 border border-gray-300">Actions</th>
+              <th className="text-black font-bold uppercase p-2 border border-gray-300 w-30">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map((user) => (
+            {paginatedUsers.map((user) => (
               <tr key={user.id} className="border-b border-gray-300">
                 <td className="p-2 border-x border-gray-300">{user.userName}</td>
                 <td className="p-2 border-x border-gray-300">{user.email}</td>
@@ -156,13 +210,91 @@ export const LoyaltyList: React.FC<LoyaltyListProps> = ({ onEdit, refreshTrigger
                 </td>
                 <td className="p-2 border-x border-gray-300">
                   <div className="flex items-center justify-center gap-2">
-                    <Button onClick={() => onEdit(user)} className="mr-2">Edit Points</Button>
+                    <Button onClick={() => onEdit(user)} className="mr-2">Edit</Button>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      )}
+
+      {/* Pagination Controls */}
+      {filteredUsers.length > 0 && (
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-sm text-gray-600">
+            Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems} entries
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {/* First Page Button */}
+            <button
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded ${
+                currentPage === 1
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              First
+            </button>
+
+            {/* Previous Page Button */}
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded ${
+                currentPage === 1
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Previous
+            </button>
+
+            {/* Page Numbers */}
+            {getVisiblePages().map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-1 rounded ${
+                  page === currentPage
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            {/* Next Page Button */}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded ${
+                currentPage === totalPages
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Next
+            </button>
+
+            {/* Last Page Button */}
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded ${
+                currentPage === totalPages
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Last
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

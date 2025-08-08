@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginAccount } from "../config/api";
+import { APP_ICON } from "../config";
 import "./AuthPages.css";
 
 export default function LoginPage() {
@@ -97,7 +98,7 @@ export default function LoginPage() {
       <div className="auth-card">
         <div className="auth-header">
           <div className="auth-logo">
-            <img src="/flower.svg" alt="FlowerShop" className="auth-logo-icon" />
+            <img src={APP_ICON} alt="FlowerShop" className="auth-logo-icon" />
             <h1 className="auth-logo-text">FlowerShop</h1>
           </div>
           <h2 className="auth-title">Welcome Back</h2>

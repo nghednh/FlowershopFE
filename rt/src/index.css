@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* App Icon Default Background - Global Style */
+.app-icon-bg {
+  background: linear-gradient(to bottom right, #10b981, #ca8a04);
+  /* Equivalent to: bg-gradient-to-br from-green-500 to-yellow-600 */
+}
+
 /* Custom animations for HomePage header */
 @keyframes gradient-x {
   0%, 100% {

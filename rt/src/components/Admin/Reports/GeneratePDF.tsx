@@ -52,6 +52,7 @@ type Props = {
   }[];
   reportPeriod: string,
   viewMode: "month" | "year";
+  topN: number;
 };
 
 export const ReportPDF: React.FC<Props> = ({
@@ -59,7 +60,8 @@ export const ReportPDF: React.FC<Props> = ({
   salesData,
   topProducts,
   reportPeriod,
-  viewMode
+  viewMode,
+  topN
 }) => (
   <Document>
     <Page size="A4" style={styles.page}>
@@ -84,22 +86,22 @@ export const ReportPDF: React.FC<Props> = ({
 
       {/* Executive Summary */}
       <View style={styles.section}>
-        <Text style={styles.tableTitle}>Executive Summary</Text>
+        <Text style={styles.tableTitle}>1. Executive Summary</Text>
         <Text style={{ marginBottom: 4 }}>• Total Revenue: ${(summary?.totalRevenue || 0).toLocaleString()}</Text>
         <Text style={{ marginBottom: 4 }}>• Total Orders: {(summary?.totalOrders || 0).toLocaleString()}</Text>
-        <Text style={{ marginBottom: 4 }}>• Average Value per Order: ${(summary?.averageOrderValue || 0).toFixed(2)}</Text>
+        <Text style={{ marginBottom: 4 }}>• Average Order Value: ${(summary?.averageOrderValue || 0).toFixed(2)}</Text>
         <Text style={{ marginBottom: 4 }}>• Data Points: {salesData?.length || 0} total {viewMode === "month" ? "days" : "months"}</Text>
       </View>
 
       {/* Detailed Revenue Table */}
       <View style={styles.section}>
-        <Text style={styles.tableTitle}>Revenue Breakdown by {viewMode === "month" ? "Day" : "Month"}</Text>
+        <Text style={styles.tableTitle}>2. Revenue Breakdown by {viewMode === "month" ? "Day" : "Month"}</Text>
         <View style={styles.table}>
           <View style={styles.tableRow}>
             <Text style={styles.tableColHeader}>{viewMode === "month" ? "Date" : "Month"}</Text>
             <Text style={styles.tableColHeader}>Revenue ($)</Text>
             <Text style={styles.tableColHeader}>Number of Orders</Text>
-            <Text style={styles.tableColHeader}>Average ($)</Text>
+            <Text style={styles.tableColHeader}>AOV ($)</Text>
           </View>
           {salesData && salesData.length > 0 ? (
             salesData.map((s, i) => (
@@ -124,7 +126,7 @@ export const ReportPDF: React.FC<Props> = ({
 
       {/* Best Selling Products Table */}
       <View style={styles.section}>
-        <Text style={styles.tableTitle}>Best Selling Products</Text>
+        <Text style={styles.tableTitle}>3. Top {topN} Best Selling Products</Text>
         {!topProducts || topProducts.length === 0 ? (
           <Text>No product sales data available for the selected period.</Text>
         ) : (
@@ -132,7 +134,7 @@ export const ReportPDF: React.FC<Props> = ({
             <View style={styles.tableRow}>
               <Text style={styles.tableColHeader}>Rank</Text>
               <Text style={styles.tableColHeader}>Product Name</Text>
-              <Text style={styles.tableColHeader}>Qty Sold</Text>
+              <Text style={styles.tableColHeader}>Quantity Sold</Text>
               <Text style={styles.tableColHeader}>Revenue ($)</Text>
             </View>
             {topProducts.map((p, i) => (

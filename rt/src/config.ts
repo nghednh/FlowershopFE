@@ -1,5 +1,8 @@
 export const API_BASE_URL = "https://localhost:5001";
 
+// App constants
+export const APP_ICON = "/flower.svg";
+
 export const config = {
   API_BASE_URL: 'https://localhost:5001',
   API_TIMEOUT: 10000,

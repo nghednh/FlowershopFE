@@ -20,62 +20,31 @@ export const FlowerList: React.FC<FlowerListProps> = ({
 }) => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [categories, setCategories] = useState<ICategory[]>([]);
-  const [totalProducts, setTotalProducts] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Define filter types
-  type FilterKey = 'New' | 'Old' | 'Low Stock';
-  
-  // Controlled filter/search/sort states
-  const [searchInput, setSearchInput] = useState("");
-  const [filtersInput, setFiltersInput] = useState<Record<FilterKey, boolean>>({ New: false, Old: false, "Low Stock": false });
-  const [categoriesInput, setCategoriesInput] = useState(categories[0]?.id || 0);
+  // Filter and sort states - similar to OrderList
+  const [searchTerm, setSearchTerm] = useState("");
   const [sortInput, setSortInput] = useState<{ field: string; order: 'asc' | 'desc' }>({ field: 'name', order: 'asc' });
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<number>(0);
 
-  // Applied filter/search/sort states
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<{ field: string; order: 'asc' | 'desc' }>({ field: 'name', order: 'asc' });
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const pageSizeOptions = [10, 20, 50, 100];
-
-  const loadProducts = async (
-    page: number = currentPage,
-    size: number = pageSize,
-    flowerTypes: number[] = [],
-    categoryIds: number[] = [],
-    searchTerm: string = search,
-    sortParam: { field: string; order: 'asc' | 'desc' } = sort
-  ) => {
+  const loadProducts = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      // Map sort field and order to sortBy and sortDirection numbers
-      const sortFieldMap: { [key: string]: number } = { name: 0, basePrice: 1, stockQuantity: 2, flowerStatus: 3 };
-      const sortBy = sortFieldMap[sortParam.field] ?? 0;
-      const sortDirection = sortParam.order === 'asc' ? 0 : 1;
-
+      // Load ALL products without pagination or filtering
       const productsData = await getProducts({
-        page,
-        pageSize: size,
-        flowerTypes: flowerTypes.length > 0 ? flowerTypes : undefined,
-        categoryIds: categoryIds.length > 0 ? categoryIds : undefined,
-        searchTerm: searchTerm,
-        sortBy,
-        sortDirection,
+        pageSize: 1000, // Load a large number to get all products
       });
       if (!productsData || !productsData.data || !productsData.data.products) {
         throw new Error("Invalid products data structure");
       }
       setProducts(productsData.data.products);
-      setTotalProducts(productsData.data.pagination.totalItems);
-      setCurrentPage(page);
-      setPageSize(size);
-      setSearch(searchTerm);
-      setSort(sortParam);
     } catch (err: any) {
       setError(err.message || 'Failed to load products');
       console.error('Error loading products:', err);
@@ -87,9 +56,7 @@ export const FlowerList: React.FC<FlowerListProps> = ({
   const loadCategories = async () => {
     try {
       const response = await getCategories();
-      console.log('Categories loaded:', response);
       setCategories(response);
-      console.log('Categories:', categories);
     } catch (error) {
       console.error('Error loading categories:', error);
     }
@@ -106,77 +73,112 @@ export const FlowerList: React.FC<FlowerListProps> = ({
     }
   }, [refreshTrigger]);
 
-  const handlePageChange = (page: number, newPageSize?: number) => {
-    const actualPageSize = newPageSize || pageSize;
-    const validPage = Math.max(1, Math.min(page, Math.ceil(totalProducts / actualPageSize) || 1));
-    loadProducts(validPage, actualPageSize, [], [], search, sort);
-  };
-
-  const handlePageSizeChange = (newPageSize: number) => {
-    handlePageChange(1, newPageSize);
-  };
-
-  // Controlled input handlers
-  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchInput(e.target.value);
-  };
-
-  const handleFilterInputChange = (filterName: FilterKey) => {
-    setFiltersInput({ ...filtersInput, [filterName]: !filtersInput[filterName] });
-  };
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value);
 
   const handleSortInputChange = (field: string, order: 'asc' | 'desc') => {
     setSortInput({ field, order });
   };
 
-  const handleApplyFilters = () => {
-    if (categoriesInput === 0) {
-      loadProducts(1, pageSize, getSelectedFlowerTypes(), [], searchInput, sortInput);
-    } else {
-      loadProducts(1, pageSize, getSelectedFlowerTypes(), [categoriesInput], searchInput, sortInput);
+  const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatusFilter(e.target.value);
+  };
+
+  const handleCategoryFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCategoryFilter(Number(e.target.value));
+  };
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setSortInput({ field: 'name', order: 'asc' });
+    setStatusFilter("");
+    setCategoryFilter(0);
+    setCurrentPage(1);
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      setError(null);
+      await onDelete(id);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      onDeleteSuccess?.();
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete product');
+      console.error('Error deleting product:', err);
     }
   };
 
-  const getSelectedFlowerTypes = () => {
-    return Object.entries(filtersInput)
-      .filter(([_, value]) => value)
-      .map(([key]) => {
-        switch (key) {
-          case "New": return 0;
-          case "Old": return 1;
-          case "Low Stock": return 2;
-          default: return -1; // Invalid status
-        }
-      })
-      .filter(type => type !== -1);
-  }
+  // Client-side filtering and sorting - similar to OrderList pattern
+  const filteredProducts = (products ?? [])
+    .filter((p) => {
+      const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.id.toString().includes(searchTerm);
+      
+      const matchesStatus = !statusFilter || 
+        (statusFilter === 'New' && p.flowerStatus === 0) ||
+        (statusFilter === 'Old' && p.flowerStatus === 1) ||
+        (statusFilter === 'Low Stock' && p.stockQuantity <= 10);
+      
+      const matchesCategory = !categoryFilter || p.categories?.some(c => c.id === categoryFilter);
+      
+      return matchesSearch && matchesStatus && matchesCategory;
+    })
+    .sort((a, b) => {
+      if (!sortInput.field) return 0;
+      const multiplier = sortInput.order === "asc" ? 1 : -1;
+      if (sortInput.field === "name") return multiplier * a.name.localeCompare(b.name);
+      if (sortInput.field === "basePrice") return multiplier * (a.basePrice - b.basePrice);
+      if (sortInput.field === "stockQuantity") return multiplier * (a.stockQuantity - b.stockQuantity);
+      if (sortInput.field === "flowerStatus") return multiplier * (a.flowerStatus - b.flowerStatus);
+      return 0;
+    });
 
-  const handleResetFilters = () => {
-    setSearchInput("");
-    setFiltersInput({ "New": false, Old: false, "Low Stock": false });
-    setSortInput({ field: 'name', order: 'asc' });
-    loadProducts(1, pageSize, [], [], "", { field: 'name', order: 'asc' });
+  // Pagination calculations
+  const totalItems = filteredProducts.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
+  // Reset to first page when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, categoryFilter]);
+
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
+  const getVisiblePages = () => {
+    const visiblePages: number[] = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        visiblePages.push(i);
+      }
+    } else {
+      const start = Math.max(1, currentPage - 2);
+      const end = Math.min(totalPages, start + maxVisiblePages - 1);
+      
+      for (let i = start; i <= end; i++) {
+        visiblePages.push(i);
+      }
+    }
+    
+    return visiblePages;
   };
 
   const handleSortChange = (field: string) => {
     const newOrder = sortInput.field === field && sortInput.order === 'asc' ? 'desc' : 'asc';
     setSortInput({ field, order: newOrder });
   };
-
-  const handleDelete = async (id: number) => {
-    try {
-      await onDelete(id);
-      await loadProducts();
-      onDeleteSuccess?.();
-    } catch (error) {
-      console.error('Error deleting product:', error);
-    }
-  };
-
-  const totalPages = totalProducts > 0 ? Math.ceil(totalProducts / pageSize) : 0;
-  const startItem = totalProducts > 0 ? Math.max(1, (currentPage - 1) * pageSize + 1) : 0;
-  const endItem = totalProducts > 0 ? Math.min(currentPage * pageSize, totalProducts) : 0;
-  const validCurrentPage = totalProducts > 0 ? Math.max(1, Math.min(currentPage, totalPages)) : 0;
 
   if (loading) {
     return <div className="text-center py-8">Loading products...</div>;
@@ -199,8 +201,7 @@ export const FlowerList: React.FC<FlowerListProps> = ({
         <h2 className="text-black font-bold uppercase text-2xl">Flower Products</h2>
         <div className="flex items-center gap-2">
           <Button onClick={onAdd}>Add Flower</Button>
-          <Button onClick={handleApplyFilters} className="ml-2">Apply</Button>
-          <Button onClick={handleResetFilters} className="ml-1">Reset</Button>
+          <Button onClick={resetFilters} className="ml-1">Reset</Button>
         </div>
       </div>
 
@@ -208,29 +209,29 @@ export const FlowerList: React.FC<FlowerListProps> = ({
         <div className="flex items-center gap-4">
           <input
             type="text"
-            value={searchInput}
-            onChange={handleSearchInputChange}
+            value={searchTerm}
+            onChange={handleSearch}
             placeholder="Search products..."
             className="border border-gray-300 p-2 rounded text-sm"
           />
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Filter by Status:</span>
-            {(["New", "Old", "Low Stock"] as FilterKey[]).map((status) => (
-              <label key={status} className="flex items-center gap-1 text-sm">
-                <input
-                  type="checkbox"
-                  checked={filtersInput[status]}
-                  onChange={() => handleFilterInputChange(status)}
-                />
-                {status}
-              </label>
-            ))}
+            <select 
+              value={statusFilter} 
+              onChange={handleStatusFilterChange}
+              className="border border-gray-300 p-1 rounded text-sm"
+            >
+              <option value="">All Status</option>
+              <option value="New">New</option>
+              <option value="Old">Old</option>
+              <option value="Low Stock">Low Stock</option>
+            </select>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Filter by Category:</span>
             <select
-              value={categoriesInput}
-              onChange={(e) => setCategoriesInput(Number(e.target.value))}
+              value={categoryFilter}
+              onChange={handleCategoryFilterChange}
               className="border border-gray-300 p-1 rounded text-sm"
             >
               <option value={0}>All Categories</option>
@@ -259,80 +260,77 @@ export const FlowerList: React.FC<FlowerListProps> = ({
               <option value="stockQuantity|desc">Stock (High to Low)</option>
             </select>
           </div>
-
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">
-            {totalProducts > 0
-              ? `Showing ${startItem}-${endItem} of ${totalProducts} products`
-              : "No products found"}
-          </span>
+          
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Show:</span>
             <select
-              value={pageSize}
-              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              value={itemsPerPage}
+              onChange={handleItemsPerPageChange}
               className="border border-gray-300 p-1 rounded text-sm"
             >
-              {pageSizeOptions.map((size) => (
-                <option key={size} value={size}>{size}</option>
-              ))}
+              <option value={5}>5 per page</option>
+              <option value={10}>10 per page</option>
+              <option value={25}>25 per page</option>
+              <option value={50}>50 per page</option>
+              <option value={100}>100 per page</option>
             </select>
-            <span className="text-sm text-gray-600">per page</span>
           </div>
+
         </div>
       </div>
 
-      {products.length === 0 ? (
+      {filteredProducts.length === 0 ? (
         <div className="text-center text-gray-500 py-8">
-          {totalProducts === 0 ? "No products available." : "No data found."}
+          No products found.
         </div>
       ) : (
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-100">
               <th
-                className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
+                className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer w-1/4"
                 onClick={() => handleSortChange('name')}
               >
-                Name {sort.field === 'name' && (sort.order === 'asc' ? '↑' : '↓')}
+                Name {sortInput.field === 'name' && (sortInput.order === 'asc' ? '↑' : '↓')}
               </th>
-              <th className="text-black font-bold uppercase p-2 border border-gray-300">
+              <th className="text-black font-bold uppercase p-2 border border-gray-300 w-20">
                 Status
               </th>
-              <th className="text-black font-bold uppercase p-2 border border-gray-300">
+              <th className="text-black font-bold uppercase p-2 border border-gray-300 w-1/5">
                 Categories
               </th>
               <th
-                className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
+                className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer w-24"
                 onClick={() => handleSortChange('basePrice')}
               >
-                Price {sort.field === 'basePrice' && (sort.order === 'asc' ? '↑' : '↓')}
+                Price {sortInput.field === 'basePrice' && (sortInput.order === 'asc' ? '↑' : '↓')}
               </th>
               <th
-                className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
+                className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer w-20"
                 onClick={() => handleSortChange('stockQuantity')}
               >
-                Stock {sort.field === 'stockQuantity' && (sort.order === 'asc' ? '↑' : '↓')}
+                Stock {sortInput.field === 'stockQuantity' && (sortInput.order === 'asc' ? '↑' : '↓')}
               </th>
-              <th className="text-black font-bold uppercase p-2 border border-gray-300">Actions</th>
+              <th className="text-black font-bold uppercase p-2 border border-gray-300 w-40">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {products.map((p) => (
+            {paginatedProducts.map((p) => (
               <tr key={p.id} className="border-b border-gray-300">
-                <td className="p-2 border-x border-gray-300">{p.name}</td>
-                <td className="p-2 border-x border-gray-300">{["New", "Old", "Low Stock"][p.flowerStatus]}</td>
-                <td className="p-2 border-x border-gray-300">
-                  {p.categories.map((id) => (
-                    <span key={id.id} className="inline-block bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs mr-1">
-                      {id.name}
-                    </span>
-                  ))}
+                <td className="p-2 border-x border-gray-300 w-1/4">{p.name}</td>
+                <td className="p-2 border-x border-gray-300 w-20">
+                  {p.flowerStatus === 0 ? 'New' : p.flowerStatus === 1 ? 'Old' : p.stockQuantity <= 10 ? 'Low Stock' : 'Unknown'}
                 </td>
-                <td className="p-2 border-x border-gray-300">${p.basePrice}</td>
-                <td className="p-2 border-x border-gray-300">{p.stockQuantity}</td>
-                <td className="p-2 border-x border-gray-300">
+                <td className="p-2 border-x border-gray-300 w-1/5">
+                  {p.categories?.map((cat) => (
+                    <span key={cat.id} className="inline-block bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs mr-1">
+                      {cat.name}
+                    </span>
+                  )) || 'No categories'}
+                </td>
+                <td className="p-2 border-x border-gray-300 w-24">${p.basePrice}</td>
+                <td className="p-2 border-x border-gray-300 w-20">{p.stockQuantity}</td>
+                <td className="p-2 border-x border-gray-300 w-32">
                   <div className="flex items-center justify-center gap-2">
                     <Button onClick={() => onEdit(p)} className="mr-2">
                       Edit
@@ -346,52 +344,84 @@ export const FlowerList: React.FC<FlowerListProps> = ({
         </table>
       )}
 
-      <div className="flex items-center justify-center gap-2 mt-4 p-4">
-        <Button
-          onClick={() => handlePageChange(1)}
-          disabled={totalProducts === 0}
-          className="px-3 py-1 text-sm"
-        >
-          First
-        </Button>
-        <Button
-          onClick={() => handlePageChange(validCurrentPage - 1)}
-          disabled={validCurrentPage <= 1 || totalProducts === 0}
-          className="px-3 py-1 text-sm"
-        >
-          Previous
-        </Button>
-        {totalProducts > 0 &&
-          Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            const pageNum = Math.max(1, Math.min(totalPages - 4, validCurrentPage - 2)) + i;
-            if (pageNum <= totalPages) {
-              return (
-                <Button
-                  key={pageNum}
-                  onClick={() => handlePageChange(pageNum)}
-                  className={`px-3 py-1 text-sm ${validCurrentPage === pageNum ? "bg-blue-500 text-white" : "bg-gray-200"}`}
-                >
-                  {pageNum}
-                </Button>
-              );
-            }
-            return null;
-          })}
-        <Button
-          onClick={() => handlePageChange(validCurrentPage + 1)}
-          disabled={validCurrentPage >= totalPages || totalProducts === 0}
-          className="px-3 py-1 text-sm"
-        >
-          Next
-        </Button>
-        <Button
-          onClick={() => handlePageChange(totalPages)}
-          disabled={totalProducts === 0 || validCurrentPage >= totalPages}
-          className="px-3 py-1 text-sm"
-        >
-          Last
-        </Button>
-      </div>
+      {/* Pagination Controls */}
+      {filteredProducts.length > 0 && (
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-sm text-gray-600">
+            Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems} entries
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {/* First Page Button */}
+            <button
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded ${
+                currentPage === 1
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              First
+            </button>
+
+            {/* Previous Page Button */}
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded ${
+                currentPage === 1
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Previous
+            </button>
+
+            {/* Page Numbers */}
+            {getVisiblePages().map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-1 rounded ${
+                  page === currentPage
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            {/* Next Page Button */}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded ${
+                currentPage === totalPages
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Next
+            </button>
+
+            {/* Last Page Button */}
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded ${
+                currentPage === totalPages
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Last
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

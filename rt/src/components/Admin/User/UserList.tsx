@@ -15,6 +15,10 @@ export const UserList: React.FC<UserListProps> = ({ onEdit, refreshTrigger }) =>
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   const loadUsers = async () => {
     try {
       setLoading(true);
@@ -49,6 +53,7 @@ export const UserList: React.FC<UserListProps> = ({ onEdit, refreshTrigger }) =>
   const resetFilters = () => {
     setSearchTerm("");
     setSortInput({ field: 'name', order: 'asc' });
+    setCurrentPage(1);
   };
 
   const filteredUsers = (users ?? [])
@@ -63,6 +68,48 @@ export const UserList: React.FC<UserListProps> = ({ onEdit, refreshTrigger }) =>
     });
 
   console.log("Filtered Users id:", filteredUsers.map(u => u.userName));
+
+  // Pagination calculations
+  const totalItems = filteredUsers.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+  // Reset to first page when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
+  const getVisiblePages = () => {
+    const visiblePages: number[] = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        visiblePages.push(i);
+      }
+    } else {
+      const start = Math.max(1, currentPage - 2);
+      const end = Math.min(totalPages, start + maxVisiblePages - 1);
+      
+      for (let i = start; i <= end; i++) {
+        visiblePages.push(i);
+      }
+    }
+    
+    return visiblePages;
+  };
 
   return (
     <div>
@@ -103,6 +150,21 @@ export const UserList: React.FC<UserListProps> = ({ onEdit, refreshTrigger }) =>
             </select>
           </div>
 
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Show:</span>
+            <select
+              value={itemsPerPage}
+              onChange={handleItemsPerPageChange}
+              className="border border-gray-300 p-2 rounded text-sm"
+            >
+              <option value={5}>5 per page</option>
+              <option value={10}>10 per page</option>
+              <option value={25}>25 per page</option>
+              <option value={50}>50 per page</option>
+              <option value={100}>100 per page</option>
+            </select>
+          </div>
+
         </div>
 
       </div>
@@ -127,11 +189,11 @@ export const UserList: React.FC<UserListProps> = ({ onEdit, refreshTrigger }) =>
               <th className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
                 onClick={() => handleSortInputChange('role', sortInput.order === 'asc' ? 'desc' : 'asc')}
               >Role {sortInput.field === 'role' && (sortInput.order === 'asc' ? '↑' : '↓')}</th>
-              <th className="text-black font-bold uppercase p-2 border border-gray-300">Actions</th>
+              <th className="text-black font-bold uppercase p-2 border border-gray-300 w-30">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map((u) => (
+            {paginatedUsers.map((u) => (
               <tr key={u.userName} className="border-b border-gray-300">
                 <td className="p-2 border-x border-gray-300">{u.firstName} {u.lastName}</td>
                 <td className="p-2 border-x border-gray-300">{u.email}</td>
@@ -145,6 +207,84 @@ export const UserList: React.FC<UserListProps> = ({ onEdit, refreshTrigger }) =>
             ))}
           </tbody>
         </table>
+      )}
+
+      {/* Pagination Controls */}
+      {filteredUsers.length > 0 && (
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-sm text-gray-600">
+            Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems} entries
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {/* First Page Button */}
+            <button
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded ${
+                currentPage === 1
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              First
+            </button>
+
+            {/* Previous Page Button */}
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded ${
+                currentPage === 1
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Previous
+            </button>
+
+            {/* Page Numbers */}
+            {getVisiblePages().map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-1 rounded ${
+                  page === currentPage
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            {/* Next Page Button */}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded ${
+                currentPage === totalPages
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Next
+            </button>
+
+            {/* Last Page Button */}
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded ${
+                currentPage === totalPages
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Last
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

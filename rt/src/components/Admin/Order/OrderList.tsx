@@ -17,6 +17,10 @@ export const OrderList: React.FC<OrderListProps> = ({ onEdit, onDelete, refreshT
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "">("");
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   const loadOrders = async () => {
     try {
       setLoading(true);
@@ -56,6 +60,7 @@ export const OrderList: React.FC<OrderListProps> = ({ onEdit, onDelete, refreshT
     setSearchTerm("");
     setSortInput({ field: 'id', order: 'desc' });
     setStatusFilter("");
+    setCurrentPage(1);
   };
 
   const handleDelete = async (id: number) => {
@@ -89,6 +94,48 @@ export const OrderList: React.FC<OrderListProps> = ({ onEdit, onDelete, refreshT
     });
 
   console.log("Filtered Orders id:", filteredOrders.map(o => o.id));
+
+  // Pagination calculations
+  const totalItems = filteredOrders.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
+
+  // Reset to first page when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
+  const getVisiblePages = () => {
+    const visiblePages: number[] = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        visiblePages.push(i);
+      }
+    } else {
+      const start = Math.max(1, currentPage - 2);
+      const end = Math.min(totalPages, start + maxVisiblePages - 1);
+      
+      for (let i = start; i <= end; i++) {
+        visiblePages.push(i);
+      }
+    }
+    
+    return visiblePages;
+  };
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString();
@@ -170,6 +217,22 @@ export const OrderList: React.FC<OrderListProps> = ({ onEdit, onDelete, refreshT
               <option value="orderStatus|desc">Status Descending</option>
             </select>
           </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Show:</span>
+            <select
+              value={itemsPerPage}
+              onChange={handleItemsPerPageChange}
+              className="border border-gray-300 p-2 rounded text-sm"
+            >
+              <option value={5}>5 per page</option>
+              <option value={10}>10 per page</option>
+              <option value={25}>25 per page</option>
+              <option value={50}>50 per page</option>
+              <option value={100}>100 per page</option>
+            </select>
+          </div>
+
         </div>
       </div>
 
@@ -208,7 +271,7 @@ export const OrderList: React.FC<OrderListProps> = ({ onEdit, onDelete, refreshT
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.map((o) => (
+            {paginatedOrders.map((o) => (
               <tr key={o.id} className="border-b border-gray-300">
                 <td className="p-2 border-x border-gray-300 font-medium">{o.id}</td>
                 <td className="p-2 border-x border-gray-300">{o.userId}</td>
@@ -221,14 +284,92 @@ export const OrderList: React.FC<OrderListProps> = ({ onEdit, onDelete, refreshT
                 <td className="p-2 border-x border-gray-300">{o.trackingNumber}</td>
                 <td className="p-2 border-x border-gray-300">
                   <div className="flex items-center justify-center gap-2">
-                    <Button onClick={() => onEdit(o)} className="mr-2 text-xs px-2 py-1">Edit</Button>
-                    <Button onClick={() => handleDelete(o.id)} className="text-xs px-2 py-1">Delete</Button>
+                    <Button onClick={() => onEdit(o)} className="mr-2">Edit</Button>
+                    <Button onClick={() => handleDelete(o.id)}>Delete</Button>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      )}
+
+      {/* Pagination Controls */}
+      {filteredOrders.length > 0 && (
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-sm text-gray-600">
+            Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems} entries
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {/* First Page Button */}
+            <button
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded ${
+                currentPage === 1
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              First
+            </button>
+
+            {/* Previous Page Button */}
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded ${
+                currentPage === 1
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Previous
+            </button>
+
+            {/* Page Numbers */}
+            {getVisiblePages().map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-1 rounded ${
+                  page === currentPage
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            {/* Next Page Button */}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded ${
+                currentPage === totalPages
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Next
+            </button>
+
+            {/* Last Page Button */}
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded ${
+                currentPage === totalPages
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Last
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

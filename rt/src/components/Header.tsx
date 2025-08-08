@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserLoyaltyInfo } from '../config/api';
 import { IUserLoyalty } from '../types/backend';
+import { APP_ICON } from '../config';
 import './Header.css';
 
 interface HeaderProps {
@@ -106,7 +107,7 @@ const Header: React.FC<HeaderProps> = ({ toggleCart, toggleMenu }) => {
                     {/* Brand Logo/Name */}
                     <div className="header-brand">
                         <button className="brand-button" onClick={handleHome}>
-                            <img src="/flower.svg" alt="FlowerShop" className="brand-icon" />
+                            <img src={APP_ICON} alt="FlowerShop" className="brand-icon" />
                             <span className="brand-name">FlowerShop</span>
                         </button>
                     </div>
@@ -185,7 +186,7 @@ const Header: React.FC<HeaderProps> = ({ toggleCart, toggleMenu }) => {
 
                 <header className="mobile-header">
                     <div className="mobile-brand" onClick={handleHome}>
-                        <img src="/flower.svg" alt="FlowerShop" className="mobile-brand-icon" />
+                        <img src={APP_ICON} alt="FlowerShop" className="mobile-brand-icon" />
                         <span className="mobile-brand-name">FlowerShop</span>
                     </div>
                     

@@ -39,6 +39,9 @@ const loadProducts = async (
         sortBy,
         sortDirection,
       });
+      if (!productsData || !productsData.data) {
+        throw new Error("No data returned from API");
+      }
       setProducts(productsData.data.products);
       setTotalProducts(productsData.data.pagination.totalItems);
       setCurrentPage(page);

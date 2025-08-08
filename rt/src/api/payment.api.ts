@@ -1,12 +1,12 @@
-import { IPaymentRequest, IPaymentResponse } from "../types/backend";
+import { IBackendRes, IPaymentRequest, IPaymentResponse } from "../types/backend";
 import instance from "../config/axios-customize";
 
 export const PaymentService = {
-  createPayment: (paymentData: IPaymentRequest): Promise<IPaymentResponse> => {
+  createPayment: (paymentData: IPaymentRequest): Promise<IBackendRes<IPaymentResponse>> => {
     return instance.post('/api/Payment', paymentData);
   },
 
-  getPaymentStatus: (paymentId: number): Promise<IPaymentResponse> => {
+  getPaymentStatus: (paymentId: number): Promise<IBackendRes<IPaymentResponse>> => {
     return instance.get(`/api/Payment/${paymentId}`);
   },
 

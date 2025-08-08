@@ -1,4 +1,4 @@
-import { IProduct } from "../types/backend";
+import { IBackendRes, IProduct } from "../types/backend";
 import instance from "../config/axios-customize";
 
 export const ProductService = {
@@ -15,7 +15,7 @@ export const ProductService = {
     searchTerm?: string;
     sortBy?: number; // 0: Name, 1: Price, 2: Stock, 3: Status
     sortDirection?: number; // 0: Asc, 1: Desc
-  }): Promise<{ products: IProduct[]; pagination: { totalItems: number } }> => {
+  }): Promise<IBackendRes<{ products: IProduct[]; pagination: { totalItems: number } }>> => {
     const queryParams = new URLSearchParams();
 
     if (params) {
@@ -49,7 +49,7 @@ export const ProductService = {
     return instance.get(`/api/products/${productId}`);
   },
 
-  createProduct: (formData: FormData): Promise<IProduct> => {
+  createProduct: (formData: FormData): Promise<IBackendRes<IProduct>> => {
     return instance.post('/api/products', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',

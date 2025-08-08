@@ -10,7 +10,7 @@ export const AdminService = {
     return instance.get('/api/admin/users');
   },
 
-  updateUserRole: (userId: string, roleName: string[]): Promise<IUser> => {
-    return instance.post(`/api/admin/update-user-role`, { userId, newRoleName: roleName[0] });
+  updateUserRole: (userId: string, newRoleName: string): Promise<string> => {
+    return instance.post(`/api/admin/update-user-role`, { userId, newRoleName });
   },
 };

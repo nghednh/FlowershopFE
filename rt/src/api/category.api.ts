@@ -1,4 +1,4 @@
-import { ICategory } from "../types/backend";
+import { IBackendRes, ICategory } from "../types/backend";
 import instance from "../config/axios-customize";
 
 export const CategoryService = {
@@ -6,11 +6,11 @@ export const CategoryService = {
     return instance.get('/api/category');
   },
 
-  createCategory: (category: Omit<ICategory, 'id'>): Promise<ICategory> => {
+  createCategory: (category: Omit<ICategory, 'id'>): Promise<IBackendRes<ICategory>> => {
     return instance.post('/api/category', category);
   },
 
-  updateCategory: (id: number, category: Partial<ICategory>): Promise<ICategory> => {
+  updateCategory: (id: number, category: Partial<ICategory>): Promise<IBackendRes<ICategory>> => {
     return instance.put(`/api/category/${id}`, category);
   },
 

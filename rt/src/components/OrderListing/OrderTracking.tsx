@@ -3,6 +3,26 @@ import { useParams } from "react-router-dom";
 import { IOrder, OrderStatus, PaymentMethod } from "../../types/backend.d";
 import { getOrderDetails } from "../../config/api";
 
+// Extended interface for order details with additional information
+interface IOrderDetails extends IOrder {
+  userName?: string;
+  address?: {
+    fullName: string;
+    streetAddress: string;
+    city: string;
+    phoneNumber: string;
+  };
+  orderItems?: {
+    id: number;
+    name: string;
+    quantity: number;
+    price: number;
+    product?: {
+      images?: { imageUrl: string }[];
+    };
+  }[];
+}
+
 const trackingSteps: OrderStatus[] = [
   OrderStatus.Pending,
   OrderStatus.Processing,
@@ -17,8 +37,7 @@ const orderStatusToStep = (status: OrderStatus) => {
 
 export default function OrderTracking() {
   const { orderId } = useParams<{ orderId: string }>();
-  const [order, setOrder] = useState<IOrder | null>(null);
-  const [response, setResponse] = useState<null>(null);
+  const [order, setOrder] = useState<IOrderDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,9 +46,9 @@ export default function OrderTracking() {
 
     getOrderDetails(Number(orderId))
       .then((res) => {
+        console.log("Order details responseeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee:", res);
         if (res) {
-          setOrder(res);
-          setResponse(res);
+          setOrder(res as IOrderDetails);
         } else {
           setError("Order not found.");
         }
@@ -59,7 +78,9 @@ export default function OrderTracking() {
       <div className="space-y-1">
         <p className="text-lg font-medium">Order ID: {order.id}</p>
         <p className="text-sm text-gray-500">Tracking Number: {order.trackingNumber}</p>
-        <p className="text-sm text-gray-500">User: {response.userName}</p>
+        {order.userName && (
+          <p className="text-sm text-gray-500">User: {order.userName}</p>
+        )}
         <p className="text-sm text-gray-500">
           Created: {new Date(order.createdAt).toLocaleString()}
         </p>
@@ -76,41 +97,45 @@ export default function OrderTracking() {
         </p>
       </div>
 
-      <div>
-        <h2 className="font-semibold mb-1">Shipping Address</h2>
-        <div className="text-sm text-gray-700">
-          <p>{response.address.fullName}</p>
-          <p>{response.address.streetAddress}</p>
-          <p>{response.address.city}</p>
-          <p>{response.address.phoneNumber}</p>
+      {order.address && (
+        <div>
+          <h2 className="font-semibold mb-1">Shipping Address</h2>
+          <div className="text-sm text-gray-700">
+            <p>{order.address.fullName}</p>
+            <p>{order.address.streetAddress}</p>
+            <p>{order.address.city}</p>
+            <p>{order.address.phoneNumber}</p>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div>
-        <h2 className="font-semibold mb-1">Items</h2>
-        <div className="space-y-4">
-          {response.orderItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex gap-4 items-center border p-3 rounded-md"
-            >
-              <img
-                src={item.product.images?.[0]?.imageUrl}
-                alt={item.name}
-                className="w-16 h-16 object-cover rounded"
-              />
-              <div className="flex-1 text-sm">
-                <p className="font-medium">{item.name}</p>
-                <p>Quantity: {item.quantity}</p>
-                <p>Price per item: ${item.price.toFixed(2)}</p>
-                <p className="font-semibold">
-                  Subtotal: ${(item.price * item.quantity).toFixed(2)}
-                </p>
+      {order.orderItems && order.orderItems.length > 0 && (
+        <div>
+          <h2 className="font-semibold mb-1">Items</h2>
+          <div className="space-y-4">
+            {order.orderItems.map((item: NonNullable<IOrderDetails['orderItems']>[0]) => (
+              <div
+                key={item.id}
+                className="flex gap-4 items-center border p-3 rounded-md"
+              >
+                <img
+                  src={item.product?.images?.[0]?.imageUrl || '/placeholder-image.jpg'}
+                  alt={item.name}
+                  className="w-16 h-16 object-cover rounded"
+                />
+                <div className="flex-1 text-sm">
+                  <p className="font-medium">{item.name}</p>
+                  <p>Quantity: {item.quantity}</p>
+                  <p>Price per item: ${item.price.toFixed(2)}</p>
+                  <p className="font-semibold">
+                    Subtotal: ${(item.price * item.quantity).toFixed(2)}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {order.orderStatus === OrderStatus.Cancelled ? (
         <div className="text-red-600 font-semibold mt-4">Order has been cancelled.</div>

@@ -10,7 +10,7 @@ import { createPricingRule, updatePricingRule, getProducts } from "../../../conf
 
 interface PricingRuleFormProps {
   rule?: IPricingRule;
-  onSave: (data: IPricingRule) => void;
+  onSave: () => void;
   onClose: () => void;
 }
 
@@ -36,6 +36,9 @@ export const PricingRuleForm: React.FC<PricingRuleFormProps> = ({ rule, onSave, 
 
 
       const productsData = await getProducts();
+      if (!productsData || !productsData.data || !Array.isArray(productsData.data.products))
+        throw new Error("Invalid products data format");
+
       setProducts(productsData.data.products);
     } catch (err: any) {
       setError(err.message || 'Failed to load products');
@@ -194,7 +197,7 @@ export const PricingRuleForm: React.FC<PricingRuleFormProps> = ({ rule, onSave, 
       if (!rule || rule.pricingRuleId === 0) {
         createPricingRule(ruleData)
           .then(response => {
-            onSave(response.data);
+            onSave();
             console.log("Pricing rule created successfully:", response);
             onClose();
           })
@@ -207,7 +210,7 @@ export const PricingRuleForm: React.FC<PricingRuleFormProps> = ({ rule, onSave, 
       } else {
         updatePricingRule(rule.pricingRuleId, ruleData)
           .then(response => {
-            onSave(response.data.rule);
+            onSave();
             console.log("Pricing rule updated successfully:", response);
           })
           .catch(error => {

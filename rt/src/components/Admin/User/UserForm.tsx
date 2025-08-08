@@ -6,7 +6,7 @@ import { updateUserRole } from "../../../config/api";
 
 interface UserFormProps {
   user?: IUser;
-  onSave: (data: IUser) => void;
+  onSave: () => void;
   onClose: () => void;
 }
 
@@ -35,8 +35,8 @@ export const UserForm: React.FC<UserFormProps> = ({ user, onSave, onClose }) => 
       if (!user || user.id === 0) {
       } else {
         // Update existing user role
-        const response = await updateUserRole(user.id.toString(), formData.roles);
-        onSave(response.data);
+        const response = await updateUserRole(user.id.toString(), formData.roles[0]);
+        onSave();
         console.log("User updated successfully:", response);
       }
 

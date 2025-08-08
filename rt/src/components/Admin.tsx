@@ -170,71 +170,14 @@ const Admin = () => {
     }
   };
 
-  const handleProductSave = async (data: IProduct) => {
+  const handleSave = async (type: string) => {
     try {
       setError(null);
       closeModal();
       setRefreshTrigger(prev => prev + 1);
     } catch (err: any) {
-      setError(err.message || 'Failed to save product');
-      console.error('Error saving product:', err);
-    }
-  };
-
-  const handleUserSave = async (user: IUser) => {
-    try {
-      setError(null);
-      closeModal();
-      setRefreshTrigger(prev => prev + 1);
-    } catch (err: any) {
-      setError(err.message || 'Failed to save user');
-      console.error('Error saving user:', err);
-    }
-  };
-
-  const handlePricingRuleSave = async (data: IPricingRule) => {
-    try {
-      setError(null);
-      closeModal();
-      setRefreshTrigger(prev => prev + 1);
-    }
-    catch (err: any) {
-      setError(err.message || 'Failed to save pricing rule');
-      console.error('Error saving pricing rule:', err);
-    }
-  }
-
-  const handleCategorySave = async (data: ICategory) => {
-    try {
-      setError(null);
-      closeModal();
-      setRefreshTrigger(prev => prev + 1);
-    } catch (err: any) {
-      setError(err.message || 'Failed to save category');
-      console.error('Error saving category:', err);
-    }
-  };
-
-  const handleOrderSave = async (data: IOrder) => {
-    try {
-      setError(null);
-      closeModal();
-      setRefreshTrigger(prev => prev + 1);
-    }
-    catch (err: any) {
-      setError(err.message || 'Failed to save order');
-      console.error('Error saving order:', err);
-    }
-  };
-
-  const handleLoyaltySave = async (data: IUserSummaryLoyalty) => {
-    try {
-      setError(null);
-      closeModal();
-      setRefreshTrigger(prev => prev + 1);
-    } catch (err: any) {
-      setError(err.message || 'Failed to update loyalty points');
-      console.error('Error updating loyalty points:', err);
+      setError(err.message || `Failed to save ${type}`);
+      console.error(`Error saving ${type}:`, err);
     }
   };
 
@@ -264,7 +207,7 @@ const Admin = () => {
             <Modal isOpen={modal.isOpen && modal.type === "flower"} onClose={closeModal}>
               <FlowerForm
                 flower={modal.data ?? undefined}
-                onSave={handleProductSave}
+                onSave={() => handleSave("product")}
                 onClose={closeModal}
               />
             </Modal>
@@ -283,7 +226,7 @@ const Admin = () => {
               <PricingRuleForm
                 rule={modal.data ?? undefined}
                 onClose={closeModal}
-                onSave={handlePricingRuleSave}
+                onSave={() => handleSave("pricing rule")}
               />
             </Modal>
           </>
@@ -299,7 +242,7 @@ const Admin = () => {
               <OrderForm
                 order={modal.data ?? undefined}
                 onClose={closeModal}
-                onSave={handleOrderSave}
+                onSave={() => handleSave("order")}
               />
             </Modal>
           </>
@@ -314,7 +257,7 @@ const Admin = () => {
             <Modal isOpen={modal.isOpen && modal.type === "user"} onClose={closeModal}>
               <UserForm
                 user={modal.data ?? undefined}
-                onSave={handleUserSave}
+                onSave={() => handleSave("user")}
                 onClose={closeModal}
               />
             </Modal>
@@ -347,7 +290,7 @@ const Admin = () => {
             <Modal isOpen={modal.isOpen && modal.type === "category"} onClose={closeModal}>
               <CategoryForm
                 category={modal.data ?? undefined}
-                onSave={handleCategorySave}
+                onSave={() => handleSave("category")}
                 onClose={closeModal}
               />
             </Modal>
@@ -375,7 +318,7 @@ const Admin = () => {
               {modal.data && (
                 <LoyaltyForm
                   user={modal.data as IUserSummaryLoyalty}
-                  onSave={handleLoyaltySave}
+                  onSave={() => handleSave("loyalty points")}
                   onClose={closeModal}
                 />
               )}

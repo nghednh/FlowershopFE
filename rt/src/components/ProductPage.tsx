@@ -28,11 +28,11 @@ const ProductPage: React.FC = () => {
         setProduct(response);
 
         // Initialize gallery images with primary image
-        const primaryImage = response.images && response.images.length > 0
-          ? response.images.map(img => img.imageUrl)
+        const imageUrls: string[] = response.imageUrls && response.imageUrls.length > 0
+          ? response.imageUrls
           : ['https://via.placeholder.com/800x600/FFDDC1/800000?text=No+Image'];
-        setGalleryImages(primaryImage);
-        setCurrentDisplayImage(primaryImage[0]);
+        setGalleryImages(imageUrls);
+        setCurrentDisplayImage(imageUrls[0]);
 
         // Fetch dynamic pricing
         await fetchDynamicPrice(Number(id));
@@ -41,7 +41,7 @@ const ProductPage: React.FC = () => {
         if (response.categories && response.categories.length > 0) {
           try {
             const relatedResponse = await getSimilarProducts(response.id, 6);
-            const filtered = relatedResponse.data?.products || relatedResponse.products || [];
+            const filtered = relatedResponse.products;
             setRelatedProducts(filtered);
           } catch (relatedError) {
             console.error('Error fetching related products:', relatedError);
@@ -65,11 +65,7 @@ const ProductPage: React.FC = () => {
       const currentTime = new Date().toISOString();
       const priceResponse = await getDynamicPrice(productId, currentTime);
       console.log('Dynamic price response:', priceResponse);
-
-      if (priceResponse.success && priceResponse.data) {
-        setDynamicPrice(priceResponse.data.dynamicPrice);
-        console.log('Dynamic price fetched:', priceResponse.data);
-      }
+      setDynamicPrice(priceResponse.dynamicPrice);
     } catch (err) {
       console.error('Error fetching dynamic price:', err);
       // Fallback to base price if dynamic pricing fails

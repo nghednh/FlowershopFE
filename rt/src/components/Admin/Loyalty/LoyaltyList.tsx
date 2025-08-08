@@ -21,11 +21,15 @@ export const LoyaltyList: React.FC<LoyaltyListProps> = ({ onEdit, refreshTrigger
       setError(null);
       const response = await getAllUsersLoyaltyInfo();
       console.log("Loyalty Users Response:", response);
-      // Since API now returns { users: IUserSummaryLoyalty[] } directly
+      
+      // Handle the response structure properly
       if (Array.isArray(response)) {
         setUsers(response);
+      } else if (response && response.users) {
+        setUsers(response.users);
       } else {
-        setUsers(response.users || []);
+        console.warn("Unexpected response structure:", response);
+        setUsers([]);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to load loyalty data');

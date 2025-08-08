@@ -1,15 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../../Button";
-import { IOrder } from "../../../types/backend";
+import { IOrder, OrderStatus, PaymentMethod } from "../../../types/backend.d";
 import { getOrders } from "../../../config/api";
-
-export enum OrderStatus {
-    "Pending",
-    "Processing",
-    "Shipped",
-    "Delivered",
-    "Cancelled"
-}
 
 interface OrderListProps {
   onEdit: (order: IOrder) => void;
@@ -82,14 +74,15 @@ export const OrderList: React.FC<OrderListProps> = ({ onEdit, onDelete, refreshT
       const matchesSearch = o.id.toString().includes(searchTerm) ||
         OrderStatus[o.orderStatus].toLowerCase().includes(searchTerm.toLowerCase()) ||
         o.trackingNumber.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = !statusFilter || OrderStatus[o.orderStatus] === statusFilter;
+      const matchesStatus = !statusFilter || OrderStatus[o.orderStatus] === String(statusFilter);
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
       if (!sortInput.field) return 0;
       const multiplier = sortInput.order === "asc" ? 1 : -1;
       if (sortInput.field === "id") return multiplier * (a.id - b.id);
-      if (sortInput.field === "orderStatus") return multiplier * a.orderStatus.localeCompare(b.orderStatus);
+      if (sortInput.field === "userId") return multiplier * (a.userId - b.userId);
+      if (sortInput.field === "orderStatus") return multiplier * OrderStatus[a.orderStatus].localeCompare(OrderStatus[b.orderStatus]);
       if (sortInput.field === "sum") return multiplier * (a.sum - b.sum);
       if (sortInput.field === "createdAt") return multiplier * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
       return 0;
@@ -109,6 +102,15 @@ export const OrderList: React.FC<OrderListProps> = ({ onEdit, onDelete, refreshT
       case OrderStatus.Pending: return 'text-orange-600';
       case OrderStatus.Cancelled: return 'text-red-600';
       default: return 'text-gray-600';
+    }
+  };
+
+  const getPaymentMethodName = (method: PaymentMethod): string => {
+    switch (method) {
+      case PaymentMethod.COD: return "Cash on Delivery";
+      case PaymentMethod.PayPal: return "PayPal";
+      case PaymentMethod.VNPay: return "VNPay";
+      default: return "Unknown";
     }
   };
 
@@ -156,12 +158,16 @@ export const OrderList: React.FC<OrderListProps> = ({ onEdit, onDelete, refreshT
               }}
               className="border border-gray-300 p-2 rounded text-sm"
             >
-              <option value="id|desc">ID Descending</option>
-              <option value="id|asc">ID Ascending</option>
+              <option value="id|desc">Order ID Descending</option>
+              <option value="id|asc">Order ID Ascending</option>
+              <option value="userId|asc">User ID Ascending</option>
+              <option value="userId|desc">User ID Descending</option>
               <option value="sum|asc">Amount Ascending</option>
               <option value="sum|desc">Amount Descending</option>
               <option value="createdAt|desc">Date Descending</option>
               <option value="createdAt|asc">Date Ascending</option>
+              <option value="orderStatus|asc">Status Ascending</option>
+              <option value="orderStatus|desc">Status Descending</option>
             </select>
           </div>
         </div>
@@ -185,13 +191,18 @@ export const OrderList: React.FC<OrderListProps> = ({ onEdit, onDelete, refreshT
                 onClick={() => handleSortInputChange('id', sortInput.order === 'asc' ? 'desc' : 'asc')}
               >Order ID {sortInput.field === 'id' && (sortInput.order === 'asc' ? '↑' : '↓')}</th>
               <th className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
-              >Status {sortInput.field === 'orderStatus'}</th>
+                onClick={() => handleSortInputChange('userId', sortInput.order === 'asc' ? 'desc' : 'asc')}
+              >User ID {sortInput.field === 'userId' && (sortInput.order === 'asc' ? '↑' : '↓')}</th>
               <th className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
                 onClick={() => handleSortInputChange('sum', sortInput.order === 'asc' ? 'desc' : 'asc')}
               >Total Amount {sortInput.field === 'sum' && (sortInput.order === 'asc' ? '↑' : '↓')}</th>
               <th className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
                 onClick={() => handleSortInputChange('createdAt', sortInput.order === 'asc' ? 'desc' : 'asc')}
               >Order Date {sortInput.field === 'createdAt' && (sortInput.order === 'asc' ? '↑' : '↓')}</th>
+              <th className="text-black font-bold uppercase p-2 border border-gray-300">Payment Method</th>
+              <th className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer"
+                onClick={() => handleSortInputChange('orderStatus', sortInput.order === 'asc' ? 'desc' : 'asc')}
+              >Order Status {sortInput.field === 'orderStatus' && (sortInput.order === 'asc' ? '↑' : '↓')}</th>
               <th className="text-black font-bold uppercase p-2 border border-gray-300">Tracking Number</th>
               <th className="text-black font-bold uppercase p-2 border border-gray-300">Actions</th>
             </tr>
@@ -200,16 +211,18 @@ export const OrderList: React.FC<OrderListProps> = ({ onEdit, onDelete, refreshT
             {filteredOrders.map((o) => (
               <tr key={o.id} className="border-b border-gray-300">
                 <td className="p-2 border-x border-gray-300 font-medium">{o.id}</td>
+                <td className="p-2 border-x border-gray-300">{o.userId}</td>
+                <td className="p-2 border-x border-gray-300 font-medium">${o.sum.toFixed(2)}</td>
+                <td className="p-2 border-x border-gray-300">{formatDate(o.createdAt)}</td>
+                <td className="p-2 border-x border-gray-300">{getPaymentMethodName(o.paymentMethod)}</td>
                 <td className={`p-2 border-x border-gray-300 font-semibold ${getStatusColor(o.orderStatus)}`}>
                   {OrderStatus[o.orderStatus]}
                 </td>
-                <td className="p-2 border-x border-gray-300">${o.sum}</td>
-                <td className="p-2 border-x border-gray-300">{formatDate(o.createdAt)}</td>
                 <td className="p-2 border-x border-gray-300">{o.trackingNumber}</td>
                 <td className="p-2 border-x border-gray-300">
                   <div className="flex items-center justify-center gap-2">
-                    <Button onClick={() => onEdit(o)} className="mr-2">Edit</Button>
-                    <Button onClick={() => handleDelete(o.id)}>Delete</Button>
+                    <Button onClick={() => onEdit(o)} className="mr-2 text-xs px-2 py-1">Edit</Button>
+                    <Button onClick={() => handleDelete(o.id)} className="text-xs px-2 py-1">Delete</Button>
                   </div>
                 </td>
               </tr>

@@ -2,18 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Select } from "../../Select";
 import { Input } from "../../Input";
 import { Button } from "../../Button";
-import { IOrder, IUser } from "../../../types/backend";
+import { IOrder, IUser, PaymentMethod, OrderStatus } from "../../../types/backend.d";
 import { createOrder, updateOrder, getUsers, getUserAddresses } from "../../../config/api";
-
-export enum PaymentMethod {
-    COD,        // Cash on Delivery
-    PayPal,
-    VNPay
-}
 
 interface OrderFormProps {
   order?: IOrder;
-  onSave: (data: IOrder) => void;
+  onSave: () => void;
   onClose: () => void;
 }
 
@@ -25,13 +19,13 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
       cartId: 0,
       addressId: 0,
       paymentMethod: PaymentMethod.COD,
-      totalAmount: 0,
-      status: "Pending",
+      trackingNumber: "",
+      sum: 0,
+      orderStatus: OrderStatus.Pending,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
   );
-
   const [users, setUsers] = useState<IUser[]>([]);
   const [addresses, setAddresses] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -40,6 +34,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
 
   const loadData = async () => {
     try {
+      console.log('Order Dataaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:', order);
       setLoading(true);
       setError(null);
 
@@ -48,8 +43,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
         getUserAddresses(),
       ]);
 
-      setUsers(usersData.data);
-      setAddresses(addressesData.data || []);
+      console.log("Users Dataaaaaaaaaaaaaaaaaaaaaaaaaaa:", usersData);
+
+      setUsers(usersData);
+      setAddresses(addressesData || []);
     } catch (err: any) {
       setError(err.message || 'Failed to load data');
       console.error('Error loading data:', err);
@@ -64,7 +61,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
 
   // Validate required fields and constraints
   const validateForm = (): boolean => {
-    const { userId, totalAmount, status } = formData;
+    const { userId, sum, orderStatus } = formData;
 
     // User ID validation
     if (!userId || userId <= 0) {
@@ -72,20 +69,22 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
       return false;
     }
 
-    // Total Amount validation
-    if (!totalAmount || totalAmount <= 0) {
-      setValidationError("Total Amount must be greater than 0");
-      return false;
-    }
+    // Sum validation (only for new orders)
+    if (!order) {
+      if (!sum || sum <= 0) {
+        setValidationError("Total Amount must be greater than 0");
+        return false;
+      }
 
-    if (totalAmount > 999999.99) {
-      setValidationError("Total Amount cannot exceed $999,999.99");
-      return false;
+      if (sum > 999999.99) {
+        setValidationError("Total Amount cannot exceed $999,999.99");
+        return false;
+      }
     }
 
     // Status validation
-    const validStatuses = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
-    if (!status || !validStatuses.includes(status)) {
+    const validStatuses = [OrderStatus.Pending, OrderStatus.Processing, OrderStatus.Shipped, OrderStatus.Delivered, OrderStatus.Cancelled];
+    if (orderStatus === undefined || !validStatuses.includes(orderStatus)) {
       setValidationError("Please select a valid status");
       return false;
     }
@@ -112,9 +111,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
       };
 
       if (!order || order.id === 0) {
-        createOrder(orderData)
+        createOrder({ cartId: orderData.cartId, addressId: orderData.addressId, paymentMethod: orderData.paymentMethod })
           .then(response => {
-            onSave(response.data);
+            onSave();
             console.log("Order created successfully:", response);
             onClose();
           })
@@ -125,9 +124,9 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
             console.error("Request data:", error.config?.data);
           });
       } else {
-        updateOrder(order.id, orderData.status, "trackingNumber")
+        updateOrder(order.id, orderData.orderStatus, orderData.trackingNumber)
           .then(response => {
-            onSave(response.data);
+            onSave();
             console.log("Order updated successfully:", response);
           })
           .catch(error => {
@@ -178,32 +177,8 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
       )}
 
       <Select
-        label="User"
-        value={formData.userId.toString()}
-        onChange={(e) => {
-          setFormData({ ...formData, userId: Number(e.target.value) });
-          setTimeout(() => validateAll(), 0);
-        }}
-        options={[
-          { value: "0", label: "Select a user" },
-          ...users.map((user) => ({
-            value: user.id.toString(),
-            label: `${user.firstName} ${user.lastName} (ID: ${user.id})`
-          }))
-        ]}
-        required
-      />
-
-      <Input
-        label="Cart ID"
-        type="number"
-        value={formData.cartId.toString()}
-        onChange={(e) => setFormData({ ...formData, cartId: Number(e.target.value) || 0 })}
-      />
-
-      <Select
         label="Address"
-        value={formData.addressId.toString()}
+        value={formData.addressId}
         onChange={(e) => setFormData({ ...formData, addressId: Number(e.target.value) })}
         options={[
           { value: "0", label: "Select an address" },
@@ -216,7 +191,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
 
       <Select
         label="Payment Method"
-        value={formData.paymentMethod.toString()}
+        value={formData.paymentMethod?.toString() || PaymentMethod.COD.toString()}
         onChange={(e) => setFormData({ ...formData, paymentMethod: Number(e.target.value) as PaymentMethod })}
         options={[
           { value: PaymentMethod.COD.toString(), label: getPaymentMethodName(PaymentMethod.COD) },
@@ -227,32 +202,39 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
       />
 
       <Input
-        label="Total Amount"
-        type="number"
-        step={0.01}
-        min={0.01}
-        max={999999.99}
-        value={formData.totalAmount}
-        onChange={(e) => {
-          setFormData({ ...formData, totalAmount: Number(e.target.value) });
-          setTimeout(() => validateAll(), 0);
-        }}
-        required
+        label="Tracking Number"
+        type="text"
+        value={formData.trackingNumber}
+        onChange={(e) => setFormData({ ...formData, trackingNumber: e.target.value })}
       />
+
+      {!order && (
+        <Input
+          label="Total Amount"
+          type="number"
+          step={0.01}
+          value={formData.sum}
+          onChange={(e) => {
+            setFormData({ ...formData, sum: Number(e.target.value) });
+            setTimeout(() => validateAll(), 0);
+          }}
+          required
+        />
+      )}
 
       <Select
         label="Status"
-        value={formData.status}
+        value={formData.orderStatus.toString()}
         onChange={(e) => {
-          setFormData({ ...formData, status: e.target.value });
+          setFormData({ ...formData, orderStatus: Number(e.target.value) as OrderStatus });
           setTimeout(() => validateAll(), 0);
         }}
         options={[
-          { value: "Pending", label: "Pending" },
-          { value: "Processing", label: "Processing" },
-          { value: "Shipped", label: "Shipped" },
-          { value: "Delivered", label: "Delivered" },
-          { value: "Cancelled", label: "Cancelled" }
+          { value: OrderStatus.Pending.toString(), label: "Pending" },
+          { value: OrderStatus.Processing.toString(), label: "Processing" },
+          { value: OrderStatus.Shipped.toString(), label: "Shipped" },
+          { value: OrderStatus.Delivered.toString(), label: "Delivered" },
+          { value: OrderStatus.Cancelled.toString(), label: "Cancelled" }
         ]}
         required
       />

@@ -26,7 +26,7 @@ export const OrderService = {
     return instance.put(`/api/Orders/${orderId}`, { orderStatus: orderStatus, trackingNumber });
   },
 
-  getMyOrders: (): Promise<IOrder> => {
+  getMyOrders: (): Promise<IOrder[]> => {
     return instance.get(`api/Orders/my-orders`);
   },
 };

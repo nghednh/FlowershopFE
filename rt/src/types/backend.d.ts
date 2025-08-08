@@ -203,3 +203,12 @@ export interface IUserRegister {
     errors: string[];
     timestamp: string;
 }
+
+export interface IAddressResponse {
+    success: boolean;
+    message?: string;
+    data?: IAddress[];
+    errors?: string[];
+    statusCode?: number;
+    timestamp?: string;
+}

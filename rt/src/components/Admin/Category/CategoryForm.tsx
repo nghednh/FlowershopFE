@@ -6,7 +6,7 @@ import { createCategory, updateCategory } from "../../../config/api";
 
 interface CategoryFormProps {
   category?: ICategory;
-  onSave: (data: ICategory) => void;
+  onSave: () => void;
   onClose: () => void;
 }
 
@@ -67,7 +67,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ category, onSave, on
       if (!category || category.id === 0) {
         createCategory(categoryData)
           .then(response => {
-            onSave(response);
+            onSave();
             console.log("Category created successfully:", response);
             onClose();
           })
@@ -80,7 +80,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ category, onSave, on
       } else {
         updateCategory(category.id, categoryData)
           .then(response => {
-            onSave(response);
+            onSave();
             console.log("Category updated successfully:", response);
           })
           .catch(error => {

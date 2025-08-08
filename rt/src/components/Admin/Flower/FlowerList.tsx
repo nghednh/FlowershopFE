@@ -26,9 +26,12 @@ export const FlowerList: React.FC<FlowerListProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Define filter types
+  type FilterKey = 'New' | 'Old' | 'Low Stock';
+  
   // Controlled filter/search/sort states
   const [searchInput, setSearchInput] = useState("");
-  const [filtersInput, setFiltersInput] = useState({ New: false, Old: false, "Low Stock": false });
+  const [filtersInput, setFiltersInput] = useState<Record<FilterKey, boolean>>({ New: false, Old: false, "Low Stock": false });
   const [categoriesInput, setCategoriesInput] = useState(categories[0]?.id || 0);
   const [sortInput, setSortInput] = useState<{ field: string; order: 'asc' | 'desc' }>({ field: 'name', order: 'asc' });
 
@@ -64,6 +67,9 @@ export const FlowerList: React.FC<FlowerListProps> = ({
         sortBy,
         sortDirection,
       });
+      if (!productsData || !productsData.data || !productsData.data.products) {
+        throw new Error("Invalid products data structure");
+      }
       setProducts(productsData.data.products);
       setTotalProducts(productsData.data.pagination.totalItems);
       setCurrentPage(page);
@@ -115,7 +121,7 @@ export const FlowerList: React.FC<FlowerListProps> = ({
     setSearchInput(e.target.value);
   };
 
-  const handleFilterInputChange = (filterName: string) => {
+  const handleFilterInputChange = (filterName: FilterKey) => {
     setFiltersInput({ ...filtersInput, [filterName]: !filtersInput[filterName] });
   };
 
@@ -147,7 +153,7 @@ export const FlowerList: React.FC<FlowerListProps> = ({
 
   const handleResetFilters = () => {
     setSearchInput("");
-    setFiltersInput({ New: false, Old: false, "Low Stock": false });
+    setFiltersInput({ "New": false, Old: false, "Low Stock": false });
     setSortInput({ field: 'name', order: 'asc' });
     loadProducts(1, pageSize, [], [], "", { field: 'name', order: 'asc' });
   };
@@ -209,7 +215,7 @@ export const FlowerList: React.FC<FlowerListProps> = ({
           />
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Filter by Status:</span>
-            {["New", "Old", "Low Stock"].map((status) => (
+            {(["New", "Old", "Low Stock"] as FilterKey[]).map((status) => (
               <label key={status} className="flex items-center gap-1 text-sm">
                 <input
                   type="checkbox"

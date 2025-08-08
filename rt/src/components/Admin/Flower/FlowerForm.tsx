@@ -14,7 +14,7 @@ const isValidCategoryIds = (ids: number[]) => ids.length > 0;
 
 interface FlowerFormProps {
   flower?: IProduct;
-  onSave: (flower: IProduct) => void;
+  onSave: () => void;
   onClose: () => void;
 
 }
@@ -50,6 +50,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, onClose 
   const loadCategories = async () => {
     try {
       const response = await getCategories();
+      console.log("Fetched categories:", response);
       setCategories(response);
     } catch (error) {
       console.error('Error loading categories:', error);
@@ -101,7 +102,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, onClose 
     if (!flower || flower.id === 0) {
       createProduct(formDataToSend)
         .then(response => {
-          onSave(response.data);
+          onSave();
           console.log("Product saved successfully:", response);
           onClose();
         })
@@ -115,7 +116,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, onClose 
       // Update existing flower
       updateProduct(flower.id, formDataToSend)
         .then(response => {
-          onSave(response.data);
+          onSave();
           console.log("Product updated successfully:", response);
           onClose();
         })

@@ -116,6 +116,8 @@ const ProductListingPage: React.FC = () => {
         sortBy,
         sortDirection,
       });
+      if (!productsData.data)
+        throw new Error("No data returned from API");
       setProducts(productsData.data.products);
       setTotalProducts(productsData.data.pagination.totalItems);
       setCurrentPage(page);
@@ -183,6 +185,9 @@ const ProductListingPage: React.FC = () => {
       conditions,
       isActive: true,
     });
+    if (!res.data) {
+      throw new Error("No data returned from API");
+    }
     if (res.success) {
       const realProducts = res.data.products || [];
       const filteredMockProducts = mockProducts.filter(matchesFilters);

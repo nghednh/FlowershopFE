@@ -6,7 +6,7 @@ import { updateUserLoyaltyPoints } from "../../../config/api";
 
 interface LoyaltyFormProps {
   user: IUserSummaryLoyalty;
-  onSave: (data: IUserSummaryLoyalty) => void;
+  onSave: () => void;
   onClose: () => void;
 }
 
@@ -25,8 +25,9 @@ export const LoyaltyForm: React.FC<LoyaltyFormProps> = ({ user, onSave, onClose 
         return;
       }
 
-      const response = await updateUserLoyaltyPoints(user.id, newPointsValue);
-      onSave(response.data);
+      await updateUserLoyaltyPoints(user.id, newPointsValue);
+      
+      onSave();
       onClose();
     } catch (error: any) {
       setError(error.response?.data?.message || error.message || 'Failed to update loyalty points');

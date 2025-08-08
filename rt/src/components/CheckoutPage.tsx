@@ -143,6 +143,8 @@ const CheckoutPage: React.FC = () => {
             setPaymentDetails(paymentResponse.data);
 
             // If VNPay, redirect to payment URL
+            if (!paymentResponse.data)
+                throw new Error("Payment creation failed, no payment URL returned");
             if (paymentMethod === PaymentMethod.VNPay && paymentResponse.data.paymentUrl) {
                 // Store necessary data in localStorage before redirect
                 localStorage.setItem('pendingOrder', JSON.stringify({
@@ -165,9 +167,7 @@ const CheckoutPage: React.FC = () => {
         } catch (error) {
             console.error('Error processing payment:', error);
             alert('Failed to process payment. Please try again.');
-            console.log("Error status:", error.response?.status);
-            console.log("Error data:", error.response?.data);
-            console.log("Request data:", error.config?.data);
+            console.log("Error details:", error);
         } finally {
             setIsProcessing(false);
         }

@@ -73,7 +73,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
                         return {
                             ...item,
                             basePrice: item.price, // Assuming current price is base price
-                            dynamicPrice: priceResponse?.dynamicPrice || undefined
+                            dynamicPrice: priceResponse.data?.dynamicPrice || undefined
                         };
                     } catch (error) {
                         console.error(`Error fetching dynamic price for product ${item.productId}:`, error);

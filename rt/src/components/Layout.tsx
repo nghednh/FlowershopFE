@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from './Header';
 import ShoppingCart from './ShoppingCart';
 import Menu from './Menu';
@@ -17,13 +18,17 @@ const Layout: React.FC = () => {
         setShowMenu(!showMenu);
     };
 
+    const location = useLocation();
+    // Hide footer on /products/<productId> page
+    const hideFooter = /^\/products\/[\w-]+$/.test(location.pathname);
+
     return (
         <div className="flex flex-col min-h-screen">
             <Header toggleCart={toggleCart} toggleMenu={toggleMenu} />
             <main className="flex-grow">
                 <Outlet />
             </main>
-            <Footer />
+            {!hideFooter && <Footer />}
 
             <Menu
                 isOpen={showMenu}

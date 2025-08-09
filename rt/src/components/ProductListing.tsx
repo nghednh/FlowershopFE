@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { IProduct, ICategory } from "../types/backend.d";
 import { getCategories, getProducts } from "../config/api"
-import { mockProducts } from './ProductListing/mockProducts';
 
 import { SearchBarWithAutocomplete } from './ProductListing/SearchBarAutocomplete';
 

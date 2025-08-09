@@ -33,7 +33,7 @@ const ProductPage: React.FC = () => {
         // Initialize gallery images with primary image
         const imageUrls: string[] = response.imageUrls && response.imageUrls.length > 0
           ? response.imageUrls
-          : ['https://via.placeholder.com/800x600/FFDDC1/800000?text=No+Image'];
+          : ['/no-image.svg'];
         console.log('Gallery images:', imageUrls);
         setGalleryImages(imageUrls);
         setCurrentDisplayImage(imageUrls[0]);
@@ -70,7 +70,7 @@ const ProductPage: React.FC = () => {
       const currentTime = new Date().toISOString();
       const priceResponse = await getDynamicPrice(productId, currentTime);
       console.log('Dynamic price response:', priceResponse);
-      setDynamicPrice(priceResponse.dynamicPrice);
+      setDynamicPrice(priceResponse?.data?.dynamicPrice || null);
     } catch (err) {
       console.error('Error fetching dynamic price:', err);
       // Fallback to base price if dynamic pricing fails
@@ -124,7 +124,7 @@ const ProductPage: React.FC = () => {
           name={product.name}
           description={product.description || ''}
           category={categoryName}
-          price={finalPrice}
+          finalPrice={finalPrice}
           basePrice={product.basePrice}
           stockQuantity={product.stockQuantity}
           discountPercentage={priceChangePercentage}

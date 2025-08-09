@@ -172,7 +172,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
               onError={(e) => {
                 console.error('Error loading product image:', imageUrl);
-                e.currentTarget.src = 'https://via.placeholder.com/400x300/FFDDC1/800000?text=Beautiful+Flower';
+                e.currentTarget.src = '/no-image.svg'; // Fallback image
               }}
             />
             {/* Image overlay with sparkle effect */}

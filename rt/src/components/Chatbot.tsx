@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Send, Search, ShoppingCart, Star, ChevronDown, ChevronUp } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { 
   getPopularProducts, 
   getRecommendationsForUser,
@@ -29,6 +29,7 @@ interface ChatbotState {
 
 const Chatbot = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [typing, setTyping] = useState(false);
@@ -450,10 +451,10 @@ const ProductRecommendationsWithDynamicPrice = ({ products }: { products: IProdu
           <div 
             key={product.id} 
             className="product-recommendation-card"
-            onClick={() => window.open(`/products/${product.id}`, '_blank')}
+            onClick={() => navigate(`/products/${product.id}`)}
           >
             <img 
-              src={product.imageUrls?.[0] || 'https://via.placeholder.com/60x60'} 
+              src={product.imageUrls?.[0] || '/no-image.svg'}
               alt={product.name}
               className="product-recommendation-image"
             />

@@ -15,8 +15,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ imageUrl, onV
                 alt="Product"
                 onError={(e) => {
                     console.error('Error loading product image:', e);
-                    // Fallback image in case of error
-                    e.currentTarget.src = 'https://via.placeholder.com/150';
+                    e.currentTarget.src = '/no-image.svg';
                 }}
             />
         </div>

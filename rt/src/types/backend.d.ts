@@ -36,6 +36,7 @@ export interface ICartItem {
     productId: number;
     productName?: string;
     price: number;
+    basePrice: number;
     quantity: number;
     subTotal: number;
     productImage?: string;

@@ -13,6 +13,8 @@ interface CartItem {
     name: string;
     quantity: number;
     price: number;
+    basePrice: number;
+    dynamicPrice?: number;
 }
 
 interface AddressData {
@@ -57,24 +59,28 @@ const CheckoutPage: React.FC = () => {
         imageUrl: item.productImage,
         name: item.productName,
         quantity: item.quantity,
-        price: item.price
+        price: item.price,
+        basePrice: item.basePrice
     }));
 
     const totalAmount = contextTotalAmount;
+    // Calculate subtotal using dynamic price
+    const dynamicSubtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     // Show loading or empty state while checking cart
     if (contextCartItems.length === 0 && !orderSuccess) {
         return (
-            <div className="checkout-page">
+            <div className="checkout-page enhanced-checkout" style={{ background: 'linear-gradient(90deg, #f3e8ff 0%, #fff1f2 100%)' }}>
                 <div className="contact-info">
-                    <div className="empty-cart-message">
-                        <h2>Your cart is empty</h2>
-                        <p>Please add some items to your cart before proceeding to checkout.</p>
+                    <div className="empty-cart-message" style={{ background: 'linear-gradient(90deg, #f3e8ff 0%, #fff1f2 100%)', borderRadius: 18, padding: 40, textAlign: 'center' }}>
+                        <h2 style={{ background: 'linear-gradient(90deg, #db2777 0%, #7c3aed 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800, fontSize: '2rem', marginBottom: 12 }}>Your cart is empty</h2>
+                        <p style={{ color: '#7c3aed', fontWeight: 600 }}>Please add some items to your cart before proceeding to checkout.</p>
                         <button
                             className="continue-shopping-btn"
+                            style={{ marginTop: 20, padding: '12px 24px', background: 'linear-gradient(90deg, #10B981 60%, #db2777 100%)', color: 'white', border: 'none', borderRadius: 10, fontWeight: 600, boxShadow: '0 2px 12px #db277744', cursor: 'pointer', fontSize: '1rem' }}
                             onClick={() => navigate('/home')}
                         >
-                            Continue Shopping
+                            <span role="img" aria-label="shop">🌸</span> Continue Shopping
                         </button>
                     </div>
                 </div>
@@ -225,12 +231,12 @@ const CheckoutPage: React.FC = () => {
 
     // Success component
     const OrderSuccessMessage = () => (
-        <div className="order-success">
-            <div className="success-icon">✅</div>
-            <h2 className="success-title">Order Placed Successfully!</h2>
-            <div className="success-details">
+        <div className="order-success" style={{ background: 'linear-gradient(90deg, #f3e8ff 0%, #fff1f2 100%)', borderRadius: 18, padding: 40, textAlign: 'center' }}>
+            <div className="success-icon" style={{ fontSize: 64, marginBottom: 16, color: '#db2777' }}>✅</div>
+            <h2 className="success-title" style={{ background: 'linear-gradient(90deg, #db2777 0%, #7c3aed 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800, fontSize: '2rem', marginBottom: 24 }}>Order Placed Successfully!</h2>
+            <div className="success-details" style={{ background: '#fff1f2', padding: 24, borderRadius: 18, border: '1px solid #db2777', textAlign: 'left', width: '100%', maxWidth: 500, margin: '0 auto' }}>
                 <p><strong>Order ID:</strong> {orderDetails?.id}</p>
-                <p><strong>Total Amount:</strong> ${(totalAmount + 5.00).toFixed(2)}</p>
+                <p><strong>Total Amount:</strong> <span style={{ color: '#db2777', fontWeight: 700 }}>${(totalAmount + 5.00).toFixed(2)}</span></p>
                 <p><strong>Payment Method:</strong> {
                     paymentMethod === PaymentMethod.COD ? 'Cash on Delivery' :
                         paymentMethod === PaymentMethod.PayPal ? 'PayPal' :
@@ -238,24 +244,26 @@ const CheckoutPage: React.FC = () => {
                 }</p>
                 <p><strong>Delivery Address:</strong> {addressData.fullName}, {addressData.streetAddress}, {addressData.city}</p>
                 {paymentMethod === PaymentMethod.COD && (
-                    <p className="cod-note">💰 You will pay when your order is delivered.</p>
+                    <p className="cod-note" style={{ background: 'linear-gradient(90deg, #e8f5e8 60%, #db2777 100%)', padding: 12, borderRadius: 4, marginTop: 16, fontWeight: 500 }}>💰 You will pay when your order is delivered.</p>
                 )}
                 {paymentMethod !== PaymentMethod.COD && (
-                    <p className="payment-note">💳 Payment has been processed successfully.</p>
+                    <p className="payment-note" style={{ background: 'linear-gradient(90deg, #e8f5e8 60%, #db2777 100%)', padding: 12, borderRadius: 4, marginTop: 16, fontWeight: 500 }}>💳 Payment has been processed successfully.</p>
                 )}
             </div>
-            <div className="success-actions">
+            <div className="success-actions" style={{ display: 'flex', gap: 16, marginTop: 24, justifyContent: 'center' }}>
                 <button
                     className="track-order-btn"
+                    style={{ padding: '16px 24px', fontSize: 16, fontWeight: 500, borderRadius: 10, cursor: 'pointer', textTransform: 'uppercase', background: 'linear-gradient(90deg, #db2777 60%, #7c3aed 100%)', color: 'white', border: 'none', boxShadow: '0 2px 12px #db277744' }}
                     onClick={() => window.location.href = `/orders/${orderDetails?.id}`}
                 >
-                    Track Your Order
+                    <span role="img" aria-label="track">📦</span> Track Your Order
                 </button>
                 <button
                     className="continue-shopping-btn"
+                    style={{ padding: '16px 24px', fontSize: 16, fontWeight: 500, borderRadius: 10, cursor: 'pointer', textTransform: 'uppercase', background: 'linear-gradient(90deg, #10B981 60%, #db2777 100%)', color: 'white', border: 'none', boxShadow: '0 2px 12px #db277744' }}
                     onClick={() => window.location.href = '/home'}
                 >
-                    Continue Shopping
+                    <span role="img" aria-label="shop">🌸</span> Continue Shopping
                 </button>
             </div>
         </div>
@@ -264,20 +272,20 @@ const CheckoutPage: React.FC = () => {
     // If order is successful, show success message
     if (orderSuccess) {
         return (
-            <div className="checkout-page">
+            <div className="checkout-page enhanced-checkout" style={{ background: 'linear-gradient(90deg, #f3e8ff 0%, #fff1f2 100%)' }}>
                 <div className="contact-info">
                     <OrderSuccessMessage />
                 </div>
                 <div className="order-summary">
-                    <h2 className="breadcrumb">Order Confirmation</h2>
+                    <h2 className="breadcrumb" style={{ background: 'linear-gradient(90deg, #db2777 0%, #7c3aed 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800, fontSize: '2rem', marginBottom: 24 }}>Order Confirmation</h2>
                     <div className="order-summary-section">
-                        <div className="confirmation-message">
-                            <h3>Thank you for your purchase!</h3>
-                            <p>Your order has been successfully placed and will be processed shortly.</p>
+                        <div className="confirmation-message" style={{ background: 'linear-gradient(90deg, #e8f5e8 0%, #fff1f2 100%)', borderRadius: 18, padding: 40, textAlign: 'center' }}>
+                            <h3 style={{ background: 'linear-gradient(90deg, #27ae60 0%, #db2777 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800, fontSize: '1.5rem', marginBottom: 16 }}>Thank you for your purchase!</h3>
+                            <p style={{ color: '#7c3aed', fontWeight: 600 }}>Your order has been successfully placed and will be processed shortly.</p>
                             {paymentMethod === PaymentMethod.COD ? (
-                                <p>Please have the exact amount ready when your order arrives.</p>
+                                <p style={{ color: '#db2777', fontWeight: 600 }}>Please have the exact amount ready when your order arrives.</p>
                             ) : (
-                                <p>Payment confirmation will be sent to your email.</p>
+                                <p style={{ color: '#db2777', fontWeight: 600 }}>Payment confirmation will be sent to your email.</p>
                             )}
                         </div>
                     </div>
@@ -446,14 +454,39 @@ const CheckoutPage: React.FC = () => {
                     {/* Product Details */}
                     <ul className="checkout-cart-items">
                         {cartItems.map(item => (
-                            <li key={item.id} className="checkout-cart-item">
-                                <img src={item.imageUrl} alt={item.name} className="checkout-cart-item-image" />
+                            <li key={item.id} className="checkout-cart-item" style={{ background: 'linear-gradient(90deg, #f3e8ff 0%, #fff1f2 100%)', borderRadius: 18, border: '1px solid #db2777', boxShadow: '0 2px 12px #db277744', marginBottom: 18 }}>
+                                <img src={item.imageUrl} alt={item.name} className="checkout-cart-item-image" style={{ border: '2px solid #7c3aed', boxShadow: '0 2px 8px #db277722' }} />
                                 <div className="checkout-cart-item-wrapper">
                                     <div className="checkout-cart-item-details">
-                                        <p className="checkout-cart-item-name">{item.name}</p>
-                                        <p className="checkout-cart-item-quantity">Quantity: {item.quantity}</p>
+                                        <p className="checkout-cart-item-name" style={{ fontWeight: 700, color: '#db2777', fontSize: '1.2rem', marginBottom: 8 }}>{item.name}</p>
+                                        <p className="checkout-cart-item-quantity" style={{ color: '#7c3aed', fontWeight: 600 }}>Quantity: {item.quantity}</p>
                                     </div>
-                                    <p className="checkout-cart-item-price">${(item.price * item.quantity).toFixed(2)}</p>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        {item.price !== item.basePrice ? (
+                                            <>
+                                                <span style={{ color: '#7c3aed', fontWeight: 700, fontSize: '1.1rem' }}>
+                                                    ${(item.price * item.quantity).toFixed(2)}
+                                                </span>
+                                                <span style={{ color: '#db2777', textDecoration: 'line-through', fontSize: '1rem' }}>
+                                                    ${(item.basePrice * item.quantity).toFixed(2)}
+                                                </span>
+                                                {item.price > item.basePrice && (
+                                                    <span style={{ background: 'linear-gradient(90deg, #f39c12 60%, #db2777 100%)', color: 'white', fontWeight: 600, padding: '2px 6px', borderRadius: 3, fontSize: 12 }}>
+                                                        +{Math.round(((item.price - item.basePrice) / item.basePrice) * 100)}%
+                                                    </span>
+                                                )}
+                                                {item.price < item.basePrice && (
+                                                    <span style={{ background: 'linear-gradient(90deg, #e74c3c 60%, #db2777 100%)', color: 'white', fontWeight: 600, padding: '2px 6px', borderRadius: 3, fontSize: 12 }}>
+                                                        -{Math.round(((item.basePrice - item.price) / item.basePrice) * 100)}%
+                                                    </span>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <span style={{ color: '#db2777', fontWeight: 700, fontSize: '1.1rem' }}>
+                                                ${(item.price * item.quantity).toFixed(2)}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </li>
                         ))}
@@ -472,7 +505,7 @@ const CheckoutPage: React.FC = () => {
                     <div className="order-summary-sub-section">
                         <div className="order-summary-row">
                             <span className="order-summary-text">Subtotal</span>
-                            <span className="order-summary-price">${totalAmount.toFixed(2)}</span>
+                            <span className="order-summary-price">${dynamicSubtotal.toFixed(2)}</span>
                         </div>
                         <div className="order-summary-row">
                             <span className="order-summary-text">Shipping</span>
@@ -486,7 +519,7 @@ const CheckoutPage: React.FC = () => {
                     <div className="order-summary-sub-section-total">
                         <div className="order-summary-row">
                             <span className="order-summary-text-total">Total</span>
-                            <span className="order-summary-price-total">${(totalAmount + 5.00).toFixed(2)}</span>
+                            <span className="order-summary-price-total">${(dynamicSubtotal + 5.00).toFixed(2)}</span>
                         </div>
                         <div className="secure-checkout">
                             <span className="secure-checkout-text">Secure checkout</span>

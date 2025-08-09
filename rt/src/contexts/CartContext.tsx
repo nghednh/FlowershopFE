@@ -69,19 +69,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
                     try {
                         const currentTime = new Date().toISOString();
                         const priceResponse = await getDynamicPrice(item.productId, currentTime);
-
-                        return {
-                            ...item,
-                            basePrice: item.price, // Assuming current price is base price
-                            dynamicPrice: priceResponse.data?.dynamicPrice || undefined
-                        };
+                        return item;
                     } catch (error) {
                         console.error(`Error fetching dynamic price for product ${item.productId}:`, error);
-                        return {
-                            ...item,
-                            basePrice: item.price,
-                            dynamicPrice: undefined
-                        };
+                        return item;
                     }
                 })
             );

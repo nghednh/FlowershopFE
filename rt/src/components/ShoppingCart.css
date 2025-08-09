@@ -51,11 +51,90 @@
     border-bottom: 1px solid black;
 }
 
-.cart-item {
+
+.cart-item-card {
+    background: linear-gradient(90deg, #f3e8ff 0%, #fff1f2 100%);
+    border-radius: 18px;
+    box-shadow: 0 2px 12px #db277733;
+    padding: 18px 24px;
+    margin-bottom: 18px;
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 10px 20px;
+    gap: 18px;
+    transition: box-shadow 0.2s;
+}
+.cart-item-card:hover {
+    box-shadow: 0 4px 24px #db277799;
+}
+
+.cart-item-image.modern {
+    border-radius: 14px;
+    box-shadow: 0 2px 8px #db277722;
+    border: none;
+}
+
+.cart-item-wrapper {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.cart-item-details {
+    flex: 1;
+}
+
+.cart-item-price-section .highlight {
+    color: #db2777;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.cart-discount-badge.animated, .cart-surcharge-badge.animated {
+    animation: pulseBadge 1.2s infinite alternate;
+}
+@keyframes pulseBadge {
+    0% { box-shadow: 0 0 0 #db277700; }
+    100% { box-shadow: 0 0 8px #db277744; }
+}
+
+.remove-button.modern {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.remove-button.modern:hover {
+    background: #ffe4e6;
+}
+
+.gift-message textarea {
+    border-radius: 10px;
+    background: #f3f4f6;
+    border: 1px solid #db2777;
+    padding: 12px;
+    font-size: 15px;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.checkout-button {
+    background: linear-gradient(90deg, #db2777 60%, #7c3aed 100%);
+    box-shadow: 0 2px 12px #db277744;
+    border-radius: 14px;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 24px 0;
+    margin: 24px 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.checkout-button:hover {
+    transform: scale(1.04);
+    box-shadow: 0 4px 24px #db277799;
+    background: linear-gradient(90deg, #7c3aed 60%, #db2777 100%);
 }
 
 .cart-item-wrapper {

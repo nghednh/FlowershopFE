@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './ProductPage/ProductPage.css';
 import ProductImageGallery from './ProductPage/ProductImageGallery';
 import ProductDetails from './ProductPage/ProductDetails';
@@ -9,6 +10,7 @@ import { set } from 'zod/v4';
 
 const ProductPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<IProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

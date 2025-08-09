@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import QuantitySelector from '../QuantitySelector';
 import './ProductPage.css';
@@ -56,6 +57,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
     const isOutOfStock = stockQuantity === 0;
 
+    const navigate = useNavigate();
+    const handleBack = () => {
+        navigate('/list');
+    };
     const handleAddToCart = async () => {
         if (isOutOfStock || isLoading) return;
 
@@ -174,6 +179,16 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
     return (
     <div className="product-details enhanced-details" style={{ background: 'linear-gradient(135deg, #fff1f2 0%, #f3e8ff 100%)', boxShadow: '0 4px 32px #f472b633', borderRadius: '24px', padding: '32px 20px', position: 'relative', overflow: 'hidden', lineHeight: '1.15', minHeight: '70vh', width: '100%', maxWidth: '800px', margin: '0 auto' }}>
+        {/* Back Arrow Button - upper right corner */}
+        <button
+            onClick={handleBack}
+            style={{ position: 'absolute', top: 16, right: 16, zIndex: 10, background: '#2563eb', borderRadius: '50%', padding: '8px', border: 'none', boxShadow: '0 2px 8px #2563eb33', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            aria-label="Back to Products"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="white" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+        </button>
         {/* Debug: Show flowerStatus value for visibility */}
         {typeof (window as any).flowerStatus !== 'undefined' && (
             <div style={{ position: 'absolute', top: 8, right: 16, zIndex: 99, background: '#fffbe6', color: '#db2777', padding: '4px 12px', borderRadius: '8px', fontWeight: 'bold', fontSize: '13px', boxShadow: '0 2px 8px #db277711', border: '1px solid #db2777' }}>

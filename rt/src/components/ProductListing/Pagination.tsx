@@ -42,20 +42,20 @@ const Pagination: React.FC<Props> = ({ total, pageSize, currentPage, onPageChang
   const visiblePages = getVisiblePages();
 
   return (
-    <div className="flex items-center justify-center">
+  <div className="w-full flex items-center justify-center">
       <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-2">
-        <div className="flex items-center gap-1">
+  <div className="flex items-center gap-2">
           {/* Previous Button */}
           <button
             onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`p-3 rounded-xl transition-all duration-300 ${
+            className={`flex-grow min-w-[40px] p-3 rounded-xl transition-all duration-300 ${
               currentPage === 1
                 ? 'text-gray-300 cursor-not-allowed'
                 : 'text-gray-600 hover:bg-gradient-to-r hover:from-pink-100 hover:to-rose-100 hover:text-pink-600 hover:scale-110'
             }`}
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-4 h-4 mx-auto" />
           </button>
 
           {/* Page Numbers */}
@@ -75,7 +75,7 @@ const Pagination: React.FC<Props> = ({ total, pageSize, currentPage, onPageChang
               <button
                 key={pageNumber}
                 onClick={() => onPageChange(pageNumber)}
-                className={`px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+                className={`flex-grow min-w-[40px] px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
                   isCurrentPage
                     ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg scale-110 border-2 border-pink-300'
                     : 'text-gray-600 hover:bg-gradient-to-r hover:from-pink-100 hover:to-rose-100 hover:text-pink-600 hover:scale-105'
@@ -90,13 +90,13 @@ const Pagination: React.FC<Props> = ({ total, pageSize, currentPage, onPageChang
           <button
             onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`p-3 rounded-xl transition-all duration-300 ${
+            className={`flex-grow min-w-[40px] p-3 rounded-xl transition-all duration-300 ${
               currentPage === totalPages
                 ? 'text-gray-300 cursor-not-allowed'
                 : 'text-gray-600 hover:bg-gradient-to-r hover:from-pink-100 hover:to-rose-100 hover:text-pink-600 hover:scale-110'
             }`}
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4 mx-auto" />
           </button>
         </div>
 

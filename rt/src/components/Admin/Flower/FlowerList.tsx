@@ -25,7 +25,7 @@ export const FlowerList: React.FC<FlowerListProps> = ({
 
   // Filter and sort states - similar to OrderList
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortInput, setSortInput] = useState<{ field: string; order: 'asc' | 'desc' }>({ field: 'name', order: 'asc' });
+  const [sortInput, setSortInput] = useState<{ field: string; order: 'asc' | 'desc' }>({ field: 'id', order: 'asc' });
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<number>(0);
 
@@ -288,6 +288,12 @@ export const FlowerList: React.FC<FlowerListProps> = ({
           <thead>
             <tr className="bg-gray-100">
               <th
+                className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer w-16"
+                onClick={() => handleSortChange('id')}
+              >
+                ID {sortInput.field === 'id' && (sortInput.order === 'asc' ? '↑' : '↓')}
+              </th>
+              <th
                 className="text-black font-bold uppercase p-2 border border-gray-300 cursor-pointer w-1/4"
                 onClick={() => handleSortChange('name')}
               >
@@ -317,6 +323,7 @@ export const FlowerList: React.FC<FlowerListProps> = ({
           <tbody>
             {paginatedProducts.map((p) => (
               <tr key={p.id} className="border-b border-gray-300">
+                <td className="p-2 border-x border-gray-300 w-16 font-bold">{p.id}</td>
                 <td className="p-2 border-x border-gray-300 w-1/4">{p.name}</td>
                 <td className="p-2 border-x border-gray-300 w-20">
                   {p.flowerStatus === 0 ? 'New' : p.flowerStatus === 1 ? 'Old' : p.stockQuantity <= 10 ? 'Low Stock' : 'Common'}

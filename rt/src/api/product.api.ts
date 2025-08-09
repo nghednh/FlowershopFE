@@ -142,7 +142,7 @@ export const ProductService = {
     return instance.get(`/api/products/recommendations/recently-viewed?count=${count}`);
   },
 
-  getDynamicPrice: (productId: number, requestTime?: string): Promise<{
+  getDynamicPrice: (productId: number, requestTime?: string): Promise<IBackendRes<{
     productId: number;
     productName: string;
     basePrice: number;
@@ -153,7 +153,7 @@ export const ProductService = {
     calculatedAt: string;
     hasDiscount: boolean;
     hasSurcharge: boolean;
-  }> => {
+  }>> => {
     const params = new URLSearchParams();
     if (requestTime) {
       params.append('requestTime', requestTime);

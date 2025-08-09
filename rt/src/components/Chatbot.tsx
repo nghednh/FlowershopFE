@@ -5,7 +5,8 @@ import {
   getPopularProducts, 
   getRecommendationsForUser,
   searchProducts,
-  getMyOrders
+  getMyOrders,
+  getDynamicPrice
 } from "../config/api";
 import { IProduct, IOrder } from "../types/backend";
 import "./Chatbot.css";
@@ -411,49 +412,102 @@ const Chatbot = () => {
   if (!showChatbot) {
     return null;
   }
+// Helper component to fetch and show dynamic price for each product
 
-  const ProductRecommendations = ({ products }: { products: IProduct[] }) => (
+// Helper component to fetch and show dynamic price for each product
+
+const ProductRecommendations = ({ products }: { products: IProduct[] }) => (
+  <ProductRecommendationsWithDynamicPrice products={products} />
+);
+// Helper component to fetch and show dynamic price for each product
+
+const ProductRecommendationsWithDynamicPrice = ({ products }: { products: IProduct[] }) => {
+  const [dynamicPrices, setDynamicPrices] = useState<{ [id: number]: number }>({});
+  useEffect(() => {
+    let isMounted = true;
+    const fetchPrices = async () => {
+      const prices: { [id: number]: number } = {};
+      await Promise.all(products.map(async (product) => {
+        try {
+          const res = await getDynamicPrice(product.id);
+          prices[product.id] = res?.data?.dynamicPrice ?? product.basePrice;
+        } catch {
+          prices[product.id] = product.basePrice;
+        }
+      }));
+      if (isMounted) setDynamicPrices(prices);
+    };
+    fetchPrices();
+    return () => { isMounted = false; };
+  }, [products]);
+
+  return (
     <div className="products-container">
-      {products.map((product) => (
-        <div 
-          key={product.id} 
-          className="product-recommendation-card"
-          onClick={() => window.open(`/products/${product.id}`, '_blank')}
-        >
-          <img 
-            src={product.imageUrls?.[0] || 'https://via.placeholder.com/60x60'} 
-            alt={product.name}
-            className="product-recommendation-image"
-          />
-          <div className="product-recommendation-details">
-            <h4 className="product-recommendation-name">
-              {product.name}
-            </h4>
-            <p className="product-recommendation-price">
-              ${product.basePrice?.toFixed(2)}
-            </p>
-            <div className="product-recommendation-footer">
-              <p className="product-recommendation-stock">
-                {product.stockQuantity > 0 ? (
-                  <span className="in-stock">✅ {product.stockQuantity} in stock</span>
+      {products.map((product) => {
+        const dynamicPrice = dynamicPrices[product.id];
+        const hasDiscount = typeof dynamicPrice === 'number' && dynamicPrice < product.basePrice;
+        return (
+          <div 
+            key={product.id} 
+            className="product-recommendation-card"
+            onClick={() => window.open(`/products/${product.id}`, '_blank')}
+          >
+            <img 
+              src={product.imageUrls?.[0] || 'https://via.placeholder.com/60x60'} 
+              alt={product.name}
+              className="product-recommendation-image"
+            />
+            <div className="product-recommendation-details">
+              <h4 className="product-recommendation-name">
+                {product.name}
+              </h4>
+              <p className="product-recommendation-price">
+                {hasDiscount ? (
+                  <>
+                    <span style={{ color: '#d7263d', fontWeight: 'bold' }}>
+                      ${dynamicPrice.toFixed(2)}
+                    </span>
+                    <span style={{ textDecoration: 'line-through', color: '#888', marginLeft: 8 }}>
+                      ${product.basePrice.toFixed(2)}
+                    </span>
+                  </>
                 ) : (
-                  <span className="out-of-stock">❌ Out of stock</span>
+                  <span style={{ fontWeight: 'bold' }}>
+                    ${dynamicPrice ? dynamicPrice.toFixed(2) : product.basePrice.toFixed(2)}
+                  </span>
                 )}
               </p>
-              {product.reviews && product.reviews.length > 0 && (
-                <div className="product-rating">
-                  <Star size={12} className="star-icon" />
-                  <span>
-                    {(product.reviews.reduce((acc, review) => acc + review.rating, 0) / product.reviews.length).toFixed(1)}
-                  </span>
-                </div>
-              )}
+              <div className="product-recommendation-footer">
+                <p className="product-recommendation-stock">
+                  {product.stockQuantity > 0 ? (
+                    <span className="in-stock">
+                      {product.stockQuantity > 10 
+                        ? `✅ ${product.stockQuantity} in Stock`
+                        : product.stockQuantity > 0 
+                        ? `⚡ Only ${product.stockQuantity} left`
+                        : '❌ Out of Stock'
+                      }
+                    </span>
+                  ) : (
+                    <span className="out-of-stock">❌ Out of stock</span>
+                  )}
+                </p>
+                {product.reviews && product.reviews.length > 0 && (
+                  <div className="product-rating">
+                    <Star size={12} className="star-icon" />
+                    <span>
+                      {(product.reviews.reduce((acc, review) => acc + review.rating, 0) / product.reviews.length).toFixed(1)}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
+};
 
   const TypingIndicator = () => (
     <div className="message-container bot">

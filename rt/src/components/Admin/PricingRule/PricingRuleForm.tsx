@@ -101,16 +101,6 @@ export const PricingRuleForm: React.FC<PricingRuleFormProps> = ({ rule, onSave, 
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to start of today
 
-    // If start date is provided, validate it's not before today
-    if (startDate) {
-      const startDateTime = createDateTime(startDate ?? null, startTime ?? null);
-
-      if (startDateTime && startDateTime < today) {
-        setValidationError("Start date cannot be in the past");
-        return false;
-      }
-    }
-
     // If both start and end dates are provided, validate end is after start
     if (startDate && endDate) {
       const startDateTime = createDateTime(startDate ?? null, startTime ?? null);

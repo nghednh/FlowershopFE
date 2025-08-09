@@ -4,6 +4,7 @@ import { Star, Sparkles, ShoppingCart } from 'lucide-react';
 import { IProduct } from '../../types/backend.d';
 import { CartService } from '../../api/cart.api';
 import { ProductService } from '../../api/product.api';
+import { API_BASE_URL } from '../../config';
 
 interface Props {
   product: IProduct;
@@ -50,7 +51,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
   // Handle image URL - ensure it's a complete URL
   const rawImageUrl = product.imageUrls?.[0];
   const imageUrl = rawImageUrl 
-    ? (rawImageUrl.startsWith('http') ? rawImageUrl : `https://localhost:5001${rawImageUrl.startsWith('/') ? rawImageUrl : `/${rawImageUrl}`}`)
+    ? (rawImageUrl.startsWith('http') ? rawImageUrl : `${API_BASE_URL}/${rawImageUrl.startsWith('/') ? rawImageUrl : `/${rawImageUrl}`}`)
     : null;
     
   const navigate = useNavigate();
@@ -61,7 +62,9 @@ const ProductCard: React.FC<Props> = ({ product }) => {
       try {
         setPriceLoading(true);
         const priceData = await ProductService.getDynamicPrice(product.id);
-        setDynamicPrice(priceData.dynamicPrice);
+        console.log(priceData);
+        console.log('Dynamic Price Data vs Base Price:', priceData.data?.dynamicPrice, product.basePrice);
+        setDynamicPrice(priceData.data?.dynamicPrice || product.basePrice);
       } catch (error) {
         console.error('Failed to fetch dynamic price:', error);
         // Fallback to base price
@@ -269,7 +272,8 @@ const ProductCard: React.FC<Props> = ({ product }) => {
                   : 'bg-red-50 text-red-700 border border-red-200'
               }`}>
                 {product.stockQuantity > 10 
-                  ? '✅ In Stock' 
+                  // ? '✅ In Stock' 
+                  ? `✅ ${product.stockQuantity} in Stock`
                   : product.stockQuantity > 0 
                   ? `⚡ Only ${product.stockQuantity} left`
                   : '❌ Out of Stock'
@@ -308,9 +312,6 @@ const ProductCard: React.FC<Props> = ({ product }) => {
                   )}
                 </>
               )}
-            </div>
-            <div className="text-xs text-gray-500 font-semibold">
-              Raw Price: ${typeof product.basePrice === 'number' ? product.basePrice.toFixed(2) : 'N/A'}
             </div>
             {dynamicPrice && dynamicPrice < product.basePrice && (
               <div className="text-xs text-green-600 font-medium">

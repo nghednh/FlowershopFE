@@ -32,7 +32,7 @@ const statusOptions = [
 
 const sortOptions = [
   { value: '0', label: 'Name' },
-  { value: '1', label: 'Price' },
+  { value: '1', label: 'Base Price' },
   { value: '2', label: 'Stock' },
   { value: '3', label: 'Status' }
 ];

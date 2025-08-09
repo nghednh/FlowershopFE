@@ -126,7 +126,7 @@ const CheckoutPage: React.FC = () => {
 
             const orderResponse = await createOrder(orderData);
             console.log("Order created successfully:", orderResponse);
-            setOrderDetails(orderResponse);
+            setOrderDetails({ ...orderResponse, totalAmount: dynamicSubtotal + 5.00 });
 
             // For COD, update order status to 1 and finish
             if (paymentMethod === PaymentMethod.COD) {
@@ -139,9 +139,9 @@ const CheckoutPage: React.FC = () => {
             // For VNPay/PayPal, create payment with the order ID
             const paymentRequest: IPaymentRequest = {
                 orderId: orderResponse.id, // Use the created order ID
-                amount: totalAmount + 5.00, // Include shipping
+                amount: orderResponse.sum + 5.00,
                 description: `Payment for flower order #${orderResponse.id} - ${new Date().toISOString()}`,
-                method: paymentMethod,
+                method: orderResponse.paymentMethod,
             };
 
             const paymentResponse = await createPayment(paymentRequest);
@@ -207,7 +207,7 @@ const CheckoutPage: React.FC = () => {
                 console.log("Order updated after successful payment");
                 await refreshCart();
                 setOrderSuccess(true);
-                setOrderDetails({ id: orderData.orderId });
+                setOrderDetails({ id: orderData.orderId, totalAmount: dynamicSubtotal + 5.00 });
                 localStorage.removeItem('pendingOrder');
             } catch (error) {
                 console.error('Error updating order after successful payment:', error);
@@ -236,7 +236,11 @@ const CheckoutPage: React.FC = () => {
             <h2 className="success-title" style={{ background: 'linear-gradient(90deg, #db2777 0%, #7c3aed 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800, fontSize: '2rem', marginBottom: 24 }}>Order Placed Successfully!</h2>
             <div className="success-details" style={{ background: '#fff1f2', padding: 24, borderRadius: 18, border: '1px solid #db2777', textAlign: 'left', width: '100%', maxWidth: 500, margin: '0 auto' }}>
                 <p><strong>Order ID:</strong> {orderDetails?.id}</p>
-                <p><strong>Total Amount:</strong> <span style={{ color: '#db2777', fontWeight: 700 }}>${(totalAmount + 5.00).toFixed(2)}</span></p>
+                                <p><strong>Total Amount:</strong> <span style={{ color: '#db2777', fontWeight: 700 }}>
+                                    {orderDetails && orderDetails.totalAmount
+                                        ? `$${orderDetails.totalAmount.toFixed(2)}`
+                                        : `$${(totalAmount).toFixed(2)}`}
+                                </span></p>
                 <p><strong>Payment Method:</strong> {
                     paymentMethod === PaymentMethod.COD ? 'Cash on Delivery' :
                         paymentMethod === PaymentMethod.PayPal ? 'PayPal' :
@@ -519,7 +523,11 @@ const CheckoutPage: React.FC = () => {
                     <div className="order-summary-sub-section-total">
                         <div className="order-summary-row">
                             <span className="order-summary-text-total">Total</span>
-                            <span className="order-summary-price-total">${(dynamicSubtotal + 5.00).toFixed(2)}</span>
+                                                        <span className="order-summary-price-total">
+                                                            {orderSuccess && orderDetails && orderDetails.totalAmount
+                                                                ? `$${orderDetails.totalAmount.toFixed(2)}`
+                                                                : `$${(dynamicSubtotal + 5.00).toFixed(2)}`}
+                                                        </span>
                         </div>
                         <div className="secure-checkout">
                             <span className="secure-checkout-text">Secure checkout</span>

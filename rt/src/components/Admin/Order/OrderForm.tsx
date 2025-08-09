@@ -191,18 +191,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
         ]}
       />
 
-      <Select
-        label="Payment Method"
-        value={formData?.paymentMethod?.toString() || PaymentMethod.COD.toString()}
-        onChange={(e) => setFormData({ ...formData, paymentMethod: Number(e.target.value) as PaymentMethod })}
-        options={[
-          { value: PaymentMethod.COD.toString(), label: getPaymentMethodName(PaymentMethod.COD) },
-          { value: PaymentMethod.PayPal.toString(), label: getPaymentMethodName(PaymentMethod.PayPal) },
-          { value: PaymentMethod.VNPay.toString(), label: getPaymentMethodName(PaymentMethod.VNPay) }
-        ]}
-        required
-      />
-
       <Input
         label="Tracking Number"
         type="text"

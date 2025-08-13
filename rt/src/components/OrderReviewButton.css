@@ -1,0 +1,63 @@
+/* OrderReviewButton.css */
+
+.order-review-button {
+  background: linear-gradient(90deg, #db2777 0%, #7c3aed 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(219, 39, 119, 0.3);
+}
+
+.order-review-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(219, 39, 119, 0.4);
+}
+
+.order-review-button.reviewed {
+  background: linear-gradient(90deg, #059669 0%, #047857 100%);
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.order-review-button.reviewed:hover {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+}
+
+.order-review-button-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* For different button sizes */
+.order-review-button.small {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+}
+
+.order-review-button.large {
+  padding: 12px 20px;
+  font-size: 1rem;
+}
+
+/* Button states */
+.order-review-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.order-review-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}

@@ -15,6 +15,7 @@ import UserProfile from "./components/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { CartProvider } from "./contexts/CartContext";
 import Chatbot from "./components/Chatbot";
+import ReviewPage from "./components/ReviewPage";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/orderhistory" element={<OrderHistoryPage />} />
             <Route path="/orders/:orderId" element={<OrderTracking />} />
+            <Route path="/review/:productId" element={<ReviewPage />} />
           </Route>
           <Route
             path="/admin"

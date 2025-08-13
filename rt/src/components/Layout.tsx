@@ -19,8 +19,8 @@ const Layout: React.FC = () => {
     };
 
     const location = useLocation();
-    // Hide footer on /products/<productId> page
-    const hideFooter = /^\/products\/[\w-]+$/.test(location.pathname);
+    // Hide footer on /product/<productId> page
+    const hideFooter = /^\/product\/[\w-]+$/.test(location.pathname);
 
     return (
         <div className="flex flex-col min-h-screen">

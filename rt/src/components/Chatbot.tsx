@@ -451,7 +451,7 @@ const ProductRecommendationsWithDynamicPrice = ({ products }: { products: IProdu
           <div 
             key={product.id} 
             className="product-recommendation-card"
-            onClick={() => navigate(`/products/${product.id}`)}
+            onClick={() => navigate(`/product/${product.id}`)}
           >
             <img 
               src={product.imageUrls?.[0] || '/no-image.svg'}

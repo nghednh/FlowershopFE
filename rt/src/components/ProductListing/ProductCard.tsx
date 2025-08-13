@@ -80,7 +80,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
   const handleCardClick = () => {
     // Track product view
     ProductService.trackProductView(product.id).catch(console.error);
-    navigate(`/products/${product.id}`);
+    navigate(`/product/${product.id}`);
   };
 
   const handleAddToCart = async (e: React.MouseEvent) => {

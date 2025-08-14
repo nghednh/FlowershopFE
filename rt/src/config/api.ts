@@ -102,6 +102,7 @@ export const getPricingRuleById = PricingService.getPricingRuleById;
 // Address
 export const createAddress = AddressService.createAddress;
 export const getUserAddresses = AddressService.getUserAddresses;
+export const updateAddress = AddressService.updateAddress;
 export const getAddressById = AddressService.getAddressById;
 
 // Payment

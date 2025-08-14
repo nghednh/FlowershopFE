@@ -5,6 +5,7 @@ import { IProduct } from '../../types/backend.d';
 import { CartService } from '../../api/cart.api';
 import { ProductService } from '../../api/product.api';
 import { API_BASE_URL } from '../../config';
+import { useCart } from "../../contexts/CartContext";
 
 interface Props {
   product: IProduct;
@@ -16,7 +17,8 @@ const ProductCard: React.FC<Props> = ({ product }) => {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [dynamicPrice, setDynamicPrice] = useState<number | null>(null);
   const [priceLoading, setPriceLoading] = useState(false);
-  
+  const { refreshCart } = useCart();
+
   const flowerType = product.categories?.map((cat) => cat.name).join(", ");
   
   // Get flower status based on flowerStatus number and stock quantity
@@ -89,6 +91,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
     try {
       setIsAddingToCart(true);
       await CartService.addToCart(product.id, 1);
+      await refreshCart();
       
       // Show success feedback (you can replace with toast notification)
       console.log('Product added to cart successfully');

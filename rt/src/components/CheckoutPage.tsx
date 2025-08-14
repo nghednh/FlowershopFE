@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./CheckoutPage.css";
 import { useCart } from "../contexts/CartContext";
-import { createOrder, createAddress, createPayment, updateOrder } from "../config/api";
+import { createOrder, createAddress, createPayment } from "../config/api";
 import { useNavigate } from "react-router-dom";
 import { IPaymentRequest } from "../types/backend";
 import { PaymentMethod, DisplayLanguage, Currency, BankCode } from "../types/backend.d";
-import { track } from "framer-motion/client";
 
 interface CartItem {
     id: number;
@@ -128,9 +127,8 @@ const CheckoutPage: React.FC = () => {
             console.log("Order created successfully:", orderResponse);
             setOrderDetails({ ...orderResponse, totalAmount: dynamicSubtotal + 5.00 });
 
-            // For COD, update order status to 1 and finish
-            if (paymentMethod === PaymentMethod.COD) {
-                console.log("Processing COD payment...");
+            if (paymentMethod === PaymentMethod.PayPal) {
+                console.log("Processing PayPal payment...");
                 await refreshCart();
                 setOrderSuccess(true);
                 return;
@@ -139,9 +137,15 @@ const CheckoutPage: React.FC = () => {
             // For VNPay/PayPal, create payment with the order ID
             const paymentRequest: IPaymentRequest = {
                 orderId: orderResponse.id, // Use the created order ID
+                paymentId: 0,
                 amount: orderResponse.sum + 5.00,
-                description: `Payment for flower order #${orderResponse.id} - ${new Date().toISOString()}`,
+                description: `Order #${orderResponse.id} payment`,
+                ipAddress: "",
                 method: orderResponse.paymentMethod,
+                bankCode: BankCode.ANY, // Default to ANY for now
+                createdDate: new Date().toISOString(),
+                currency: Currency.VND,
+                language: DisplayLanguage.Vietnamese
             };
 
             const paymentResponse = await createPayment(paymentRequest);
@@ -182,7 +186,9 @@ const CheckoutPage: React.FC = () => {
     // Handle return from VNPay
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
+        console.log("URL Params:", urlParams.toString());
         const vnpResponseCode = urlParams.get('vnp_ResponseCode');
+        console.log("VNPay response code:", vnpResponseCode);
 
         if (vnpResponseCode) {
             handleVNPayReturn(urlParams);

@@ -198,6 +198,7 @@ const CheckoutPage: React.FC = () => {
     const handleVNPayReturn = async (urlParams: URLSearchParams) => {
         const responseCode = urlParams.get('vnp_ResponseCode');
         const pendingOrderData = localStorage.getItem('pendingOrder');
+        console.log("Pending order data:", pendingOrderData);
 
         if (!pendingOrderData) {
             alert('Order data not found. Please try again.');

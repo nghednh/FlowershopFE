@@ -16,6 +16,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { CartProvider } from "./contexts/CartContext";
 import Chatbot from "./components/Chatbot";
 import ReviewPage from "./components/ReviewPage";
+import PaymentSuccessPage from "./components/PaymentSuccessPage";
+import PaymentFailedPage from "./components/PaymentFailedPage";
 
 function App() {
   return (
@@ -32,6 +34,9 @@ function App() {
               </CartProvider>
             }
           >
+
+            <Route path="/payment/success" element={<PaymentSuccessPage />} />
+            <Route path="/payment/failed" element={<PaymentFailedPage />} />
             <Route path="/home" element={<HomePage />} />
             <Route path="/product/:id" element={<ProductPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
@@ -52,7 +57,7 @@ function App() {
             }
           />
         </Routes>
-        
+
         {/* Chatbot should be outside Routes to appear on all pages */}
         <Chatbot />
       </div>

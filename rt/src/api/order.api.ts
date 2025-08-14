@@ -15,7 +15,8 @@ export const OrderService = {
   },
 
   getOrderDetails: (orderId: number): Promise<IOrder> => {
-    return instance.get(`/api/orders/${orderId}`);
+    console.log("API/Fetching order details...");
+    return instance.get(`/api/Orders/${orderId}`);
   },
 
   cancelOrder: (orderId: number): Promise<{ success: boolean }> => {

@@ -1,6 +1,6 @@
 export interface IBackendRes<T> {
     success: boolean;
-    data?: T;
+    data: T;
     message?: string;
     errors?: string[];
     statusCode?: number;
@@ -109,6 +109,25 @@ export interface IOrder {
     orderStatus: OrderStatus;
     createdAt: string; // ISO date-time string
     updatedAt?: string; // ISO date-time string
+}
+
+interface IOrderDetails extends IOrder {
+  userName?: string;
+  address?: {
+    fullName: string;
+    streetAddress: string;
+    city: string;
+    phoneNumber: string;
+  };
+  orderItems?: {
+    id: number;
+    name: string;
+    quantity: number;
+    price: number;
+    product?: {
+      images?: { imageUrl: string }[];
+    };
+  }[];
 }
 
 export enum OrderStatus {

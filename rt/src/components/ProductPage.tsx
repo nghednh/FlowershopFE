@@ -31,7 +31,6 @@ const ProductPage: React.FC = () => {
       try {
         setLoading(true);
         const response = await getProductDetails(Number(id));
-        console.log('Product responseeeeeeeeeeeeeeeeee:', response);
         setProduct(response);
 
         // Set rating data
@@ -47,9 +46,6 @@ const ProductPage: React.FC = () => {
         console.log('Gallery images:', imageUrls);
         setGalleryImages(imageUrls);
         setCurrentDisplayImage(imageUrls[0]);
-
-        // Fetch dynamic pricing
-        // await fetchDynamicPrice(Number(id));
 
         // Fetch related products based on category
         if (response.categories && response.categories.length > 0) {

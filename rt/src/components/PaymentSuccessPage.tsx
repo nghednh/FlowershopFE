@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PaymentMethod } from "../types/backend.d";
+import { IOrderDetails, IAddress } from "../types/backend";
 
 const OrderSuccessPage = ({ orderDetails, paymentMethod, addressData, totalAmount }: {
-    orderDetails: any,
+    orderDetails: IOrderDetails | null,
     paymentMethod: PaymentMethod,
-    addressData: any,
+    addressData: IAddress | null,
     totalAmount: number
 }) => (
     <div className="checkout-page enhanced-checkout" style={{ background: 'linear-gradient(90deg, #f3e8ff 0%, #fff1f2 100%)' }}>
@@ -16,16 +17,14 @@ const OrderSuccessPage = ({ orderDetails, paymentMethod, addressData, totalAmoun
                 <div className="success-details" style={{ background: '#fff1f2', padding: 24, borderRadius: 18, border: '1px solid #db2777', textAlign: 'left', width: '100%', maxWidth: 500, margin: '0 auto' }}>
                     <p><strong>Order ID:</strong> {orderDetails?.id}</p>
                     <p><strong>Total Amount:</strong> <span style={{ color: '#db2777', fontWeight: 700 }}>
-                        {orderDetails && orderDetails.totalAmount
-                            ? `$${orderDetails.totalAmount.toFixed(2)}`
-                            : `$${(totalAmount).toFixed(2)}`}
+                        {totalAmount ? `$${totalAmount.toFixed(2)}` : 'Calculating...'}
                     </span></p>
                     <p><strong>Payment Method:</strong> {
                         paymentMethod === PaymentMethod.COD ? 'Cash on Delivery' :
                             paymentMethod === PaymentMethod.PayPal ? 'PayPal' :
                                 paymentMethod === PaymentMethod.VNPay ? 'VNPay' : 'Unknown'
                     }</p>
-                    <p><strong>Delivery Address:</strong> {addressData.fullName}, {addressData.streetAddress}, {addressData.city}</p>
+                    <p><strong>Delivery Address:</strong> {addressData?.fullName}, {addressData?.streetAddress}, {addressData?.city}</p>
                     {paymentMethod === PaymentMethod.COD && (
                         <p className="cod-note" style={{ background: 'linear-gradient(90deg, #e8f5e8 60%, #db2777 100%)', padding: 12, borderRadius: 4, marginTop: 16, fontWeight: 500 }}>💰 You will pay when your order is delivered.</p>
                     )}
@@ -90,9 +89,9 @@ const OrderFailurePage = () => (
 const PaymentSuccessPage: React.FC = () => {
     const [searchParams] = useSearchParams();
     const paymentId = Number(searchParams.get("paymentId"));
-    const [orderDetails, setOrderDetails] = useState<any>(null);
+    const [orderDetails, setOrderDetails] = useState<IOrderDetails | null>(null);
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.COD);
-    const [addressData, setAddressData] = useState<any>({});
+    const [addressData, setAddressData] = useState<any>(null);
     const [totalAmount, setTotalAmount] = useState<number>(0);
 
     useEffect(() => {
@@ -100,14 +99,15 @@ const PaymentSuccessPage: React.FC = () => {
             try {
                 if (!paymentId) return;
                 const paymentRes = await import('../api/payment.api').then(mod => mod.PaymentService.getPaymentStatus(paymentId));
-                const orderRes = await import('../api/order.api').then(mod => mod.OrderService.getOrderDetails(paymentRes.data.orderId));
-                setOrderDetails("orderRes.data: " + JSON.stringify(orderRes));
-                setPaymentMethod(paymentRes.data.method);
-                setTotalAmount(paymentRes.data.amount);
+                console.log("Payment response:", paymentRes);
+                const orderRes = await import('../api/order.api').then(mod => mod.OrderService.getOrderDetails(paymentRes.data?.orderId));
+                setOrderDetails(orderRes as IOrderDetails);
+                setPaymentMethod(paymentRes.data?.method);
+                setTotalAmount(paymentRes.data?.amount);
                 setAddressData({
-                    fullName: orderRes.data.address.fullName,
-                    streetAddress: orderRes.data.address.streetAddress,
-                    city: orderRes.data.address.city,
+                    fullName: (orderRes as IOrderDetails).address?.fullName,
+                    streetAddress: (orderRes as IOrderDetails).address?.streetAddress,
+                    city: (orderRes as IOrderDetails).address?.city,
                 });
                 console.log("addressData", addressData);
             } catch (error) {

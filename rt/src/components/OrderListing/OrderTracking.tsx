@@ -1,27 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { IOrder, OrderStatus, PaymentMethod } from "../../types/backend.d";
+import { IOrder, IOrderDetails, OrderStatus, PaymentMethod } from "../../types/backend.d";
 import { getOrderDetails } from "../../config/api";
-
-// Extended interface for order details with additional information
-interface IOrderDetails extends IOrder {
-  userName?: string;
-  address?: {
-    fullName: string;
-    streetAddress: string;
-    city: string;
-    phoneNumber: string;
-  };
-  orderItems?: {
-    id: number;
-    name: string;
-    quantity: number;
-    price: number;
-    product?: {
-      images?: { imageUrl: string }[];
-    };
-  }[];
-}
 
 const trackingSteps: OrderStatus[] = [
   OrderStatus.Pending,

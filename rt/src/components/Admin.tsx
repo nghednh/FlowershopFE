@@ -111,8 +111,6 @@ const Admin = () => {
       if (!userStr) throw new Error('User not found');
       const user = JSON.parse(userStr);
       if (user.role !== 'Admin') throw new Error('Admin access required');
-      //   const ordersData = await getOrders();
-      //   setOrders(ordersData.data);
     } catch (err: any) {
       setError(err.message || 'Failed to load orders');
       console.error('Error loading orders:', err);

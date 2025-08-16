@@ -3,18 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { getUserLoyaltyInfo, getUserAddresses, updateAddress } from '../config/api';
 import { AddressService } from '../api/address.api';
 import { IUserLoyalty } from '../types/backend';
+import { UserService } from '../api/user.api';
 
 const UserProfile: React.FC = () => {
     const navigate = useNavigate();
     const [loyaltyInfo, setLoyaltyInfo] = useState<IUserLoyalty | null>(null);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
-    const [userData, setUserData] = useState<any>(null);
+    const [userData, setUserData] = useState({
+        userName: '',
+        role: '',
+    });
     const [formData, setFormData] = useState({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
-        phone: '',
-        address: ''
+        phoneNumber: '',
     });
 
     // Address management
@@ -28,24 +32,38 @@ const UserProfile: React.FC = () => {
     });
     const [addressSearchTerm, setAddressSearchTerm] = useState('');
 
+    // Password change
+    const [showChangePassword, setShowChangePassword] = useState(false);
+    const [passwordForm, setPasswordForm] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+    });
+    const [passwordError, setPasswordError] = useState<string | null>(null);
+    const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+
     useEffect(() => {
-        // Get user data from localStorage
-        const user = localStorage.getItem('user');
-        const parsedUserData = user && user !== 'null' ? JSON.parse(user) : null;
-        
-        if (!parsedUserData) {
-            navigate('/login');
-            return;
-        }
+        const fetchProfileData = async () => {
+            try {
+                const response = await UserService.getUserProfile();
+                setUserData({
+                    userName: response.data.userName || '',
+                    role: response.data.role || ''
+                });
+                setFormData({
+                    firstName: response.data.firstName || '',
+                    lastName: response.data.lastName || '',
+                    email: response.data.email || '',
+                    phoneNumber: response.data.phoneNumber || '',
+                });
+                console.log('Form data:', formData);
+            } catch (error) {
+                console.error('Error fetching profile data:', error);
+                navigate('/login');
+            }
+        };
 
-        setUserData(parsedUserData);
-        setFormData({
-            name: parsedUserData.name || '',
-            email: parsedUserData.email || '',
-            phone: parsedUserData.phone || '',
-            address: parsedUserData.address || ''
-        });
-
+        fetchProfileData();
         loadLoyaltyInfo();
         loadAddresses();
     }, [navigate]);
@@ -120,17 +138,13 @@ const UserProfile: React.FC = () => {
         setEditingAddressId(null);
     };
 
-    const handleSaveProfile = () => {
-        // In a real application, you would send this data to your API
+    const handleSaveProfile = async () => {
         const updatedUser = {
-            ...userData,
-            name: formData.name,
-            fullName: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            address: formData.address
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            phoneNumber: formData.phoneNumber,
         };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        await UserService.updateUserProfile(updatedUser);
         setIsEditing(false);
         alert('Profile updated successfully!');
     };
@@ -150,6 +164,40 @@ const UserProfile: React.FC = () => {
         }
     };
 
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setPasswordForm(prev => ({ ...prev, [name]: value }));
+        setPasswordError(null);
+        setPasswordSuccess(null);
+    };
+
+    const handleSubmitChangePassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmNewPassword) {
+            setPasswordError("All fields are required.");
+            return;
+        }
+        if (passwordForm.newPassword.length < 6) {
+            setPasswordError("New password must be at least 6 characters.");
+            return;
+        }
+        if (passwordForm.newPassword !== passwordForm.confirmNewPassword) {
+            setPasswordError("New passwords do not match.");
+            return;
+        }
+        try {
+            await UserService.changeUserPassword({
+                currentPassword: passwordForm.currentPassword,
+                newPassword: passwordForm.newPassword,
+                confirmNewPassword: passwordForm.confirmNewPassword
+            });
+            setPasswordSuccess("Password changed successfully!");
+            setPasswordForm({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
+        } catch (error: any) {
+            setPasswordError(error.message || "Failed to change password.");
+        }
+    };
+
     if (!userData) {
         return null; // User will be redirected to login
     }
@@ -158,17 +206,17 @@ const UserProfile: React.FC = () => {
         <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
                 <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
-                    
+
                     {/* Header Section */}
                     <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-12">
                         <div className="flex items-center space-x-6">
                             <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg">
                                 <span className="text-3xl font-bold text-purple-600">
-                                    {formData.name ? formData.name.charAt(0).toUpperCase() : '?'}
+                                    {formData.firstName ? formData.firstName.charAt(0).toUpperCase() : '?'}
                                 </span>
                             </div>
                             <div className="text-white">
-                                <h1 className="text-3xl font-bold">{formData.name || 'User'}</h1>
+                                <h1 className="text-3xl font-bold">{userData.userName || 'User'}</h1>
                                 <p className="text-purple-100 text-lg">{formData.email}</p>
                                 <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-sm font-medium mt-2">
                                     {userData.role || 'Customer'}
@@ -194,7 +242,7 @@ const UserProfile: React.FC = () => {
                             </div>
                             <div className="text-center">
                                 <div className="text-2xl font-bold text-gray-900">
-                                    {userData?.role === 'Admin' ? 'Admin' : 'Customer'}
+                                    {userData?.role === 'Admin' ? 'Admin' : 'User'}
                                 </div>
                                 <div className="text-gray-600">Role</div>
                             </div>
@@ -233,20 +281,39 @@ const UserProfile: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Full Name
+                                    First Name
                                 </label>
                                 {isEditing ? (
                                     <input
                                         type="text"
-                                        name="name"
-                                        value={formData.name}
+                                        name="firstName"
+                                        value={formData.firstName}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Enter your full name"
+                                        placeholder="Enter your first name"
                                     />
                                 ) : (
                                     <div className="w-full px-4 py-3 bg-gray-50 rounded-lg text-gray-900">
-                                        {formData.name || 'Not provided'}
+                                        {formData.firstName || 'Not provided'}
+                                    </div>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Last Name
+                                </label>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        name="lastName"
+                                        value={formData.lastName}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="Enter your last name"
+                                    />
+                                ) : (
+                                    <div className="w-full px-4 py-3 bg-gray-50 rounded-lg text-gray-900">
+                                        {formData.lastName || 'Not provided'}
                                     </div>
                                 )}
                             </div>
@@ -255,20 +322,9 @@ const UserProfile: React.FC = () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Email Address
                                 </label>
-                                {isEditing ? (
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Enter your email"
-                                    />
-                                ) : (
-                                    <div className="w-full px-4 py-3 bg-gray-50 rounded-lg text-gray-900">
-                                        {formData.email || 'Not provided'}
-                                    </div>
-                                )}
+                                <div className="w-full px-4 py-3 bg-gray-50 rounded-lg text-gray-900">
+                                    {formData.email || 'Not provided'}
+                                </div>
                             </div>
 
                             <div>
@@ -279,34 +335,14 @@ const UserProfile: React.FC = () => {
                                     <input
                                         type="tel"
                                         name="phone"
-                                        value={formData.phone}
+                                        value={formData.phoneNumber}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         placeholder="Enter your phone number"
                                     />
                                 ) : (
                                     <div className="w-full px-4 py-3 bg-gray-50 rounded-lg text-gray-900">
-                                        {formData.phone || 'Not provided'}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Address
-                                </label>
-                                {isEditing ? (
-                                    <textarea
-                                        name="address"
-                                        value={formData.address}
-                                        onChange={handleInputChange}
-                                        rows={3}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Enter your address"
-                                    />
-                                ) : (
-                                    <div className="w-full px-4 py-3 bg-gray-50 rounded-lg text-gray-900 min-h-[84px]">
-                                        {formData.address || 'Not provided'}
+                                        {formData.phoneNumber || 'Not provided'}
                                     </div>
                                 )}
                             </div>
@@ -423,6 +459,61 @@ const UserProfile: React.FC = () => {
                                 )}
                             </div>
                         )}
+                    </div>
+
+                    {/* Change Password Section */}
+                    <div className="px-8 py-8 border-t">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-gray-900">Change Password</h2>
+                        </div>
+                        <div className="mt-8">
+                            <button
+                                className="btn-secondary"
+                                onClick={() => setShowChangePassword(!showChangePassword)}
+                            >
+                                {showChangePassword ? "Hide Change Password" : "Change Password"}
+                            </button>
+                            {showChangePassword && (
+                                <form className="mt-4 space-y-4" onSubmit={handleSubmitChangePassword}>
+                                    <div>
+                                        <label className="block font-medium mb-1">Current Password</label>
+                                        <input
+                                            type="password"
+                                            name="currentPassword"
+                                            value={passwordForm.currentPassword}
+                                            onChange={handlePasswordChange}
+                                            className="auth-input"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-medium mb-1">New Password</label>
+                                        <input
+                                            type="password"
+                                            name="newPassword"
+                                            value={passwordForm.newPassword}
+                                            onChange={handlePasswordChange}
+                                            className="auth-input"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-medium mb-1">Confirm New Password</label>
+                                        <input
+                                            type="password"
+                                            name="confirmNewPassword"
+                                            value={passwordForm.confirmNewPassword}
+                                            onChange={handlePasswordChange}
+                                            className="auth-input"
+                                            required
+                                        />
+                                    </div>
+                                    {passwordError && <div className="error-message">{passwordError}</div>}
+                                    {passwordSuccess && <div className="auth-message success">{passwordSuccess}</div>}
+                                    <button type="submit" className="auth-button">Update Password</button>
+                                </form>
+                            )}
+                        </div>
                     </div>
 
                     {/* Quick Actions */}

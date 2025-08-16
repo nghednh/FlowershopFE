@@ -1,7 +1,8 @@
 import instance from "../config/axios-customize";
+import { IBackendRes } from "../types/backend";
 
 export const UserService = {
-    getUserProfile: (): Promise<any> => {
+    getUserProfile: (): Promise<IBackendRes<any>> => {
         return instance.get('/api/User/profile');
     },
 

@@ -5,6 +5,7 @@ import { createOrder, createAddress, createPayment } from "../config/api";
 import { useNavigate } from "react-router-dom";
 import { IPaymentRequest } from "../types/backend";
 import { PaymentMethod, DisplayLanguage, Currency, BankCode } from "../types/backend.d";
+import { AddressService } from "../api/address.api";
 
 interface CartItem {
     id: number;
@@ -39,6 +40,8 @@ const CheckoutPage: React.FC = () => {
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.COD);
     const [isProcessing, setIsProcessing] = useState(false);
     const [selectedBankCode, setSelectedBankCode] = useState<BankCode>(BankCode.ANY);
+    const [addresses, setAddresses] = useState<any[]>([]);
+    const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
 
     // Use cart context instead of hardcoded data
     const { cartItems: contextCartItems, totalAmount: contextTotalAmount, refreshCart } = useCart();
@@ -52,6 +55,19 @@ const CheckoutPage: React.FC = () => {
         }
     }, [contextCartItems, orderSuccess, navigate]);
 
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            try {
+                const response = await AddressService.getUserAddresses();
+                setAddresses(response);
+            } catch (error) {
+                console.error('Error fetching addresses:', error);
+            }
+        };
+
+        fetchAddresses();
+    }, []);
+
     // Convert context cart items to local format
     const cartItems: CartItem[] = contextCartItems.map(item => ({
         id: item.id,
@@ -63,7 +79,6 @@ const CheckoutPage: React.FC = () => {
     }));
 
     const totalAmount = contextTotalAmount;
-    // Calculate subtotal using dynamic price
     const dynamicSubtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     // Show loading or empty state while checking cart
@@ -106,13 +121,19 @@ const CheckoutPage: React.FC = () => {
 
         try {
             // First create address
-            const addressResponse = await createAddress({
-                fullName: addressData.fullName,
-                phoneNumber: addressData.phoneNumber,
-                streetAddress: addressData.streetAddress,
-                city: addressData.city,
-            });
-            const addressId = addressResponse.id;
+            let addressId: number;
+            console.log("Selected Address ID:", selectedAddressId);
+            if (selectedAddressId === null) {
+                const addressResponse = await createAddress({
+                    fullName: addressData.fullName,
+                    phoneNumber: addressData.phoneNumber,
+                    streetAddress: addressData.streetAddress,
+                    city: addressData.city,
+                });
+                addressId = addressResponse.id;
+            } else {
+                addressId = selectedAddressId;
+            }
 
             // Create order first with initial status (0 - Pending)
             const orderData = {
@@ -183,55 +204,6 @@ const CheckoutPage: React.FC = () => {
         }
     };
 
-    // Handle return from VNPay
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        console.log("URL Params:", urlParams.toString());
-        const vnpResponseCode = urlParams.get('vnp_ResponseCode');
-        console.log("VNPay response code:", vnpResponseCode);
-
-        if (vnpResponseCode) {
-            handleVNPayReturn(urlParams);
-        }
-    }, []);
-
-    const handleVNPayReturn = async (urlParams: URLSearchParams) => {
-        const responseCode = urlParams.get('vnp_ResponseCode');
-        const pendingOrderData = localStorage.getItem('pendingOrder');
-        console.log("Pending order data:", pendingOrderData);
-
-        if (!pendingOrderData) {
-            alert('Order data not found. Please try again.');
-            navigate('/checkout');
-            return;
-        }
-
-        const orderData = JSON.parse(pendingOrderData);
-
-        if (responseCode === '00') {
-            // Payment successful - update order status from 0 to 1
-            try {
-                console.log("Order updated after successful payment");
-                await refreshCart();
-                setOrderSuccess(true);
-                setOrderDetails({ id: orderData.orderId, totalAmount: dynamicSubtotal + 5.00 });
-                localStorage.removeItem('pendingOrder');
-            } catch (error) {
-                console.error('Error updating order after successful payment:', error);
-                alert('Payment successful but order update failed. Please contact support.');
-            }
-        } else {
-            // Payment failed - you might want to update order status to cancelled or delete it
-            try {
-                alert('Payment failed. Order has been cancelled.');
-            } catch (error) {
-                console.error('Error cancelling order after failed payment:', error);
-            }
-            localStorage.removeItem('pendingOrder');
-            navigate('/checkout');
-        }
-    };
-
     const handlePaymentMethodSelect = (method: PaymentMethod) => {
         setPaymentMethod(method);
     };
@@ -243,11 +215,11 @@ const CheckoutPage: React.FC = () => {
             <h2 className="success-title" style={{ background: 'linear-gradient(90deg, #db2777 0%, #7c3aed 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800, fontSize: '2rem', marginBottom: 24 }}>Order Placed Successfully!</h2>
             <div className="success-details" style={{ background: '#fff1f2', padding: 24, borderRadius: 18, border: '1px solid #db2777', textAlign: 'left', width: '100%', maxWidth: 500, margin: '0 auto' }}>
                 <p><strong>Order ID:</strong> {orderDetails?.id}</p>
-                                <p><strong>Total Amount:</strong> <span style={{ color: '#db2777', fontWeight: 700 }}>
-                                    {orderDetails && orderDetails.totalAmount
-                                        ? `$${orderDetails.totalAmount.toFixed(2)}`
-                                        : `$${(totalAmount).toFixed(2)}`}
-                                </span></p>
+                <p><strong>Total Amount:</strong> <span style={{ color: '#db2777', fontWeight: 700 }}>
+                    {orderDetails && orderDetails.totalAmount
+                        ? `$${orderDetails.totalAmount.toFixed(2)}`
+                        : `$${(totalAmount).toFixed(2)}`}
+                </span></p>
                 <p><strong>Payment Method:</strong> {
                     paymentMethod === PaymentMethod.COD ? 'Cash on Delivery' :
                         paymentMethod === PaymentMethod.PayPal ? 'PayPal' :
@@ -309,7 +281,6 @@ const CheckoutPage: React.FC = () => {
     const renderPaymentMethodSelection = () => (
         <div className="payment-options">
             <select
-                className="payment-method-select"
                 value={paymentMethod}
                 onChange={e => handlePaymentMethodSelect(Number(e.target.value))}
             >
@@ -363,41 +334,63 @@ const CheckoutPage: React.FC = () => {
                     <div className="info-section">
                         <h2 className="info-title">1 Shipping Details</h2>
                         <form className="contact-form" onSubmit={handleAddressSubmit}>
-                            <input
-                                type="text"
-                                placeholder="Recipients Name"
-                                value={addressData.fullName}
-                                onChange={(e) => setAddressData({ ...addressData, fullName: e.target.value })}
-                                required
-                            />
-                            <input
-                                type="tel"
-                                placeholder="Recipients Phone number *"
-                                value={addressData.phoneNumber}
-                                onChange={(e) => setAddressData({ ...addressData, phoneNumber: e.target.value })}
-                                required
-                            />
-                            <div className="address-section">
-                                <input
-                                    type="text"
-                                    placeholder="Street"
-                                    value={addressData.streetAddress}
-                                    onChange={(e) => setAddressData({ ...addressData, streetAddress: e.target.value })}
-                                    required
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="City"
-                                    value={addressData.city}
-                                    onChange={(e) => setAddressData({ ...addressData, city: e.target.value })}
-                                    required
-                                />
-                            </div>
+                            <label htmlFor="address-select">Choose an existing address:</label>
+                            <select
+                                id="address-select"
+                                value={selectedAddressId ?? ""}
+                                onChange={
+                                    e => {
+                                        setSelectedAddressId(Number(e.target.value) || null);
+                                    }
+                                }
+                                style={{ marginBottom: 12 }}
+                            >
+                                <option value="">-- Enter address manually --</option>
+                                {addresses.map(addr => (
+                                    <option key={addr.id} value={addr.id}>
+                                        {addr.fullName}, {addr.streetAddress}, {addr.city} ({addr.phoneNumber})
+                                    </option>
+                                ))}
+                            </select>
+                            {selectedAddressId === null && (
+                                <>
+                                    <input
+                                        type="text"
+                                        placeholder="Recipients Name"
+                                        value={addressData.fullName}
+                                        onChange={e => setAddressData({ ...addressData, fullName: e.target.value })}
+                                        required
+                                    />
+                                    <input
+                                        type="tel"
+                                        placeholder="Recipients Phone number *"
+                                        value={addressData.phoneNumber}
+                                        onChange={e => setAddressData({ ...addressData, phoneNumber: e.target.value })}
+                                        required
+                                    />
+                                    <div className="address-section">
+                                        <input
+                                            type="text"
+                                            placeholder="Street"
+                                            value={addressData.streetAddress}
+                                            onChange={e => setAddressData({ ...addressData, streetAddress: e.target.value })}
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="City"
+                                            value={addressData.city}
+                                            onChange={e => setAddressData({ ...addressData, city: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                </>
+                            )}
                             <div className="checkbox-section">
                                 <input
                                     type="checkbox"
                                     checked={addressData.callRecipient}
-                                    onChange={(e) => setAddressData({ ...addressData, callRecipient: e.target.checked })}
+                                    onChange={e => setAddressData({ ...addressData, callRecipient: e.target.checked })}
                                 />
                                 I don't know the address, please call the recipient.
                             </div>
@@ -530,11 +523,11 @@ const CheckoutPage: React.FC = () => {
                     <div className="order-summary-sub-section-total">
                         <div className="order-summary-row">
                             <span className="order-summary-text-total">Total</span>
-                                                        <span className="order-summary-price-total">
-                                                            {orderSuccess && orderDetails && orderDetails.totalAmount
-                                                                ? `$${orderDetails.totalAmount.toFixed(2)}`
-                                                                : `$${(dynamicSubtotal + 5.00).toFixed(2)}`}
-                                                        </span>
+                            <span className="order-summary-price-total">
+                                {orderSuccess && orderDetails && orderDetails.totalAmount
+                                    ? `$${orderDetails.totalAmount.toFixed(2)}`
+                                    : `$${(dynamicSubtotal + 5.00).toFixed(2)}`}
+                            </span>
                         </div>
                         <div className="secure-checkout">
                             <span className="secure-checkout-text">Secure checkout</span>

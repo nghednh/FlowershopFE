@@ -102,7 +102,7 @@ export default function OrderHistory() {
                 onClick={() => handleOrderClick(order)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') window.location.href = `/orders/${order.id}`; }}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleOrderClick(order)}}
                 aria-label={`View details for order ${order.id}`}
               >
                 <div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { IOrder, OrderStatus } from "../../types/backend.d";
 import { getMyOrders } from "../../config/api";
 import { Input } from "../Input"
@@ -49,6 +49,12 @@ export default function OrderHistory() {
     currentPage * PAGE_SIZE
   );
 
+  const navigate = useNavigate();
+
+  const handleOrderClick = (order: IOrder) => {
+      navigate(`/orders/${order.id}`);
+    };
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Order History</h1>
@@ -93,7 +99,7 @@ export default function OrderHistory() {
               <div
                 key={order.id}
                 className="border border-gray-200 rounded-lg p-4 shadow-sm bg-white flex flex-col sm:flex-row sm:justify-between cursor-pointer hover:bg-gray-50 transition"
-                onClick={() => window.location.href = `/orders/${order.id}`}
+                onClick={() => handleOrderClick(order)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') window.location.href = `/orders/${order.id}`; }}

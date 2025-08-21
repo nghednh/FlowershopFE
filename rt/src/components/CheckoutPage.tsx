@@ -204,6 +204,8 @@ const CheckoutPage: React.FC = () => {
             console.error('Error processing payment:', error);
             alert('Failed to process payment. Please try again.');
             console.log("Error details:", error);
+            await refreshCart();
+            navigate('/not-found');
         } finally {
             setIsProcessing(false);
         }

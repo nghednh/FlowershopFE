@@ -18,7 +18,7 @@ import Pagination from './ProductListing/Pagination';
 import './ProductListing/index.css';
 
 
-const PAGE_SIZE = 4;
+const PAGE_SIZE = 9;
 
 
 // Status options based on API flowerStatus field

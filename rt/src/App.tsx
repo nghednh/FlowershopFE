@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
@@ -13,11 +13,12 @@ import OrderHistoryPage from "./components/OrderHistoryPage";
 import OrderTracking from "./components/OrderListing/OrderTracking";
 import UserProfile from "./components/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
+import NotFoundPage from "./components/NotFoundPage";
 import { CartProvider } from "./contexts/CartContext";
-import Chatbot from "./components/Chatbot";
 import ReviewPage from "./components/ReviewPage";
 import PaymentSuccessPage from "./components/PaymentSuccessPage";
 import PaymentFailedPage from "./components/PaymentFailedPage";
+import ConditionalChatbot from "./components/ConditionalChatbot";
 
 function App() {
   return (
@@ -34,7 +35,6 @@ function App() {
               </CartProvider>
             }
           >
-
             <Route path="/payment/success" element={<PaymentSuccessPage />} />
             <Route path="/payment/failed" element={<PaymentFailedPage />} />
             <Route path="/home" element={<HomePage />} />
@@ -56,10 +56,12 @@ function App() {
               </ProtectedRoute>
             }
           />
-        </Routes>
 
-        {/* Chatbot should be outside Routes to appear on all pages */}
-        <Chatbot />
+          {/* Catch-all route for 404 */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+        
+        <ConditionalChatbot />
       </div>
     </Router>
   );

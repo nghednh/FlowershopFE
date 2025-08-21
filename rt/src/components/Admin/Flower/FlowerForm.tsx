@@ -27,7 +27,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, onClose 
       flowerStatus: 0,
       description: "",
       basePrice: 0,
-      condition: "",
+      condition: "None",
       stockQuantity: 0,
       isActive: true,
       imageUrls: [],
@@ -89,7 +89,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, onClose 
     formDataToSend.append('flowerStatus', formData.flowerStatus.toString());
     formDataToSend.append('description', formData.description || '');
     formDataToSend.append('basePrice', formData.basePrice.toString());
-    formDataToSend.append('condition', formData.condition || '');
+    formDataToSend.append('condition', formData.condition || 'None');
     formDataToSend.append('stockQuantity', formData.stockQuantity.toString());
     formDataToSend.append('isActive', (formData.isActive ?? true).toString());
     selectedFiles.forEach(file => {
@@ -147,7 +147,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, onClose 
       />
       <Input
         label="Description"
-        value={formData.description || ""}
+        value={formData.description}
         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
         required
       />
@@ -160,7 +160,7 @@ export const FlowerForm: React.FC<FlowerFormProps> = ({ flower, onSave, onClose 
       />
       <Input
         label="Condition"
-        value={formData.condition}
+        value={formData.condition || "None"}
         onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
       />
       <Input

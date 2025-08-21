@@ -23,7 +23,7 @@ export const ProductService = {
       if (params.page) queryParams.append('Page', params.page.toString());
       if (params.pageSize) queryParams.append('PageSize', params.pageSize.toString());
       if (params.flowerTypes?.length) {
-        params.flowerTypes.forEach(type => queryParams.append('FlowerTypes', type.toString()));
+        params.flowerTypes.forEach(type => queryParams.append('FlowerStatuses', type.toString()));
       }
       if (params.occasions?.length) {
         params.occasions.forEach(occasion => queryParams.append('Occasions', occasion));

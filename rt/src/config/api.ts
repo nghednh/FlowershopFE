@@ -114,6 +114,8 @@ export const vnpayIpnAction = PaymentService.vnpayIpnAction;
 // Report
 export const getReportSummary = ReportService.getReportSummary;
 export const getBestSellingProducts = ReportService.getBestSellingProducts;
+export const getReportInMonth = ReportService.getReportInMonth;
+export const getReportInYear = ReportService.getReportInYear;
 
 // Loyalty
 export const getUserLoyaltyInfo = LoyaltyService.getUserLoyaltyInfo;

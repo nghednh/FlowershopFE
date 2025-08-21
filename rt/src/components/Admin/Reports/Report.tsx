@@ -12,29 +12,26 @@ import {
     Legend,
     CartesianGrid,
 } from "recharts";
-import { getReportSummary, getBestSellingProducts } from "../../../config/api";
+import { ReportService } from "../../../config/api";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ReportPDF } from "./GeneratePDF.tsx";
-import { getMonthRange, getYearRange, getCurrentRange } from "../../../utils/timeRange";
 import { Button } from "../../Button";
 import "./Report.css";
 
-/**
- * Utility functions for time range generation and management
- */
+// Update type imports to use the new API types
+import type {
+    SalesSummaryResponse,
+    BestSellingProductsResponse,
+    MonthlyReportItem,
+    YearlyReportItem,
+    ProductData
+} from "../../../types/backend";
 
 export type SalesData = { 
     date: string; 
     total: number; 
     orders: number; 
     averageOrder: number; 
-};
-
-export type ProductData = {
-    productId: string;
-    productName: string;
-    totalQuantitySold: number;
-    totalRevenue: number;
 };
 
 export type ChartMetric = "revenue" | "orders" | "average";
@@ -183,6 +180,35 @@ const formatChartTick = (value: string, viewMode: "month" | "year"): string => {
     }
 };
 
+/**
+ * Convert API response to SalesData format
+ */
+const convertToSalesData = (
+    data: MonthlyReportItem[] | YearlyReportItem[],
+    viewMode: "month" | "year",
+    year: number,
+    month?: number
+): SalesData[] => {
+    return data.map(item => {
+        let dateStr: string;
+        
+        if (viewMode === "month" && month) {
+            // For monthly view: period is the day (1-31)
+            dateStr = `${year}-${month.toString().padStart(2, '0')}-${item.period.toString().padStart(2, '0')}`;
+        } else {
+            // For yearly view: period is the month (1-12)
+            dateStr = `${year}-${item.period.toString().padStart(2, '0')}-01`;
+        }
+        
+        return {
+            date: dateStr,
+            total: item.totalRevenue || 0,
+            orders: item.totalOrders || 0,
+            averageOrder: item.averageOrderValue || 0
+        };
+    });
+};
+
 export const ReportList: React.FC = () => {
     const [viewMode, setViewMode] = useState<"month" | "year">("month");
     const [chartMetric, setChartMetric] = useState<ChartMetric>("revenue");
@@ -193,11 +219,12 @@ export const ReportList: React.FC = () => {
     const [topN, setTopN] = useState(10);
     const [salesData, setSalesData] = useState<SalesData[]>([]);
     const [topProducts, setTopProducts] = useState<ProductData[]>([]);
-    const [summary, setSummary] = useState<{ totalRevenue: number; totalOrders: number; averageOrderValue: number }>({
+    const [summary, setSummary] = useState<SalesSummaryResponse>({
         totalRevenue: 0,
         totalOrders: 0,
         averageOrderValue: 0,
     });
+    const [loading, setLoading] = useState(false);
     
     // Best selling products table states
     const [searchTerm, setSearchTerm] = useState("");
@@ -207,84 +234,110 @@ export const ReportList: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    // Get total revenue and total orders
+    // Get total revenue and total orders for the selected period
     const fetchSummary = async () => {
-        const { start, end } = getCurrentRange(viewMode, filters);
         try {
-            const summaryResponse = await getReportSummary(start, end);
+            setLoading(true);
+            let startDate: string, endDate: string;
+            
+            if (viewMode === "month") {
+                // For month view: get summary for the entire month
+                startDate = `${filters.year}-${filters.month.toString().padStart(2, '0')}-01`;
+                const lastDay = new Date(filters.year, filters.month, 0).getDate();
+                endDate = `${filters.year}-${filters.month.toString().padStart(2, '0')}-${lastDay}`;
+            } else {
+                // For year view: get summary for the entire year
+                startDate = `${filters.year}-01-01`;
+                endDate = `${filters.year}-12-31`;
+            }
+            
+            const summaryResponse = await ReportService.getReportSummary(startDate, endDate);
             console.log('Response: summary data:', summaryResponse);
 
             setSummary({
-                totalRevenue: summaryResponse.totalRevenue ?? 0,
-                totalOrders: summaryResponse.totalOrders ?? 0,
-                averageOrderValue: summaryResponse.averageOrderValue ?? 0,
+                totalRevenue: summaryResponse.totalRevenue || 0,
+                totalOrders: summaryResponse.totalOrders || 0,
+                averageOrderValue: summaryResponse.averageOrderValue || 0,
             });
         } catch (error: any) {
             console.error('Error fetching summary:', error);
             setSummary({ totalRevenue: 0, totalOrders: 0, averageOrderValue: 0 });
+        } finally {
+            setLoading(false);
         }
     };
 
+    // Fetch sales data using the new batch APIs
     const fetchSales = async () => {
-        const slots =
-            viewMode === "month"
-                ? getMonthRange(filters.year, filters.month)
-                : getYearRange(filters.year);
-
-        const data: SalesData[] = [];
-        for (let s of slots) {
-            if (new Date(s.start) > new Date()) break;
-            try {
-                const response = await getReportSummary(s.start, s.end);
-                console.log(`Response: sales data for ${s.label}:`, response);
-                const avgOrder = response.totalOrders > 0 ? response.totalRevenue / response.totalOrders : 0;
-                data.push({ 
-                    date: s.label, 
-                    total: response.totalRevenue ?? 0,
-                    orders: response.totalOrders ?? 0,
-                    averageOrder: avgOrder
-                });
-            } catch (e) {
-                console.error('Error fetching sales data:', e);
-                data.push({ 
-                    date: s.label, 
-                    total: 0,
-                    orders: 0,
-                    averageOrder: 0
-                });
+        try {
+            setLoading(true);
+            let data: SalesData[] = [];
+            
+            if (viewMode === "month") {
+                // Use getReportInMonth for daily breakdown
+                const monthlyData = await ReportService.getReportInMonth(filters.month, filters.year);
+                console.log(`Response: monthly data for ${filters.year}-${filters.month}:`, monthlyData);
+                data = convertToSalesData(monthlyData, "month", filters.year, filters.month);
+            } else {
+                // Use getReportInYear for monthly breakdown
+                const yearlyData = await ReportService.getReportInYear(filters.year);
+                console.log(`Response: yearly data for ${filters.year}:`, yearlyData);
+                data = convertToSalesData(yearlyData, "year", filters.year);
             }
+            
+            setSalesData(data);
+        } catch (error: any) {
+            console.error('Error fetching sales data:', error);
+            setSalesData([]);
+        } finally {
+            setLoading(false);
         }
-        setSalesData(data);
     };
 
     // Get best-selling products based on current filter
     const fetchTopProducts = async () => {
-        const { start, end } = getCurrentRange(viewMode, filters);
         try {
-            const response = await getBestSellingProducts(topN, start, end);
-            console.log(`Response: top ${topN} products in range: ${start} - ${end}:`, response);
+            setLoading(true);
+            let startDate: string, endDate: string;
+            
+            if (viewMode === "month") {
+                startDate = `${filters.year}-${filters.month.toString().padStart(2, '0')}-01`;
+                const lastDay = new Date(filters.year, filters.month, 0).getDate();
+                endDate = `${filters.year}-${filters.month.toString().padStart(2, '0')}-${lastDay}`;
+            } else {
+                startDate = `${filters.year}-01-01`;
+                endDate = `${filters.year}-12-31`;
+            }
+            
+            const response = await ReportService.getBestSellingProducts(topN, startDate, endDate);
+            console.log(`Response: top ${topN} products in range: ${startDate} - ${endDate}:`, response);
 
-            if (Array.isArray(response)) {
-                const topProducts = response.map((p: ProductData) => ({
-                    productId: p.productId,
-                    productName: p.productName,
-                    totalQuantitySold: p.totalQuantitySold,
-                    totalRevenue: p.totalRevenue,
-                }));
-                setTopProducts(topProducts);
+            if (response.products && Array.isArray(response.products)) {
+                setTopProducts(response.products);
+            } else if (Array.isArray(response)) {
+                // Handle case where API returns array directly
+                setTopProducts(response);
             } else {
                 setTopProducts([]);
             }
         } catch (error: any) {
             console.error('Error fetching top products:', error);
             setTopProducts([]);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchSales();
-        fetchSummary();
-        fetchTopProducts();
+        const fetchAllData = async () => {
+            await Promise.all([
+                fetchSales(),
+                fetchSummary(),
+                fetchTopProducts()
+            ]);
+        };
+        
+        fetchAllData();
     }, [filters, viewMode, topN]);
 
     // Best selling products filter and pagination logic
@@ -382,13 +435,20 @@ export const ReportList: React.FC = () => {
                                 <button className="px-4 py-2 bg-gray-400 text-white rounded cursor-not-allowed">Generating PDF...</button>
                             ) : (
                                 <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-blue-700 cursor-pointer">
-                                    📥 Export PDF Report
+                                    Export PDF Report
                                 </button>
                             )
                         }
                     </PDFDownloadLink>
                 </div>
             </div>
+
+            {/* Loading indicator */}
+            {loading && (
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="text-blue-700">Loading report data...</div>
+                </div>
+            )}
 
             {/* Filter Controls */}
             <div className="flex gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
@@ -398,6 +458,7 @@ export const ReportList: React.FC = () => {
                         value={viewMode}
                         onChange={(e) => setViewMode(e.target.value as "month" | "year")}
                         className="p-2 border rounded"
+                        disabled={loading}
                     >
                         <option value="month">By Day (in Month)</option>
                         <option value="year">By Month (in Year)</option>
@@ -422,6 +483,7 @@ export const ReportList: React.FC = () => {
                         value={filters.year}
                         onChange={handleChange}
                         className="p-2 border rounded"
+                        disabled={loading}
                     >
                         {getAvailableYears().map((y) => (
                             <option key={y} value={y}>
@@ -438,6 +500,7 @@ export const ReportList: React.FC = () => {
                             value={filters.month}
                             onChange={handleChange}
                             className="p-2 border rounded"
+                            disabled={loading}
                         >
                             {[...Array(12)].map((_, i) => (
                                 <option key={i + 1} value={i + 1}>
@@ -453,6 +516,7 @@ export const ReportList: React.FC = () => {
                         value={topN}
                         onChange={(e) => setTopN(Number(e.target.value))}
                         className="p-2 border rounded"
+                        disabled={loading}
                     >
                         <option value={5}>Top 5</option>
                         <option value={10}>Top 10</option>
@@ -465,7 +529,7 @@ export const ReportList: React.FC = () => {
             </div>
 
             <div className="mb-6">
-                <h3 className="text-black font-bold text-xl mb-4">📊 Summary Overview</h3>
+                <h3 className="text-black font-bold text-xl mb-4">Summary Overview</h3>
                 
                 {/* Summary Report - Text Format */}
                 <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-2xl shadow-lg border border-gray-100 mb-6">
@@ -495,7 +559,7 @@ export const ReportList: React.FC = () => {
                 <div className="mb-8">
                     <h4 className="text-black font-bold text-lg mb-4 flex items-center gap-2">
                         <span className="inline-block w-1 h-6 rounded-full" style={{ backgroundColor: getChartConfig(chartMetric).color }}></span>
-                        📊 {getChartConfig(chartMetric).label} Distribution by {viewMode === "month" ? "Days" : "Months"}
+                        {getChartConfig(chartMetric).label} Distribution by {viewMode === "month" ? "Days" : "Months"}
                     </h4>
                     <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-2xl shadow-lg border border-gray-100">
                         {getPieChartData(salesData, viewMode, chartMetric).length > 0 ? (
@@ -609,7 +673,7 @@ export const ReportList: React.FC = () => {
             </div>
 
             <div className="mb-6">
-                <h3 className="text-black font-bold text-xl mb-4">📈 Trend Analysis</h3>
+                <h3 className="text-black font-bold text-xl mb-4">Trend Analysis</h3>
                 
                 <div className="bg-gradient-to-br from-white to-gray-50 p-8 rounded-2xl shadow-lg border border-gray-100">
                     <ResponsiveContainer width="100%" height={400}>
@@ -693,7 +757,7 @@ export const ReportList: React.FC = () => {
 
             <div className="mt-10">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-black font-bold uppercase text-2xl">🏆 Best-Selling Products</h3>
+                    <h3 className="text-black font-bold uppercase text-2xl">Best-Selling Products</h3>
                     <div className="flex items-center gap-2">
                         <Button onClick={resetFilters}>Reset</Button>
                     </div>

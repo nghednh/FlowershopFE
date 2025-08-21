@@ -233,3 +233,36 @@ export interface IAddressResponse {
     statusCode?: number;
     timestamp?: string;
 }
+
+// Type definitions for API responses
+export interface SalesSummaryResponse {
+  totalOrders: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+}
+
+export interface BestSellingProductsResponse {
+  products: ProductData[];
+}
+
+export interface ProductData {
+  productId: string;
+  productName: string;
+  totalQuantitySold: number;
+  totalRevenue: number;
+}
+
+// New types for batch report responses with period field
+export interface MonthlyReportItem {
+  period: number; // Day number (1-31)
+  totalOrders: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+}
+
+export interface YearlyReportItem {
+  period: number; // Month number (1-12)
+  totalOrders: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+}

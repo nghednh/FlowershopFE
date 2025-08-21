@@ -1,10 +1,10 @@
-export const API_BASE_URL = "https://flowershop-hzq2.onrender.com/";
+export const API_BASE_URL = "http://localhost:5000/";
 
 // App constants
 export const APP_ICON = "/flower.svg";
 
 export const config = {
-  API_BASE_URL: 'https://flowershop-hzq2.onrender.com/',
+  API_BASE_URL: 'http://localhost:5000/',
   API_TIMEOUT: 10000,
   
   // Token storage keys

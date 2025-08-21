@@ -18,7 +18,7 @@ import Pagination from './ProductListing/Pagination';
 import './ProductListing/index.css';
 
 
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 12;
 
 
 // Status options based on API flowerStatus field
@@ -150,8 +150,10 @@ const ProductListingPage: React.FC = () => {
 
   console.log('Categories loaded:', categories);
 
+  // Mobile sidebar toggle
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
-  <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 to-purple-50 flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 to-purple-50 flex flex-col relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-pink-300/20 to-purple-400/20 rounded-full blur-3xl animate-float"></div>
@@ -160,12 +162,18 @@ const ProductListingPage: React.FC = () => {
       </div>
 
       <div className="flex-1 relative z-10">
-        <div className="w-full px-4 py-8">
-          {/* Enhanced Two-column layout with proper gap handling */}
-          <div className="flex gap-8 min-h-[calc(100vh-180px)]">
-            {/* Left Sidebar - Enhanced Filters - Fixed width */}
-            <div className="w-80 flex-shrink-0">
-              <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-6 sticky top-6">
+        <div className="w-full px-2 sm:px-4 py-4 sm:py-8">
+          {/* Responsive layout: sidebar above grid on mobile */}
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 min-h-[calc(100vh-180px)]">
+            {/* Mobile sidebar toggle button */}
+            <div className="lg:hidden mb-2 flex justify-end">
+              <Button onClick={() => setSidebarOpen(!sidebarOpen)} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg">
+                {sidebarOpen ? 'Hide Filters' : 'Show Filters'}
+              </Button>
+            </div>
+            {/* Sidebar: show on desktop, toggle on mobile */}
+            <div className={`w-full lg:w-80 flex-shrink-0 ${sidebarOpen ? '' : 'hidden'} lg:block`}> 
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-4 sm:p-6 lg:sticky lg:top-6">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-3">
@@ -309,9 +317,9 @@ const ProductListingPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            {/* Right Side - Enhanced Products Display - Takes remaining space */}
+            {/* Products Display - takes remaining space */}
             <div className="flex-1 min-w-0">
-              <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-6">
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-4 sm:p-6">
                 {/* Enhanced Loading State */}
                 {loading && (
                   <div className="flex items-center justify-center py-12">
@@ -389,8 +397,8 @@ const ProductListingPage: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Enhanced Products Grid - 4 cards per row */}
-                        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-max">
+                        {/* Responsive Products Grid */}
+                        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-max">
                           {products.map((product, index) => (
                             <div 
                               key={product.id}

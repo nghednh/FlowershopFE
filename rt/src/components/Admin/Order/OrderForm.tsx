@@ -178,19 +178,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({ order, onSave, onClose }) 
         </div>
       )}
 
-      <Select
-        label="Address"
-        value={formData?.addressId?.toString() || "0"}
-        onChange={(e) => setFormData({ ...formData, addressId: Number(e.target.value) })}
-        options={[
-          { value: "0", label: "Select an address" },
-          ...addresses.map((address) => ({
-            value: address.id.toString(),
-            label: `${address.fullName} - ${address.streetAddress}, ${address.city}`
-          }))
-        ]}
-      />
-
       <Input
         label="Tracking Number"
         type="text"

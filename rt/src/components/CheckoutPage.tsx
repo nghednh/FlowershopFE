@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "./CheckoutPage.css";
 import { useCart } from "../contexts/CartContext";
-import { createOrder, createAddress, createPayment } from "../config/api";
+import { createOrder, createAddress, createPayment, cancelOrder } from "../config/api";
 import { useNavigate } from "react-router-dom";
 import { IPaymentRequest } from "../types/backend";
 import { PaymentMethod, DisplayLanguage, Currency, BankCode } from "../types/backend.d";
 import { AddressService } from "../api/address.api";
+import { a } from "framer-motion/client";
 
 interface CartItem {
     id: number;
@@ -119,6 +120,7 @@ const CheckoutPage: React.FC = () => {
         e.preventDefault();
         setIsProcessing(true);
 
+        let orderResponse: any = undefined;
         try {
             if (paymentMethod === PaymentMethod.PayPal) {
                 console.log("Processing PayPal payment...");
@@ -151,7 +153,8 @@ const CheckoutPage: React.FC = () => {
                 status: 0 // Initial status - Pending
             };
 
-            const orderResponse = await createOrder(orderData);
+            let orderResponse: any = undefined;
+            orderResponse = await createOrder(orderData);
             console.log("Order created successfully:", orderResponse);
             setOrderDetails({ ...orderResponse, totalAmount: dynamicSubtotal + 5.00 });
 
@@ -204,6 +207,17 @@ const CheckoutPage: React.FC = () => {
             console.error('Error processing payment:', error);
             alert('Failed to process payment. Please try again.');
             console.log("Error details:", error);
+
+            // Cancel the order if it was created
+            if (orderResponse?.data.id) {
+                try {
+                    await cancelOrder(orderResponse.data.id);
+                    console.log(`Order ${orderResponse.data.id} cancelled due to payment error.`);
+                } catch (cancelError) {
+                    console.error('Error cancelling order:', cancelError);
+                }
+            }
+
             await refreshCart();
             navigate('/not-found');
         } finally {
